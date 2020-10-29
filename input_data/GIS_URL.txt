@@ -1,0 +1,6 @@
+https://data.mendeley.com/public-files/datasets/z9zfhzk8cr/files/6aaefaad-fbe2-492e-bd45-4c2d8b137801/file_downloaded, Kenya_clusters.zip
+https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_KEN_shp.zip,gadm36_KEN_shp.zip
+ftp://ftp.worldpop.org.uk/GIS/Population/Global_2000_2020/2015/KEN/ken_ppp_2015_UNadj.tif, ken_ppp_2015_UNadj.tif
+http://biogeo.ucdavis.edu/data/diva/rds/KEN_rds.zip,KEN_rds.zip
+https://data.ngdc.noaa.gov/instruments/remote-sensing/passive/spectrometers-radiometers/imaging/viirs/dnb_composites/v10//201904/vcmslcfg/SVDNB_npp_20190401-20190430_00N060W_vcmslcfg_v10_c201905191000.tgz,SVDNB_npp_20190401-20190430_00N060W_vcmslcfg_v10_c201905191000.tgz
+https://data.ngdc.noaa.gov/instruments/remote-sensing/passive/spectrometers-radiometers/imaging/viirs/dnb_composites/v10//201904/vcmslcfg/SVDNB_npp_20190401-20190430_75N060W_vcmslcfg_v10_c201905191000.tgz,SVDNB_npp_20190401-20190430_75N060W_vcmslcfg_v10_c201905191000.tgz
