@@ -46,7 +46,9 @@ def project_vector(vectordata, outputvector):
 
 def main(GIS_files_path):
     """
-    Reads the GIS-layers and separates them by raster and vector data
+    Reads the GIS-layers and separates them by raster and vector data.
+    Projects the data to WGS84 UMT37S
+    Moves all files to ../Pjected_files
 
     """
     basedir = os.getcwd()
