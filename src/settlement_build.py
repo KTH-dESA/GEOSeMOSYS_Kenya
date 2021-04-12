@@ -5,6 +5,7 @@ import sys
 import geopandas as gpd
 
 def raster_to_point(pop_shp, proj_path):
+
     current = os.getcwd()
     os.chdir(proj_path)
     files = os.listdir(proj_path)
@@ -39,41 +40,42 @@ def raster_to_point(pop_shp, proj_path):
 
     # Sample the raster at every point location and store values in DataFrame
     settlements['Nighttime light'] = [x[0] for x in nighttimelight.sample(coords)]
-    print("done")
+    print("Nighttime light")
     return (settlements)
 
 def near_calculations_line(point, proj_path):
     lines = gpd.read_file(proj_path + '/Concat_Transmission_lines_UMT37S.shp')
     print(lines.crs)
     point['Distance to HV_MV_LV lines'] = point.geometry.apply(lambda x: lines.distance(x).min())
-    print("lines")
-
-    sub = gpd.read_file(proj_path + '/UMT37S_Primary_Substations.shp')
-    print(sub.crs)
-    point['Distance to substations'] = point.geometry.apply(lambda x: sub.distance(x).min())
-    print("sub")
-
-    trans = gpd.read_file(proj_path + '/UMT37S_Distribution_Transformers.shp')
-    print(trans.crs)
-    point['Distance to transformers'] = point.geometry.apply(lambda x: trans.distance(x).min())
-    print("trans")
-
-    minigrid = gpd.read_file(proj_path + '/Concat_Mini-grid_UMT37S.shp')
-    print(minigrid.crs)
-    point['Distance to Mini-grid'] = point.geometry.apply(lambda x: minigrid.distance(x).min())
-    print("minigrid")
+    print("Distance to lines")
 
     road = gpd.read_file(proj_path + '/UMT37S_Roads.shp')
     print(road.crs)
     point['Distance to Roads'] = point.geometry.apply(lambda x: road.distance(x).min())
-    print("road")
+    print("Distance to road")
+    return(point)
 
-    settlements = point
-    print(settlements)
-    return(settlements)
+def near_calculations_point(point, proj_path):
+    sub = gpd.read_file(proj_path + '/UMT37S_Primary_Substations.shp')
+    print(sub.crs)
+    point['Distance to substations'] = point.geometry.apply(lambda x: sub.distance(x).min())
+    print("Distance to substations")
+
+    trans = gpd.read_file(proj_path + '/UMT37S_Distribution_Transformers.shp')
+    print(trans.crs)
+    point['Distance to transformers'] = point.geometry.apply(lambda x: trans.distance(x).min())
+    print("Distance to transformers")
+
+    minigrid = gpd.read_file(proj_path + '/Concat_Mini-grid_UMT37S.shp')
+    print(minigrid.crs)
+    point['Distance to Mini-grid'] = point.geometry.apply(lambda x: minigrid.distance(x).min())
+    print("Distance to minigrid")
 
 if __name__ == "__main__":
+    """
+    
+    """
     pop_shp, Projected_files_path = sys.argv[1], sys.argv[2]
     points = raster_to_point(pop_shp, Projected_files_path)
-    settlements = near_calculations_line(points, Projected_files_path)
-    crs = 'EPSG:3395'
+    point_line = near_calculations_line(points, Projected_files_path)
+    settlements = near_calculations_point(point_line, Projected_files_path)
