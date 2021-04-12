@@ -1,5 +1,3 @@
-url,name
-https://data.mendeley.com/public-files/datasets/z9zfhzk8cr/files/6aaefaad-fbe2-492e-bd45-4c2d8b137801/file_downloaded,Kenya_clusters.zip
 https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_KEN_shp.zip,gadm36_KEN_shp.zip
 ftp://ftp.worldpop.org.uk/GIS/Population/Global_2000_2020/2015/KEN/ken_ppp_2015_UNadj.tif,ken_ppp_2015_UNadj.tif
 https://energydata.info/dataset/b71146ac-0330-40f5-bd47-e0d20a761e48/resource/caf4f528-e982-4db8-811c-fdbf5322352f/download/roads.zip,roadsKenya.zip

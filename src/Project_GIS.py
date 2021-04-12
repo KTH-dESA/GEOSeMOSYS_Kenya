@@ -1,4 +1,5 @@
 import geopandas as gpd
+import pandas as pd
 import os
 import fiona
 import rasterio
@@ -33,22 +34,63 @@ def masking(admin,tif_file):
         dest.write(out_image)
 
 def project_raster(rasterdata, output_raster):
-    gdal.Warp(output_raster, rasterdata, dstSRS='EPSG:32737')
+    gdal.Warp(output_raster, rasterdata, dstSRS={'init':'EPSG:32737'})
     return()
 
 def project_vector(vectordata, outputvector):
 
     gdf = gpd.read_file(vectordata)
-    gdf_umt37 = gdf.to_crs("epsg:32737")
+    gdf_umt37 = gdf.to_crs({'init':'epsg:32737'})
     gdf_umt37.to_file(outputvector)
 
     return()
+
+def merge_transmission(proj_path):
+    current = os.getcwd()
+    os.chdir(proj_path)
+    files = os.listdir(proj_path)
+    shapefiles = []
+    for file in files:
+        if file.endswith('.shp'):
+            f = os.path.abspath(file)
+            shapefiles += [f]
+    keyword = 'kV'
+    tmiss_list = []
+    for fname in shapefiles:
+        if keyword in fname:
+            shpfile = gpd.read_file(fname)
+            tmiss_list += [shpfile]
+
+    gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
+    gdf.to_file("../Projected_files/Concat_Transmission_lines_UMT37S.shp")
+    os.chdir(current)
+
+def merge_minigrid(proj_path):
+    current = os.getcwd()
+    os.chdir(proj_path)
+    files = os.listdir(proj_path)
+    shapefiles = []
+    for file in files:
+        if file.endswith('.shp'):
+            f = os.path.abspath(file)
+            shapefiles += [f]
+    keyword = 'MiniGrid'
+    tmiss_list = []
+    for fname in shapefiles:
+        if keyword in fname:
+            shpfile = gpd.read_file(fname)
+            tmiss_list += [shpfile]
+
+    gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
+    gdf.to_file("../Projected_files/Concat_Mini-grid_UMT37S.shp")
+    os.chdir(current)
 
 def main(GIS_files_path):
     """
     Reads the GIS-layers and separates them by raster and vector data.
     Projects the data to WGS84 UMT37S
-    Moves all files to ../Pjected_files
+    Moves all files to ../Projected_files
+    Merges the files named 'kV' to one merged shape file
 
     """
     basedir = os.getcwd()
@@ -76,8 +118,13 @@ def main(GIS_files_path):
         if keyword in fname:
             shutil.copy(fname, os.path.join(current, '..\Projected_files'))
 
+    merge_transmission('..\Projected_files')
+    merge_minigrid('..\Projected_files')
     return ()
 
 if __name__ == "__main__":
+    basedir = os.getcwd()
     GIS_files_path = sys.argv[1]
     main(GIS_files_path)
+    os.chdir(basedir)
+

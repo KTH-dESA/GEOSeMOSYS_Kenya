@@ -1,0 +1,13 @@
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.cpg?download=1,40x40points_WGSUMT37S.cpg
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.dbf?download=1,40x40points_WGSUMT37S.dbf
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.prj?download=1,40x40points_WGSUMT37S.prj
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.sbn?download=1,40x40points_WGSUMT37S.sbn
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.sbx?download=1,40x40points_WGSUMT37S.sbx
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.shp?download=1,40x40points_WGSUMT37S.shp
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.shp.xml?download=1,40x40points_WGSUMT37S.shp.xml
+https://zenodo.org/record/4674330/files/40x40points_WGSUMT37S.shx?download=1,40x40points_WGSUMT37S.shx
+https://zenodo.org/record/4674330/files/40x40polygon_WGSUMT37S.cpg?download=1,40x40polygon_WGSUMT37S.cpg
+https://zenodo.org/record/4674330/files/40x40polygon_WGSUMT37S.dbf?download=1,40x40polygon_WGSUMT37S.dbf
+https://zenodo.org/record/4674330/files/40x40polygon_WGSUMT37S.prj?download=1,40x40polygon_WGSUMT37S.prj
+https://zenodo.org/record/4674330/files/40x40polygon_WGSUMT37S.shp?download=1,40x40polygon_WGSUMT37S.shp
+https://zenodo.org/record/4674330/files/40x40polygon_WGSUMT37S.shx?download=1,40x40polygon_WGSUMT37S.shx

@@ -9,11 +9,11 @@ import os
 import pandas as pd
 import sys
 
-def download_url_data(url):
+def download_url_data(url,temp):
     url_adress = pd.read_csv(url, header=None, sep=',')
     for i, row in url_adress.iterrows():
         req = Request(row[0], headers={'User-Agent': 'Chrome'})
-        with urlopen(req) as response, open("temp/%s" % (row[1]), 'wb') as out_file:
+        with urlopen(req) as response, open("%s/%s" % (temp, row[1]), 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
     return()
 
@@ -42,6 +42,8 @@ def unzip_all(url):
             shutil.copy(os.path.join('temp', row[1]), os.path.join('GIS_data', row[1]))
 
 if __name__ == "__main__":
-    url_adress = sys.argv[1]
-    #download = download_url_data(url_adress)
+    current = os.getcwd()
+    url_adress,temp = sys.argv[1], sys.argv[2]
+    download = download_url_data(url_adress, temp)
     unzip = unzip_all(url_adress)
+
