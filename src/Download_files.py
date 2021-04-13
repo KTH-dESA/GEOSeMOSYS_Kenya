@@ -10,6 +10,10 @@ import pandas as pd
 import sys
 
 def download_url_data(url,temp):
+    """
+    Downloads the data from URL in url (comma separated file) and place them in temp
+
+    """
     url_adress = pd.read_csv(url, header=None, sep=',')
     for i, row in url_adress.iterrows():
         req = Request(row[0], headers={'User-Agent': 'Chrome'})
@@ -18,6 +22,10 @@ def download_url_data(url,temp):
     return()
 
 def unzip_all(url):
+    """
+    Unzip the data from URL and place them in GIS_data
+
+    """
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:

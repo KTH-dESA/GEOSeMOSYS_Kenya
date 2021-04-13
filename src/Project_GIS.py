@@ -20,6 +20,7 @@ root.withdraw()
 root.attributes("-topmost", True)
 
 def masking(admin,tif_file):
+
     with fiona.open(admin, "r") as shapefile:
         shapes = [feature["geometry"] for feature in shapefile]
     with rasterio.open(tif_file) as src:
@@ -91,6 +92,7 @@ def main(GIS_files_path):
     Projects the data to WGS84 UMT37S
     Moves all files to ../Projected_files
     Merges the files named 'kV' to one merged shape file
+    Merges the files named 'MiniGrid' to one merged shape file
 
     """
     basedir = os.getcwd()
@@ -117,7 +119,7 @@ def main(GIS_files_path):
     for fname in allFiles:
         if keyword in fname:
             shutil.copy(fname, os.path.join(current, '..\Projected_files'))
-
+    os.chdir(basedir)
     merge_transmission('..\Projected_files')
     merge_minigrid('..\Projected_files')
     return ()

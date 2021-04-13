@@ -5,7 +5,10 @@ import sys
 import geopandas as gpd
 
 def raster_to_point(pop_shp, proj_path):
-
+    """
+    Find all files named viirs avg_rade9h and mosaic them.
+    Extract values to point layer (population layer 1kmx1km)
+    """
     current = os.getcwd()
     os.chdir(proj_path)
     files = os.listdir(proj_path)
@@ -44,6 +47,9 @@ def raster_to_point(pop_shp, proj_path):
     return (settlements)
 
 def near_calculations_line(point, proj_path):
+    """
+    Calculates the nearest distance to lines in relation to population points (1kmx1km)
+    """
     lines = gpd.read_file(proj_path + '/Concat_Transmission_lines_UMT37S.shp')
     print(lines.crs)
     point['Distance to HV_MV_LV lines'] = point.geometry.apply(lambda x: lines.distance(x).min())
@@ -56,6 +62,9 @@ def near_calculations_line(point, proj_path):
     return(point)
 
 def near_calculations_point(point, proj_path):
+    """
+    Calculates the nearest distance to points in relation to population points (1kmx1km)
+    """
     sub = gpd.read_file(proj_path + '/UMT37S_Primary_Substations.shp')
     print(sub.crs)
     point['Distance to substations'] = point.geometry.apply(lambda x: sub.distance(x).min())
@@ -72,9 +81,6 @@ def near_calculations_point(point, proj_path):
     print("Distance to minigrid")
 
 if __name__ == "__main__":
-    """
-    
-    """
     pop_shp, Projected_files_path = sys.argv[1], sys.argv[2]
     points = raster_to_point(pop_shp, Projected_files_path)
     point_line = near_calculations_line(points, Projected_files_path)
