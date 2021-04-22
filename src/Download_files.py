@@ -9,15 +9,21 @@ import os
 import pandas as pd
 import sys
 
+
 def download_url_data(url,temp):
     """
     Downloads the data from URL in url (comma separated file) and place them in temp
 
     """
+
+    def create_dir(dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+    create_dir(('../' + temp))
     url_adress = pd.read_csv(url, header=None, sep=',')
     for i, row in url_adress.iterrows():
         req = Request(row[0], headers={'User-Agent': 'Chrome'})
-        with urlopen(req) as response, open("%s/%s" % (temp, row[1]), 'wb') as out_file:
+        with urlopen(req) as response, open("../%s/%s" % (temp, row[1]), 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
     return()
 
@@ -26,6 +32,11 @@ def unzip_all(url):
     Unzip the data from URL and place them in GIS_data
 
     """
+
+    def create_dir(dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+    create_dir(('../GIS_data'))
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:
@@ -43,15 +54,15 @@ def unzip_all(url):
         _, filename = os.path.split(row[1])
         name, ending = os.path.splitext(filename)
         if ending == '.zip':
-            unzip(os.path.join('temp', row[1]), os.path.join('GIS_data', name))
+            unzip(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
         elif ending == '.tgz':
-            extract(os.path.join('temp', row[1]), os.path.join('GIS_data', name))
+            extract(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
         else:
-            shutil.copy(os.path.join('temp', row[1]), os.path.join('GIS_data', row[1]))
+            shutil.copy(os.path.join('../temp', row[1]), os.path.join('../GIS_data', row[1]))
 
 if __name__ == "__main__":
     current = os.getcwd()
     url_adress,temp = sys.argv[1], sys.argv[2]
-    download = download_url_data(url_adress, temp)
+    #download = download_url_data(url_adress, temp)
     unzip = unzip_all(url_adress)
 

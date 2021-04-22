@@ -1,4 +1,7 @@
 import geopandas as gpd
+import rioxarray
+import xarray
+from shapely.geometry import mapping
 import pandas as pd
 import os
 import fiona
@@ -19,6 +22,18 @@ root = tk.Tk()
 root.withdraw()
 root.attributes("-topmost", True)
 
+def masking_nc_file(admin,nc):
+
+    netcdf = xarray.open_dataarray(nc)
+    netcdf.rio.set_spatial_dims(x_dim="lon", y_dim="lat", inplace=True)
+    netcdf.rio.write_crs("epsg:32737", inplace=True)
+    admin = gpd.read_file(admin, crs="epsg:32737")
+
+    clipped = netcdf.rio.clip(admin.geometry.apply(mapping), admin.crs, drop=False)
+    clipped.to_netcdf("masked_"+nc)
+
+    return ()
+
 def masking(admin,tif_file):
 
     with fiona.open(admin, "r") as shapefile:
@@ -35,11 +50,13 @@ def masking(admin,tif_file):
         dest.write(out_image)
 
 def project_raster(rasterdata, output_raster):
-    gdal.Warp(output_raster, rasterdata, dstSRS={'init':'EPSG:32737'})
+    print(rasterdata)
+    input_raster = gdal.Open(rasterdata)
+    gdal.Warp(output_raster, input_raster, dstSRS="EPSG:32737")
     return()
 
 def project_vector(vectordata, outputvector):
-
+    print(vectordata)
     gdf = gpd.read_file(vectordata)
     gdf_umt37 = gdf.to_crs({'init':'epsg:32737'})
     gdf_umt37.to_file(outputvector)
@@ -76,13 +93,14 @@ def merge_minigrid(proj_path):
             f = os.path.abspath(file)
             shapefiles += [f]
     keyword = 'MiniGrid'
-    tmiss_list = []
+    minigr_list = []
     for fname in shapefiles:
         if keyword in fname:
             shpfile = gpd.read_file(fname)
-            tmiss_list += [shpfile]
+            minigr_list += [shpfile]
 
-    gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
+    gdf = pd.concat([shp for shp in minigr_list]).pipe(gpd.GeoDataFrame)
+    gdf.set_crs(epsg=32737, inplace=True)
     gdf.to_file("../Projected_files/Concat_Mini-grid_UMT37S.shp")
     os.chdir(current)
 
@@ -95,30 +113,44 @@ def main(GIS_files_path):
     Merges the files named 'MiniGrid' to one merged shape file
 
     """
-    basedir = os.getcwd()
-    os.chdir(GIS_files_path)
-    current = os.getcwd()
-   #All shp-files in all folders in dir current
-    shpFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
-              os.path.splitext(f)[1] == '.shp']
-    for s in shpFiles:
-        path, filename = os.path.split(s)
-        project_vector(s, os.path.join(path, "UMT37S_%s" % (filename)))
+    try:
+        basedir = os.getcwd()
+        os.chdir(GIS_files_path)
+        current = os.getcwd()
+       #All shp-files in all folders in dir current
+        shpFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
+                  os.path.splitext(f)[1] == '.shp']
+        for s in shpFiles:
+            path, filename = os.path.split(s)
+            project_vector(s, os.path.join(path, "UMT37S_%s" % (filename)))
 
-    #All tif-files in all folders in dir current
-    tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
-              os.path.splitext(f)[1] == '.tif']
-    for t in tifFiles:
-        path, filename = os.path.split(t)
-        masking(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'), t)
-        project_raster(os.path.join(path,'%s' % (filename)), os.path.join(path,"masked_UMT37S_%s" % (filename)))
+        #All tif-files in all folders in dir current
+        tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
+                  os.path.splitext(f)[1] == '.tif']
+        for t in tifFiles:
+            path, filename = os.path.split(t)
+            masking(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'), t)
+            project_raster(os.path.join(path,'%s' % (filename)), os.path.join(path,"masked_UMT37S_%s" % (filename)))
 
-    #All files containing "UMT37S" is copied to ../Projected_files dir
-    allFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames]
-    keyword = 'UMT37S'
-    for fname in allFiles:
-        if keyword in fname:
-            shutil.copy(fname, os.path.join(current, '..\Projected_files'))
+        ncFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
+                  os.path.splitext(f)[1] == '.nc']
+        for n in ncFiles:
+            path, filename = os.path.split(n)
+            masking_nc_file(os.path.join(current, 'gadm36_KEN_shp\gadm36_KEN_0.shp'), n)
+            project_raster(os.path.join(path, '%s' % (filename)), os.path.join(path, "masked_UMT37S_%s" % (filename)))
+
+        #All files containing "UMT37S" is copied to ../Projected_files dir
+        def create_dir(dir):
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+        create_dir(('../Projected_files'))
+        allFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames]
+        keyword = 'UMT37S'
+        for fname in allFiles:
+            if keyword in fname:
+                shutil.copy(fname, os.path.join(current, '..\Projected_files'))
+    except:
+        os.chdir(basedir)
     os.chdir(basedir)
     merge_transmission('..\Projected_files')
     merge_minigrid('..\Projected_files')

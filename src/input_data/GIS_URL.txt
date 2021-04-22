@@ -1,5 +1,6 @@
+http://datadryad.org/api/v2/datasets/doi%253A10.5061%252Fdryad.dk1j0/download,kummu_gdp_ppp.zip
 https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_KEN_shp.zip,gadm36_KEN_shp.zip
-ftp://ftp.worldpop.org.uk/GIS/Population/Global_2000_2020/2015/KEN/ken_ppp_2015_UNadj.tif,ken_ppp_2015_UNadj.tif
+https://data.worldpop.org/GIS/Population/Global_2000_2020_1km/2018/KEN/ken_ppp_2018_1km_Aggregated.tif,ken_ppp_2018_1km_Aggregated.tif
 https://energydata.info/dataset/b71146ac-0330-40f5-bd47-e0d20a761e48/resource/caf4f528-e982-4db8-811c-fdbf5322352f/download/roads.zip,roadsKenya.zip
 https://data.ngdc.noaa.gov/instruments/remote-sensing/passive/spectrometers-radiometers/imaging/viirs/dnb_composites/v10//201904/vcmslcfg/SVDNB_npp_20190401-20190430_00N060W_vcmslcfg_v10_c201905191000.tgz,SVDNB_npp_20190401-20190430_00N060W_vcmslcfg_v10_c201905191000.tgz
 https://data.ngdc.noaa.gov/instruments/remote-sensing/passive/spectrometers-radiometers/imaging/viirs/dnb_composites/v10//201904/vcmslcfg/SVDNB_npp_20190401-20190430_75N060W_vcmslcfg_v10_c201905191000.tgz,SVDNB_npp_20190401-20190430_75N060W_vcmslcfg_v10_c201905191000.tgz

@@ -5,6 +5,7 @@
 import os
 import sys
 import pandas as pd
+import geopandas as gpd
 
 
 def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
@@ -16,7 +17,7 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
     pop_ratio = pop_actual / settlement['grid_code'].sum()
 
     # And use this ratio to calibrate the population in a new column
-    settlement['pop'] = settlement.df.apply(lambda row: row['grid_code'] * pop_ratio, axis=1)
+    settlement['pop'] = settlement.apply(lambda row: row['grid_code'] * pop_ratio, axis=1)
 
     # Calculate the urban split, by calibrating the cutoff until the target ratio is achieved
     # Keep looping until it is satisfied or another break conditions is reached
@@ -28,10 +29,10 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
     urban_modelled = 0
     while True:
         # Assign the 1 (urban)/0 (rural) values to each cell
-        settlement.df['urban'] = settlement.df.apply(lambda row: 1 if row['pop'] > urban_cutoff else 0, axis=1)
+        settlement['urban'] = settlement.apply(lambda row: 1 if row['pop'] > urban_cutoff else 0, axis=1)
 
         # Get the calculated urban ratio, and limit it to within reasonable boundaries
-        pop_urb = settlement.df.loc[settlement.df['urban'] == 1, 'pop'].sum()
+        pop_urb = settlement.loc[settlement['urban'] == 1, 'pop'].sum()
         urban_modelled = pop_urb / pop_actual
 
         if urban_modelled == 0:
@@ -56,8 +57,8 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
             break
 
         count += 1
-
-    return settlement, urban_modelled
+    settlement.to_file("../Projected_files/urban_pop_calibrated.shp")
+    return settlement
 
 
 def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, min_night_lights,
@@ -65,9 +66,9 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
     """
     Calibrate the current electrification status, and future 'pre-electrification' status
     """
-    urban_pop = (settlement.df.loc[settlement.df['urban'] == 2, 'pop'].sum())  # Calibrate current electrification
-    rural_pop = (settlement.df.loc[settlement.df['urban'] < 2, 'pop'].sum())  # Calibrate current electrification
-    total_pop = settlement.df['pop'].sum()
+    urban_pop = (settlement.loc[settlement['urban'] == 2, 'pop'].sum())  # Calibrate current electrification
+    rural_pop = (settlement.loc[settlement['urban'] < 2, 'pop'].sum())  # Calibrate current electrification
+    total_pop = settlement['pop'].sum()
     total_elec_ratio = elec_actual
     factor = (total_pop * total_elec_ratio) / (urban_pop * urban_elec_ratio + rural_pop * rural_elec_ratio)
     urban_elec_ratio *= factor
@@ -75,8 +76,8 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
 
     print('Calibrate current electrification')
     is_round_two = False
-    grid_cutoff2 = 5
-    road_cutoff2 = 5
+    grid_cutoff2 = 5000
+    road_cutoff2 = 5000
     count = 0
     prev_vals = []
     accuracy = 0.01
@@ -123,21 +124,21 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
     #         elec_modelled = pop_elec / pop_tot
 
     while True:
-        settlement.df['elec'] = settlement.df.apply(lambda row:
+        settlement['elec'] = settlement.apply(lambda row:
                                                   1
-                                                  if ((row["Nighttime light"] > 0 or
-                                                       row["Distance to substations"] > 0 or
-                                                       row["Distance to transformers"] > 0 or
+                                                  if ((row["Nighttime"] > 0 and
+                                                       row["Distance_3"] < dist_to_trans and
+                                                       row["Distance_4"] > dist_to_trans or
                                                        row['pop'] > pop_cutoff and
-                                                       row["Distance to lines"] < max_grid_dist or
-                                                       row["Distance to road"] < max_road_dist))
-                                                   or (row["Distance to minigrid"] > pop_cutoff2 and
-                                                   (row["Distance to lines"] < grid_cutoff2 or
-                                                   row["Distance to road"] < road_cutoff2))
+                                                       row["Distance_t"] < max_grid_dist or
+                                                       row["Distance_2"] < max_road_dist))
+                                                   or (row['pop'] > pop_cutoff2 and
+                                                   (row["Distance_t"] < grid_cutoff2 or
+                                                   row["Distance_2"] < road_cutoff2))
                                                   else 0, axis=1)
 
         # Get the calculated electrified ratio, and limit it to within reasonable boundaries
-        pop_elec = settlement.df.loc[settlement.df['elec'] == 1, 'pop'].sum()
+        pop_elec = settlement.loc[settlement['elec'] == 1, 'pop'].sum()
         elec_modelled = pop_elec / pop_tot
 
         if elec_modelled == 0:
@@ -208,6 +209,9 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
                  'If this is not acceptable please revise this part of the algorithm'.format(elec_modelled))
     condition = 1
 
+
+    settlement.to_file("../Projected_files/elec.shp")
+
     return min_night_lights, dist_to_trans, max_grid_dist, max_road_dist, elec_modelled, pop_cutoff, pop_cutoff2, rural_elec_ratio, urban_elec_ratio
 
 
@@ -216,9 +220,9 @@ if __name__ == "__main__":
     Projected_files_path = '../Projected_files/'
     from settlement_build import *
 
-    points = raster_to_point(pop_shp, Projected_files_path)
-    point_line = near_calculations_line(points, Projected_files_path)
-    settlements = near_calculations_point(point_line, Projected_files_path)
+    #points = raster_to_point(pop_shp, Projected_files_path)
+    #point_line = near_calculations_line(points, Projected_files_path)
+    #settlements = near_calculations_point(point_line, Projected_files_path)
     #settlements
     #settlements = sys.argv[1]
     elec_actual = 0.75  # percent
@@ -235,6 +239,8 @@ if __name__ == "__main__":
     urban = 0.275  # percent
     urban_cutoff = 20000
     start_year = 2018
+    settlement = gpd.read_file("../Projected_files/settlements_distance.shp")
+    settlements = pd.DataFrame(settlement)
     urbansettlements = calibrate_pop_and_urban(settlements, pop_actual, urban, urban_cutoff)
     elec_current_and_future(urbansettlements, elec_actual, pop_cutoff, dist_to_trans, min_night_lights,
-                            max_grid_dist, max_road_dist, pop_actual, pop_cutoff2, start_year)
+                            max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year)
