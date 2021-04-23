@@ -56,7 +56,7 @@ if (length(args)<2){
 
 	farms = read.csv(file = args[4], stringsAsFactors=FALSE)
 
-	z = ninja_aggregate_wind(farms$lat, farms$lon, farms$from[1], farms$to[1], farms$dataset, farms$capacity, farms$height, farms$turbine)
+	z = ninja_aggregate_wind(farms$lat, farms$lon, farms$from[1], farms$to[1], farms$dataset, farms$capacity, farms$height, farms$turbine, farms$name)
 
 	write.csv(z, args[5], row.names=TRUE)
 }
