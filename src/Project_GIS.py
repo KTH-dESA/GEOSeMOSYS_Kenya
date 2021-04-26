@@ -18,10 +18,6 @@ import sys
 import shutil
 gdal.UseExceptions()
 
-root = tk.Tk()
-root.withdraw()
-root.attributes("-topmost", True)
-
 def masking_nc_file(admin,nc):
 
     netcdf = xarray.open_dataarray(nc)

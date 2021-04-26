@@ -94,7 +94,7 @@ def download(path, wind, solar):
     i = 0
     while i < len(wind)+8:
         for x in range(i,i+8): #50/6 is 8.3 so we will upload 8 files per hour
-            if x <= len(wind):
+            if x < len(wind):
                 type = "wind"
                 csvfiles = path + "/"+ wind[x]
                 csvfilesout = path + "/out_"+wind[x]
@@ -107,7 +107,7 @@ def download(path, wind, solar):
     j = 0
     while j < len(solar)+8:
         for x in range(j,j+8): #50/6 is 8.3 so we will upload 8 files per hour
-            if x <= len(solar):
+            if x < len(solar):
                 type = "solar"
                 csvfiles = path + "/"+ solar[x]
                 csvfilesout = path + "/out_"+solar[x]
