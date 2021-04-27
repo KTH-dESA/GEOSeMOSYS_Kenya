@@ -1,6 +1,0 @@
-base_file\*
-data\*
-geopandas-Stuff-master\*
-GIS_data\*
-input_data\*
-.snakemake\*
