@@ -27,13 +27,13 @@ def renewableninja(path):
     solarbase.columns = new_header
 
     solarbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    solarbase.to_csv('../data/capacityfactor_solar.csv')
+    solarbase.to_csv('run/data/capacityfactor_solar.csv')
 
     header = windbase.columns
     new_header = [x.replace('X','') for x in header]
     windbase.columns = new_header
     windbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    windbase.to_csv('../data/capacityfactor_wind.csv')
+    windbase.to_csv('run/data/capacityfactor_wind.csv')
     return()
 
 def GIS_file():
@@ -41,7 +41,7 @@ def GIS_file():
     GIS_data = point['pointid']
     grid = pd.DataFrame(GIS_data, copy=True)
     grid.columns = ['Location']
-    grid.to_csv('../data/GIS_data.csv', index=False)
+    grid.to_csv('run/data/GIS_data.csv', index=False)
     return()
 
 if __name__ == "__main__":

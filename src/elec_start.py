@@ -88,7 +88,7 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
                                                   1
                                                   if ((row['Nighttime'] > min_night_lights or
                                                        row['Minigrid'] < dist_minig) or
-                                                      (row['Grid'] < max_grid_dist and
+                                                      (row['Grid'] < max_grid_dist or
                                                        row['Transform'] < dist_to_trans or
                                                        row['Substation'] < dist_to_sub or
                                                        row['pop'] > pop_cutoff))
@@ -111,19 +111,19 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
             break
         elif not is_round_two:
             min_night_lights = \
-            sorted([0, min_night_lights - min_night_lights * 2 * (elec_actual - elec_modelled) / elec_actual, 150])[1]
+            sorted([0, min_night_lights - min_night_lights * 0.5 * (elec_actual - elec_modelled) / elec_actual, 150])[1]
             pop_cutoff = \
-            sorted([0.01, pop_cutoff - pop_cutoff * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
+            sorted([0.01, pop_cutoff - pop_cutoff *2* (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             max_grid_dist = \
-            sorted([500, max_grid_dist + max_grid_dist * 2 * (elec_actual - elec_modelled) / elec_actual, 50000])[1]
+            sorted([500, max_grid_dist + max_grid_dist *2* (elec_actual - elec_modelled) / elec_actual, 50000])[1]
             max_road_dist = \
-            sorted([500, max_road_dist + max_road_dist * 2 * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([500, max_road_dist + max_road_dist * 0.5 * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_minig = \
-            sorted([100, dist_minig - dist_minig * 2 * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([100, dist_minig - dist_minig  * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_to_trans = \
-            sorted([100, dist_to_trans - dist_to_trans * 0.5 * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([100, dist_to_trans - dist_to_trans * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_to_sub = \
-            sorted([500, dist_to_sub + dist_to_sub * 0.5 * (elec_actual - elec_modelled) / elec_actual, 30000])[1]
+            sorted([500, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 30000])[1]
         elif elec_modelled - elec_actual < 0:
             pop_cutoff2 = sorted([0.01, pop_cutoff2 - pop_cutoff2 *
                                   (elec_actual - elec_modelled) / elec_actual, 100000])[1]
@@ -195,11 +195,11 @@ if __name__ == "__main__":
     #settlements
     #settlements = sys.argv[1]
     elec_actual = 0.75  # percent
-    pop_cutoff = 300  # people
+    pop_cutoff = 400  # people
     dist_to_trans = 5000  # meters
     dist_to_sub = 5000
     min_night_lights = 1
-    max_grid_dist = 15000  # meters
+    max_grid_dist = 10000  # meters
     max_road_dist = 1000  # meters
     dist_minig = 2000 #meters
     pop_cutoff2 = 1000  # people
