@@ -1,0 +1,4 @@
+data\*
+GIS_data\*
+Projected_files\*
+.ipynb_checkpoints\*

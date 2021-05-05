@@ -1,0 +1,27 @@
+name: geosemosys
+channels:
+  - conda-forge
+dependencies:
+    -curl
+    -fiona
+    -gdal
+    -geopandas
+    -matplotlib
+    -notebook
+    -numpy
+    -pandas
+    -pyproj
+    -python
+    -rasterio
+    -rioxarray
+    -scipy
+    -shapely
+    -tkinter
+    -urllib
+    -xarray
+    -zipfile
+    -shutil
+    -tarfile
+    -csv
+    -subprocess
+    -osgeo

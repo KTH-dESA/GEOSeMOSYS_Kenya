@@ -1,5 +1,5 @@
 # This script downloads data that is required for the analysis and unzips them
-# Developed by Nandi Moksnes 2020-10 for the paper GEOSeMOSYS
+# Developed by Nandi Moksnes 2020-12 for the paper GEOSeMOSYS
 
 from urllib.request import Request, urlopen
 import shutil
@@ -9,17 +9,34 @@ import os
 import pandas as pd
 import sys
 
-def download_url_data(url):
+
+def download_url_data(url,temp):
+    """
+    Downloads the data from URL in url (comma separated file) and place them in temp
+
+    """
+
+    def create_dir(dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+    create_dir(('../' + temp))
     url_adress = pd.read_csv(url, header=None, sep=',')
-    name_list = []
     for i, row in url_adress.iterrows():
         req = Request(row[0], headers={'User-Agent': 'Chrome'})
-        with urlopen(req) as response, open("temp/%s" % (row[1]), 'wb') as out_file:
+        with urlopen(req) as response, open("../%s/%s" % (temp, row[1]), 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
-        name_list += row[1]
     return()
 
 def unzip_all(url):
+    """
+    Unzip the data from URL and place them in GIS_data
+
+    """
+
+    def create_dir(dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+    create_dir(('../GIS_data'))
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:
@@ -37,13 +54,15 @@ def unzip_all(url):
         _, filename = os.path.split(row[1])
         name, ending = os.path.splitext(filename)
         if ending == '.zip':
-            unzip(os.path.join('temp', row[1]), os.path.join('GIS_data'))
+            unzip(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
         elif ending == '.tgz':
-            extract(os.path.join('temp', row[1]), os.path.join('GIS_data'))
+            extract(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
         else:
-            shutil.move(os.path.join('temp', row[1]), os.path.join('GIS_data', row[1]))
+            shutil.copy(os.path.join('../temp', row[1]), os.path.join('../GIS_data', row[1]))
 
 if __name__ == "__main__":
-    url_adress = sys.argv[1]
-    download = download_url_data(url_adress)
+    current = os.getcwd()
+    url_adress,temp = sys.argv[1], sys.argv[2]
+    #download = download_url_data(url_adress, temp)
     unzip = unzip_all(url_adress)
+
