@@ -1,10 +1,13 @@
 import rasterio
 from rasterio.merge import merge
+from osgeo import gdal, ogr, gdalconst
 import os
 import sys
 import geopandas as gpd
+import subprocess
+gdal.UseExceptions()
 
-def raster_to_point(pop_shp, proj_path):
+def raster_to_point(raster_list, pop_shp, proj_path):
     """
     Find all VIIRS files named avg_rade9h and mosaic them.
     Extract values to point layer (population layer 1kmx1km)
@@ -42,49 +45,142 @@ def raster_to_point(pop_shp, proj_path):
     print(nighttimelight.crs)
 
     # Sample the raster at every point location and store values in DataFrame
-    settlements['Nighttime light'] = [x[0] for x in nighttimelight.sample(coords)]
+    settlements['Nighttime'] = [x[0] for x in nighttimelight.sample(coords)]
     print("Nighttime light")
-    return (settlements)
 
-def near_calculations_line(point, proj_path):
-    """
-    Calculates the nearest distance to lines in relation to population points (1kmx1km)
-    """
-    lines = gpd.read_file(proj_path + '/Concat_Transmission_lines_UMT37S.shp')
-    print(lines.crs)
-    point['Distance_to_HV_MV_LV lines'] = point.geometry.apply(lambda x: lines.distance(x).min())
-    print("Distance to lines")
-
-    road = gpd.read_file(proj_path + '/UMT37S_Roads.shp')
-    print(road.crs)
-    point['Distance_to_Roads'] = point.geometry.apply(lambda x: road.distance(x).min())
-    print("Distance to road")
-    return(point)
-
-def near_calculations_point(point, proj_path):
-    """
-    Calculates the nearest distance to points in relation to population points (1kmx1km)
-    """
-    sub = gpd.read_file(proj_path + '/UMT37S_Primary_Substations.shp')
-    print(sub.crs)
-    point['Distance_to_substations'] = point.geometry.apply(lambda x: sub.distance(x).min())
-    print("Distance to substations")
-
-    trans = gpd.read_file(proj_path + '/UMT37S_Distribution_Transformers.shp')
+    _, filename = os.path.split(raster_list[0])
+    name, ending = os.path.splitext(filename)
+    trans = rasterio.open(raster_list[0])
     print(trans.crs)
-    point['Distance_to_transformers'] = point.geometry.apply(lambda x: trans.distance(x).min())
-    print("Distance to transformers")
+    settlements['Grid'] = [x[0] for x in trans.sample(coords)]
+    print(name)
 
-    minigrid = gpd.read_file(proj_path + '/Concat_Mini-grid_UMT37S.shp')
-    print(minigrid.crs)
-    point['Distance_to_Mini-grid'] = point.geometry.apply(lambda x: minigrid.distance(x).min())
-    print("Distance to minigrid")
+    _, filename = os.path.split(raster_list[1])
+    name, ending = os.path.splitext(filename)
+    subs = rasterio.open(raster_list[1])
+    print(subs.crs)
+    settlements['Substation'] = [x[0] for x in subs.sample(coords)]
+    print(name)
 
-    point.to_file("../Projected_files/settlements_distance.shp")
-    return(point)
+    _, filename = os.path.split(raster_list[2])
+    name, ending = os.path.splitext(filename)
+    transf = rasterio.open(raster_list[2])
+    print(transf.crs)
+    settlements['Transform'] = [x[0] for x in transf.sample(coords)]
+    print(name)
+
+    _, filename = os.path.split(raster_list[3])
+    name, ending = os.path.splitext(filename)
+    minig = rasterio.open(raster_list[3])
+    print(minig.crs)
+    settlements['Minigrid'] = [x[0] for x in minig.sample(coords)]
+    print(name)
+
+    _, filename = os.path.split(raster_list[4])
+    name, ending = os.path.splitext(filename)
+    road = rasterio.open(raster_list[4])
+    print(road.crs)
+    settlements['Road'] = [x[0] for x in road.sample(coords)]
+    print(name)
+    settlements.to_file(os.path.join(proj_path, 'settlements.shp'))
+    return()
+
+def raster_proximity(proj_path):
+    """
+    Creates raster file of lines an polygons and creates a proximity raster in the same resolution as population points (1kmx1km)
+    """
+    #Rasterise the shapefile to the same projection & pixel resolution as population layer in 1x1km resolution.
+    raster_list = [os.path.join(proj_path,'Concat_Transmission_lines_UMT37S.shp'), os.path.join(proj_path,'UMT37S_Primary_Substations.shp'), os.path.join(proj_path,'UMT37S_Distribution_Transformers.shp'), os.path.join(proj_path,'Concat_Mini-grid_UMT37S.shp'),os.path.join(proj_path,'UMT37S_Roads.shp')]
+    raster_out = []
+    raster_prox = []
+    for i in range(len(raster_list)):
+        InputVector = raster_list[i]
+        _, filename = os.path.split(raster_list[i])
+        name, ending = os.path.splitext(filename)
+
+        OutputImage = os.path.join(proj_path, name+'.tif')
+        raster_out.append(OutputImage)
+
+        RefImage = os.path.join(proj_path,'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
+
+        gdalformat = 'GTiff'
+        datatype = gdal.GDT_Byte
+        burnVal = 1  # value for the output image pixels
+        # Get projection info from reference image
+        Image = gdal.Open(RefImage, gdal.GA_ReadOnly)
+
+        # Open Shapefile
+        Shapefile = ogr.Open(InputVector)
+        Shapefile_layer = Shapefile.GetLayer()
+
+        # Rasterise
+        print("Rasterising shapefile...")
+        Output = gdal.GetDriverByName(gdalformat).Create(OutputImage, Image.RasterXSize, Image.RasterYSize, 1, datatype,
+                                                         options=['COMPRESS=DEFLATE'])
+        Output.SetProjection(Image.GetProjectionRef())
+        Output.SetGeoTransform(Image.GetGeoTransform())
+
+        # Write data to band 1
+        Band = Output.GetRasterBand(1)
+        Band.SetNoDataValue(0)
+        gdal.RasterizeLayer(Output, [1], Shapefile_layer, burn_values=[burnVal])
+
+        # Build image overviews
+        subprocess.call("gdaladdo --config COMPRESS_OVERVIEW DEFLATE " + OutputImage + " 2 4 8 16 32 64", shell=True)
+        # Close datasets
+        Band = None
+        Output = None
+        Image = None
+        # Shapefile = None
+    #Proximity raster of 50 000 m
+    for j in range(len(raster_out)):
+        src_ds = gdal.Open(raster_out[j])
+        _, filename = os.path.split(raster_list[j])
+        name, ending = os.path.splitext(filename)
+
+        srcband = src_ds.GetRasterBand(1)
+        dst_filename = os.path.join(proj_path, name+'proximity.tif')
+        raster_prox.append(dst_filename)
+
+        drv = gdal.GetDriverByName('GTiff')
+        dst_ds = drv.Create(dst_filename,
+                            src_ds.RasterXSize, src_ds.RasterYSize, 1,
+                            gdal.GetDataTypeByName('Float32'))
+
+        dst_ds.SetGeoTransform(src_ds.GetGeoTransform())
+        dst_ds.SetProjection(src_ds.GetProjectionRef())
+        dstband = dst_ds.GetRasterBand(1)
+        gdal.ComputeProximity(srcband, dstband, ["DISTUNITS=GEO", "maxdist=50000", "nodata=99999"])
+        # srcband = None
+        # dstband = None
+        # src_ds = None
+        # dst_ds = None
+
+    return(raster_prox)
+
+# def near_calculations_point(point, proj_path):
+#     """
+#     Calculates the nearest distance to points in relation to population points (1kmx1km)
+#     """
+#     sub = gpd.read_file(proj_path + '/UMT37S_Primary_Substations.shp')
+#     print(sub.crs)
+#     point['Distance_to_substations'] = point.geometry.apply(lambda x: sub.distance(x).min())
+#     print("Distance to substations")
+#
+#     trans = gpd.read_file(proj_path + '/UMT37S_Distribution_Transformers.shp')
+#     print(trans.crs)
+#     point['Distance_to_transformers'] = point.geometry.apply(lambda x: trans.distance(x).min())
+#     print("Distance to transformers")
+#
+#     minigrid = gpd.read_file(proj_path + '/Concat_Mini-grid_UMT37S.shp')
+#     print(minigrid.crs)
+#     point['Distance_to_Mini-grid'] = point.geometry.apply(lambda x: minigrid.distance(x).min())
+#     print("Distance to minigrid")
+#
+#     point.to_file("../Projected_files/settlements_distance.shp")
+#     return(point)
 
 if __name__ == "__main__":
     pop_shp, Projected_files_path = sys.argv[1], sys.argv[2]
-    points = raster_to_point(pop_shp, Projected_files_path)
-    point_line = near_calculations_line(points, Projected_files_path)
-    settlements = near_calculations_point(point_line, Projected_files_path)
+    rasterize = raster_proximity(Projected_files_path)
+    points = raster_to_point(rasterize, pop_shp, Projected_files_path)

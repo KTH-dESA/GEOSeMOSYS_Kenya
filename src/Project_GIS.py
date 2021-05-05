@@ -1,3 +1,6 @@
+# Author: KTH dESA Last modified by Nandi Moksnes
+# Date: 2021-04
+# Python version: 3.8
 import geopandas as gpd
 import rioxarray
 import xarray
@@ -9,7 +12,6 @@ import rasterio
 rasterio.gdal_version()
 import rasterio.fill
 from rasterio.mask import mask
-import tkinter as tk
 import gdal
 import warnings
 warnings.filterwarnings('ignore')
@@ -18,17 +20,6 @@ import sys
 import shutil
 gdal.UseExceptions()
 
-def masking_nc_file(admin,nc):
-
-    netcdf = xarray.open_dataarray(nc)
-    netcdf.rio.set_spatial_dims(x_dim="lon", y_dim="lat", inplace=True)
-    netcdf.rio.write_crs("epsg:32737", inplace=True)
-    admin = gpd.read_file(admin, crs="epsg:32737")
-
-    clipped = netcdf.rio.clip(admin.geometry.apply(mapping), admin.crs, drop=False)
-    clipped.to_netcdf("masked_"+nc)
-
-    return ()
 
 def masking(admin,tif_file):
 
@@ -44,6 +35,8 @@ def masking(admin,tif_file):
 
     with rasterio.open(tif_file, "w", **out_meta) as dest:
         dest.write(out_image)
+
+    return(tif_file)
 
 def project_raster(rasterdata, output_raster):
     print(rasterdata)
@@ -110,16 +103,15 @@ def main(GIS_files_path):
 
     """
     try:
-        basedir = os.getcwd()
+       #  basedir = os.getcwd()
         os.chdir(GIS_files_path)
         current = os.getcwd()
-       #All shp-files in all folders in dir current
+        #All shp-files in all folders in dir current
         shpFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
                   os.path.splitext(f)[1] == '.shp']
         for s in shpFiles:
             path, filename = os.path.split(s)
             project_vector(s, os.path.join(path, "UMT37S_%s" % (filename)))
-
         #All tif-files in all folders in dir current
         tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
                   os.path.splitext(f)[1] == '.tif']
@@ -127,13 +119,6 @@ def main(GIS_files_path):
             path, filename = os.path.split(t)
             masking(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'), t)
             project_raster(os.path.join(path,'%s' % (filename)), os.path.join(path,"masked_UMT37S_%s" % (filename)))
-
-        ncFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
-                  os.path.splitext(f)[1] == '.nc']
-        for n in ncFiles:
-            path, filename = os.path.split(n)
-            masking_nc_file(os.path.join(current, 'gadm36_KEN_shp\gadm36_KEN_0.shp'), n)
-            project_raster(os.path.join(path, '%s' % (filename)), os.path.join(path, "masked_UMT37S_%s" % (filename)))
 
         #All files containing "UMT37S" is copied to ../Projected_files dir
         def create_dir(dir):

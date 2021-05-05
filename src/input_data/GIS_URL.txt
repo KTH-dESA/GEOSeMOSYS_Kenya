@@ -1,4 +1,4 @@
-http://datadryad.org/api/v2/datasets/doi%253A10.5061%252Fdryad.dk1j0/download,kummu_gdp_ppp.zip
+https://zenodo.org/record/4736323/files/GDP_PPP_Layer2015.tif?download=1,GDP_PPP_2015_WGS_84.tif
 https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_KEN_shp.zip,gadm36_KEN_shp.zip
 https://data.worldpop.org/GIS/Population/Global_2000_2020_1km/2018/KEN/ken_ppp_2018_1km_Aggregated.tif,ken_ppp_2018_1km_Aggregated.tif
 https://energydata.info/dataset/b71146ac-0330-40f5-bd47-e0d20a761e48/resource/caf4f528-e982-4db8-811c-fdbf5322352f/download/roads.zip,roadsKenya.zip

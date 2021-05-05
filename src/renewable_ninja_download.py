@@ -133,4 +133,3 @@ if __name__ == "__main__":
     coordinates = project_vector(shapefile)
     wind, solar = csv_make(coordinates)
     down = download(path, wind, solar)
-
