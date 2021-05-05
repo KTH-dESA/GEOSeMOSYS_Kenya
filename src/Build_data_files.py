@@ -1,5 +1,5 @@
 import pandas as pd
-import geopandas
+import geopandas as gpd
 import sys
 import os
 import fnmatch
@@ -27,26 +27,24 @@ def renewableninja(path):
     solarbase.columns = new_header
 
     solarbase.drop('Unnamed: 0', axis='columns', inplace=True)
-
     solarbase.to_csv('../data/capacityfactor_solar.csv')
 
     header = windbase.columns
     new_header = [x.replace('X','') for x in header]
     windbase.columns = new_header
     windbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    GIS_col = windbase.columns
-
-    solarbase.to_csv('../data/capacityfactor_wind.csv')
-
-    GIS = pd.DataFrame(range(1,379), columns = ['Location'])
-    #GIS.sort_values(by='Location')
-    print(GIS)
-    GIS.to_csv('../data/GIS_data.csv')
-
+    windbase.to_csv('../data/capacityfactor_wind.csv')
     return()
 
+def GIS_file():
+    point = gpd.read_file('../Projected_files/new_40x40points_WGSUMT37S.shp')
+    GIS_data = point['pointid']
+    grid = pd.DataFrame(GIS_data, copy=True)
+    grid.columns = ['Location']
+    grid.to_csv('../data/GIS_data.csv', index=False)
+    return()
 
 if __name__ == "__main__":
     path = sys.argv[1]
-
     renewableninja(path)
+    GIS_file()
