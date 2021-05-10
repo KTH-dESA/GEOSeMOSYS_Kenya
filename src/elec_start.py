@@ -63,7 +63,22 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
 def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, dist_to_sub, dist_minig, min_night_lights,
                             max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year):
     """
-    Calibrate the current electrification status, and future 'pre-electrification' status
+        Calibrate the current electrification status, and future 'pre-electrification' status
+    :param settlement:
+    :param elec_actual:
+    :param pop_cutoff:
+    :param dist_to_trans:
+    :param dist_to_sub:
+    :param dist_minig:
+    :param min_night_lights:
+    :param max_grid_dist:
+    :param urban_elec_ratio:
+    :param rural_elec_ratio:
+    :param max_road_dist:
+    :param pop_actual:
+    :param pop_cutoff2:
+    :param start_year:
+    :return:
     """
     urban_pop = (settlement.loc[settlement['urban'] == 1, 'pop'].sum())  # Calibrate current electrification
     rural_pop = (settlement.loc[settlement['urban'] < 1, 'pop'].sum())  # Calibrate current electrification
@@ -86,12 +101,13 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
     while True:
         settlement['elec'] = settlement.apply(lambda row:
                                                   1
-                                                  if ((row['Nighttime'] > min_night_lights or
-                                                       row['Minigrid'] < dist_minig) or
-                                                      (row['Grid'] < max_grid_dist or
-                                                       row['Transform'] < dist_to_trans or
+                                                  if (row['Nighttime'] > min_night_lights and
+                                                       (row['Minigrid'] < dist_minig or
+                                                       row['Grid'] < max_grid_dist and
+                                                        (row['Transform'] < dist_to_trans or
                                                        row['Substation'] < dist_to_sub or
-                                                       row['pop'] > pop_cutoff))
+                                                       row['Road'] < max_road_dist or
+                                                       row['pop'] > pop_cutoff)))
                                                    or (row['pop'] > pop_cutoff2 and
                                                    (row["Grid"] < grid_cutoff2 or
                                                    row["Road"] < road_cutoff2))
@@ -113,11 +129,11 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
             min_night_lights = \
             sorted([0, min_night_lights - min_night_lights * 0.5 * (elec_actual - elec_modelled) / elec_actual, 150])[1]
             pop_cutoff = \
-            sorted([0.01, pop_cutoff - pop_cutoff *2* (elec_actual - elec_modelled) / elec_actual, 10000])[1]
+            sorted([200, pop_cutoff - pop_cutoff *2* (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             max_grid_dist = \
-            sorted([500, max_grid_dist + max_grid_dist *2* (elec_actual - elec_modelled) / elec_actual, 50000])[1]
+            sorted([500, max_grid_dist + max_grid_dist *2* (elec_actual - elec_modelled) / elec_actual, 20000])[1]
             max_road_dist = \
-            sorted([500, max_road_dist + max_road_dist * 0.5 * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([500, max_road_dist + max_road_dist * 0.5 * (elec_actual - elec_modelled) / elec_actual, 3000])[1]
             dist_minig = \
             sorted([100, dist_minig - dist_minig  * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_to_trans = \
@@ -176,7 +192,7 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
                  'If this is not acceptable please revise this part of the algorithm'.format(elec_modelled))
     condition = 1
 
-    print("nightlight:", min_night_lights, "Transformers:", dist_to_trans, "Grid:", max_grid_dist, "Road", max_road_dist, "Elec:", elec_modelled, "pop_threshold:", pop_cutoff, pop_cutoff2, "Rural_ele:", rural_elec_ratio, urban_elec_ratio)
+    print("nightlight:", min_night_lights, "Transformers:", dist_to_trans, "Substations:", dist_to_sub, "Grid:", max_grid_dist, "Road", max_road_dist, "Elec:", elec_modelled, "pop_threshold:", pop_cutoff)
     gdf = gpd.GeoDataFrame(settlement, geometry=settlement.geometry, crs=32737)
     gdf.to_file("../Projected_files/elec.shp")
     settlement.to_csv("../Projected_files/elec.csv")
@@ -195,13 +211,13 @@ if __name__ == "__main__":
     #settlements
     #settlements = sys.argv[1]
     elec_actual = 0.75  # percent
-    pop_cutoff = 400  # people
+    pop_cutoff = 350  # people
     dist_to_trans = 5000  # meters
     dist_to_sub = 5000
     min_night_lights = 1
-    max_grid_dist = 10000  # meters
-    max_road_dist = 1000  # meters
-    dist_minig = 2000 #meters
+    max_grid_dist = 50000  # meters
+    max_road_dist = 2000  # meters
+    dist_minig = 3000 #meters
     pop_cutoff2 = 1000  # people
     urban_elec_ratio = 83.5  # percent
     rural_elec_ratio = 71.5  # percent

@@ -10,6 +10,13 @@ from osgeo import gdal, ogr, gdalconst
 import os
 
 def join(elec, tif, cells):
+    """
+
+    :param elec:
+    :param tif:
+    :param cells:
+    :return:
+    """
     settlements = gpd.read_file(elec)
     print(settlements.crs)
     settlements.index = range(len(settlements))
@@ -25,14 +32,17 @@ def join(elec, tif, cells):
     cell =  gpd.read_file(cells)
     demand_cells = sjoin(settlements, cell, how="left")
     demand_cell = pd.DataFrame(demand_cells, copy=True)
-    print(demand_cell)
-    return(demand_cell)
+    if not os.path.exists('run/Demand'):
+        os.makedirs('run/Demand')
+    demand_cell.to_csv('run/Demand/demand_cells.csv')
+    path = 'run/Demand/demand_cells.csv'
+    return(path)
 
 def calculate_demand(settlements, path):
-    number_demand = settlements.groupby("elec")["pointid_right"].count()
-    print(number_demand)
-
-
+    demand_cell = pd.read_csv(settlements)
+    demand_points = demand_cell.groupby("pointid_right")["elec"]
+    demand_points.get_group(1)
+    print(demand_points)
 
     return ()
 
@@ -42,7 +52,8 @@ if __name__ == "__main__":
     gdp = '../Projected_files/masked_UMT37S_GDP_PPP_Layer2015.tif'
     elec_shp = '../Projected_files/elec.shp'
     path = 'run/Demand'
-    settlements = join(elec_shp, gdp, shape)
+    settlements = 'run/Demand/demand_cells.csv'
+    #settlements = join(elec_shp, gdp, shape)
     demand = calculate_demand(settlements, path)
 
 

@@ -22,7 +22,12 @@ gdal.UseExceptions()
 
 
 def masking(admin,tif_file):
+    """
 
+    :param admin:
+    :param tif_file:
+    :return:
+    """
     with fiona.open(admin, "r") as shapefile:
         shapes = [feature["geometry"] for feature in shapefile]
     with rasterio.open(tif_file) as src:
@@ -39,12 +44,24 @@ def masking(admin,tif_file):
     return(tif_file)
 
 def project_raster(rasterdata, output_raster):
+    """
+
+    :param rasterdata:
+    :param output_raster:
+    :return:
+    """
     print(rasterdata)
     input_raster = gdal.Open(rasterdata)
     gdal.Warp(output_raster, input_raster, dstSRS="EPSG:32737")
     return()
 
 def project_vector(vectordata, outputvector):
+    """
+
+    :param vectordata:
+    :param outputvector:
+    :return:
+    """
     print(vectordata)
     gdf = gpd.read_file(vectordata)
     gdf_umt37 = gdf.to_crs({'init':'epsg:32737'})
@@ -53,6 +70,11 @@ def project_vector(vectordata, outputvector):
     return()
 
 def merge_transmission(proj_path):
+    """
+
+    :param proj_path:
+    :return:
+    """
     current = os.getcwd()
     os.chdir(proj_path)
     files = os.listdir(proj_path)
@@ -73,6 +95,11 @@ def merge_transmission(proj_path):
     os.chdir(current)
 
 def merge_minigrid(proj_path):
+    """
+
+    :param proj_path:
+    :return:
+    """
     current = os.getcwd()
     os.chdir(proj_path)
     files = os.listdir(proj_path)
@@ -101,6 +128,8 @@ def main(GIS_files_path):
     Merges the files named 'kV' to one merged shape file
     Merges the files named 'MiniGrid' to one merged shape file
 
+    :param GIS_files_path:
+    :return:
     """
     try:
        #  basedir = os.getcwd()
