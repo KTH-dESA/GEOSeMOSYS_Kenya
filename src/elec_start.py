@@ -1,3 +1,14 @@
+"""
+Module: elec_start
+=============================
+
+A module that estimates the
+---------------------------------------------------------------------------------------------
+
+Module author: KTH-dES modified by Nandi Moksnes
+
+"""
+
 # Author: KTH dESA Last modified by Nandi Moksnes
 # Date: 2021-04
 # Python version: 3.8
@@ -62,8 +73,7 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
 
 def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, dist_to_sub, dist_minig, min_night_lights,
                             max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year):
-    """
-        Calibrate the current electrification status, and future 'pre-electrification' status
+    """This function calibrate the current electrification status, and future 'pre-electrification' status
     :param settlement:
     :param elec_actual:
     :param pop_cutoff:

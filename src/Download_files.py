@@ -1,5 +1,13 @@
-# This script downloads data that is required for the analysis and unzips them
-# Developed by Nandi Moksnes 2020-12 for the paper GEOSeMOSYS
+"""
+Module: Download_files
+=============================
+
+A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them
+---------------------------------------------------------------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
 
 from urllib.request import Request, urlopen
 import shutil
@@ -11,9 +19,11 @@ import sys
 
 
 def download_url_data(url,temp):
-    """
-    Downloads the data from URL in url (comma separated file) and place them in temp
+    """ This function downloads the data from URL in url (comma separated file) and place them in temp
 
+    :param url:
+    :param temp:
+    :return:
     """
 
     def create_dir(dir):
@@ -28,9 +38,10 @@ def download_url_data(url,temp):
     return()
 
 def unzip_all(url):
-    """
-    Unzip the data from URL and place them in GIS_data
+    """ This function unzips the data from URL (url) and place them in GIS_data folder
 
+    :param url:
+    :return:
     """
 
     def create_dir(dir):

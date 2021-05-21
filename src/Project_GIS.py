@@ -1,6 +1,15 @@
-# Author: KTH dESA Last modified by Nandi Moksnes
-# Date: 2021-04
-# Python version: 3.8
+"""
+Module: Project_GIS
+=============================
+
+A module for projecting GIS data for
+--------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+
+"""
+
 import geopandas as gpd
 import rioxarray
 import xarray
@@ -22,11 +31,10 @@ gdal.UseExceptions()
 
 
 def masking(admin,tif_file):
-    """
-
+    """ This function masks the raster data (tif-file) with the GADM Admin 0 boundaries (admin)
     :param admin:
     :param tif_file:
-    :return:
+    :return: tif_file
     """
     with fiona.open(admin, "r") as shapefile:
         shapes = [feature["geometry"] for feature in shapefile]
@@ -44,7 +52,7 @@ def masking(admin,tif_file):
     return(tif_file)
 
 def project_raster(rasterdata, output_raster):
-    """
+    """This function projects the raster data (rasterdata) to EPSG:32737 and save it with the name extension "masked_UMT37S_%s" (outputraster)
 
     :param rasterdata:
     :param output_raster:
@@ -56,7 +64,7 @@ def project_raster(rasterdata, output_raster):
     return()
 
 def project_vector(vectordata, outputvector):
-    """
+    """This function projects the vector data (vectordata) to EPSG:32737 and save it with the name extension "UMT37S_%s" (outputvector)
 
     :param vectordata:
     :param outputvector:
@@ -70,7 +78,7 @@ def project_vector(vectordata, outputvector):
     return()
 
 def merge_transmission(proj_path):
-    """
+    """This function concatinates the shapefiles which contains the keyword 'kV'
 
     :param proj_path:
     :return:
@@ -95,7 +103,7 @@ def merge_transmission(proj_path):
     os.chdir(current)
 
 def merge_minigrid(proj_path):
-    """
+    """This function concatinates the shapefiles which contains the keyword 'MiniGrid'
 
     :param proj_path:
     :return:
@@ -121,8 +129,7 @@ def merge_minigrid(proj_path):
     os.chdir(current)
 
 def main(GIS_files_path):
-    """
-    Reads the GIS-layers and separates them by raster and vector data.
+    """ This main function reads the GIS-layers in GIS_files_path and separates them by raster and vector data.
     Projects the data to WGS84 UMT37S
     Moves all files to ../Projected_files
     Merges the files named 'kV' to one merged shape file

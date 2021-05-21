@@ -1,3 +1,13 @@
+"""
+Module: settlement_build
+=============================
+
+A module for converting the population raster layer (GADM) to point layer for the
+---------------------------------------------------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
 import rasterio
 from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
@@ -89,8 +99,7 @@ def raster_to_point(raster_list, pop_shp, proj_path):
     return()
 
 def raster_proximity(proj_path):
-    """
-        Creates raster file of lines an polygons and creates a proximity raster in the same resolution as population points (1kmx1km)
+    """This function creates raster file of lines an polygons and creates a proximity raster in the same resolution as population points (1kmx1km)
     :param proj_path:
     :return:
     """
