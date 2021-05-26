@@ -1,3 +1,14 @@
+"""
+Module: Build_csv_files
+=============================
+
+A module for building the csv-files for GEOSeMOSYS https://github.com/KTH-dESA/GEOSeMOSYS to run that code
+----------------------------------------------------------------------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
+
 import pandas as pd
 import geopandas as gpd
 import sys
