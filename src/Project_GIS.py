@@ -36,19 +36,21 @@ def masking(admin,tif_file):
     :param tif_file:
     :return: tif_file
     """
-    with fiona.open(admin, "r") as shapefile:
-        shapes = [feature["geometry"] for feature in shapefile]
-    with rasterio.open(tif_file) as src:
-        out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
-        out_meta = src.meta
-    out_meta.update({"driver": "GTiff",
-                     "height": out_image.shape[1],
-                     "width": out_image.shape[2],
-                     "transform": out_transform})
+    try:
+        with fiona.open(admin, "r") as shapefile:
+            shapes = [feature["geometry"] for feature in shapefile]
+        with rasterio.open(tif_file) as src:
+            out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
+            out_meta = src.meta
+        out_meta.update({"driver": "GTiff",
+                         "height": out_image.shape[1],
+                         "width": out_image.shape[2],
+                         "transform": out_transform})
 
-    with rasterio.open(tif_file, "w", **out_meta) as dest:
-        dest.write(out_image)
-
+        with rasterio.open(tif_file, "w", **out_meta) as dest:
+            dest.write(out_image)
+    except:
+        print("Already masked")
     return(tif_file)
 
 def project_raster(rasterdata, output_raster):
@@ -58,27 +60,43 @@ def project_raster(rasterdata, output_raster):
     :param output_raster:
     :return:
     """
-    print(rasterdata)
-    input_raster = gdal.Open(rasterdata)
-    gdal.Warp(output_raster, input_raster, dstSRS="EPSG:32737")
+    try:
+        print(rasterdata)
+        input_raster = gdal.Open(rasterdata)
+        gdal.Warp(output_raster, input_raster, dstSRS="EPSG:32737")
+    except:
+        print("Already projected")
     return()
 
-def project_vector(vectordata, outputvector):
-    """This function projects the vector data (vectordata) to EPSG:32737 and save it with the name extension "UMT37S_%s" (outputvector)
+def project_vector(vectordata):
+    """This function projects the vector data (vectordata) to EPSG:32737
 
     :param vectordata:
     :param outputvector:
     :return:
     """
-    print(vectordata)
     gdf = gpd.read_file(vectordata)
     gdf_umt37 = gdf.to_crs({'init':'epsg:32737'})
-    gdf_umt37.to_file(outputvector)
+    return(gdf_umt37)
 
-    return()
+def clip_vector(admin, vectordata, outputvector):
+    """This function clips the vector data (vectordata) to admin boundaries and save it with the name extension "UMT37S_%s" (outputvector)
+
+    :return:
+    """
+    adm_multi = gpd.read_file(admin)
+    adm = adm_multi.explode()
+    try:
+        vector = gpd.clip(vectordata, adm)
+        #vector = vectordata.intersection(adm_multi)
+    except:
+        print("Already clipped")
+        vector = vectordata
+    vector.to_file(outputvector)
+    return(vector)
 
 def merge_transmission(proj_path):
-    """This function concatinates the shapefiles which contains the keyword 'kV'
+    """This function concatinates the shapefiles which contains the keyword '132kV' and '220kV'
 
     :param proj_path:
     :return:
@@ -91,16 +109,43 @@ def merge_transmission(proj_path):
         if file.endswith('.shp'):
             f = os.path.abspath(file)
             shapefiles += [f]
-    keyword = 'kV'
+    keyword = ['132kV', '220kV']
     tmiss_list = []
-    for fname in shapefiles:
-        if keyword in fname:
-            shpfile = gpd.read_file(fname)
-            tmiss_list += [shpfile]
+    out = [f for f in shapefiles if any(xs in f for xs in keyword)]
+    for f in out:
+        shpfile = gpd.read_file(f)
+        tmiss_list += [shpfile]
 
     gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
     gdf.to_file("../Projected_files/Concat_Transmission_lines_UMT37S.shp")
     os.chdir(current)
+
+def merge_mv(proj_path):
+    """This function concatinates the shapefiles which contains the keyword '33kV' and '66kV'
+
+    :param proj_path:
+    :return:
+    """
+    current = os.getcwd()
+    os.chdir(proj_path)
+    files = os.listdir(proj_path)
+    shapefiles = []
+    for file in files:
+        if file.endswith('.shp'):
+            f = os.path.abspath(file)
+            shapefiles += [f]
+    keyword = ['33kV', '66kV']
+    tmiss_list = []
+    out = [f for f in shapefiles if any(xs in f for xs in keyword)]
+    for f in out:
+        shpfile = gpd.read_file(f)
+        tmiss_list += [shpfile]
+
+    gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
+    gdf.to_file("../Projected_files/Concat_MV_lines_UMT37S.shp")
+    os.chdir(current)
+
+    return()
 
 def merge_minigrid(proj_path):
     """This function concatinates the shapefiles which contains the keyword 'MiniGrid'
@@ -138,16 +183,21 @@ def main(GIS_files_path):
     :param GIS_files_path:
     :return:
     """
+    basedir = os.getcwd()
     try:
-       #  basedir = os.getcwd()
+        basedir = os.getcwd()
         os.chdir(GIS_files_path)
         current = os.getcwd()
         #All shp-files in all folders in dir current
+        adm = project_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'))
+        adm.to_file(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'))
         shpFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
-                  os.path.splitext(f)[1] == '.shp']
+                 os.path.splitext(f)[1] == '.shp']
         for s in shpFiles:
             path, filename = os.path.split(s)
-            project_vector(s, os.path.join(path, "UMT37S_%s" % (filename)))
+            projected = project_vector(s)
+            clip_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'), projected, os.path.join(path, "UMT37S_%s" % (filename)))
+
         #All tif-files in all folders in dir current
         tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
                   os.path.splitext(f)[1] == '.tif']
@@ -167,10 +217,14 @@ def main(GIS_files_path):
             if keyword in fname:
                 shutil.copy(fname, os.path.join(current, '..\Projected_files'))
     except:
+        print("except")
+    finally:
+        basedir = os.getcwd()
         os.chdir(basedir)
     os.chdir(basedir)
     merge_transmission('..\Projected_files')
     merge_minigrid('..\Projected_files')
+    merge_mv('..\Projected_files')
     return ()
 
 if __name__ == "__main__":
