@@ -29,7 +29,7 @@ def near_dist(pop_shp, un_elec_cells, path):
     unelec_shp.to_file("run/Demand/transmission.shp", crs= point.crs)
 
 def capital_cost_transmission_distrib(transmission_near):
-    
+
     return()
 
 if __name__ == "__main__":
