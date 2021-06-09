@@ -1,7 +1,19 @@
-# Written by Nandi Moksnes 2021-04
-##Usage limits https://www.renewables.ninja/documentation
-##Anonymous users are limited to a maximum of 5 requests per day.
-##To increase this limit to 50 per hour, please register for a free user account on renewable.ninja
+"""
+Module: renewable_ninja_download
+===================================
+
+A module for downloading data from Renewable ninja. You need to have a token (account) and also a shape file of the points that you want to download.
+
+Usage limits https://www.renewables.ninja/documentation
+Anonymous users are limited to a maximum of 5 requests per day.
+To increase this limit to 50 per hour, please register for a free user account on renewable.ninja
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
 import time
 import csv
 import os
@@ -16,6 +28,11 @@ time_zone_offset = 3 #Kenya is UTC + 3hours to adjust for the time zone
 ######
 
 def project_vector(vectordata):
+    """This function projects the vectordata to EPSG: 4326 as the renewable ninja data is in that CRS
+
+    :param vectordata:
+    :return:
+    """
     print(vectordata)
     gdf = gpd.read_file(vectordata)
     gdf_wgs84 = gdf.to_crs(4326)
@@ -24,6 +41,11 @@ def project_vector(vectordata):
 
 #Make CSV files for the download loop
 def csv_make(coordinates):
+    """This function extracts the coordinates for the csv build to renewable ninja
+
+    :param coordinates:
+    :return:
+    """
 
     coordinates['lon'] = coordinates.geometry.apply(lambda p: p.x)
     coordinates['lat'] = coordinates.geometry.apply(lambda p: p.y)
@@ -90,6 +112,13 @@ def csv_make(coordinates):
     return(wind_csv, solar_csv)
 
 def download(path, wind, solar):
+    """This function downloads the renewable ninja data according to the limit of the
+
+    :param path:
+    :param wind:
+    :param solar:
+    :return:
+    """
 
     i = 0
     while i < len(wind)+8:

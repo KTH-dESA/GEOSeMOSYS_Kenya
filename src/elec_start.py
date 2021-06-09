@@ -194,11 +194,11 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
                 break
 
         count += 1
-        #rural_elec_ratio = 1
-        #urban_elec_ratio = 1
+        rural_elec_ratio = 1
+        urban_elec_ratio = 1
 
-    print('The modelled electrification rate achieved is {} and the urban ratio is {} and the rural ratio is {}. '
-                 'If this is not acceptable please revise this part of the algorithm'.format(elec_modelled, urban_elec_ratio, rural_elec_ratio))
+    print('The modelled electrification rate achieved is {}. '
+                 'If this is not acceptable please revise this part of the algorithm'.format(elec_modelled))
     condition = 1
 
     print("(All units are in meters): ", "Nightlight (avg rad):", min_night_lights, "Transformers:", dist_to_trans, "Substations:", dist_to_sub, "Distance to HV:", max_grid_dist, "Road", max_road_dist, "Elec percent:", elec_modelled, "Population threshold:", pop_cutoff, "Distance to mini grid:", dist_minig, "Distance to MV:", dist_mv, "Distance to LV:", dist_lv)
