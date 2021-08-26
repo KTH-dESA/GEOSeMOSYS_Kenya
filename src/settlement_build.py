@@ -1,3 +1,13 @@
+"""
+Module: settlement_build
+=============================
+
+A module for converting the population raster layer (GADM) to point layer for the
+---------------------------------------------------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
 import rasterio
 from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
@@ -8,9 +18,12 @@ import subprocess
 gdal.UseExceptions()
 
 def raster_to_point(raster_list, pop_shp, proj_path):
-    """
-    Find all VIIRS files named avg_rade9h and mosaic them.
+    """Find all VIIRS files named avg_rade9h and mosaic them.
     Extract values to point layer (population layer 1kmx1km)
+    :param raster_list:
+    :param pop_shp:
+    :param proj_path:
+    :return:
     """
     current = os.getcwd()
     os.chdir(proj_path)
@@ -86,10 +99,11 @@ def raster_to_point(raster_list, pop_shp, proj_path):
     return()
 
 def raster_proximity(proj_path):
+    """This function creates raster file of lines an polygons and creates a proximity raster in the same resolution as population points (1kmx1km)
+    :param proj_path:
+    :return:
     """
-    Creates raster file of lines an polygons and creates a proximity raster in the same resolution as population points (1kmx1km)
-    """
-    #Rasterise the shapefile to the same projection & pixel resolution as population layer in 1x1km resolution.
+    # Rasterise the shapefile to the same projection & pixel resolution as population layer in 1x1km resolution.
     raster_list = [os.path.join(proj_path,'Concat_Transmission_lines_UMT37S.shp'), os.path.join(proj_path,'UMT37S_Primary_Substations.shp'), os.path.join(proj_path,'UMT37S_Distribution_Transformers.shp'), os.path.join(proj_path,'Concat_Mini-grid_UMT37S.shp'),os.path.join(proj_path,'UMT37S_Roads.shp')]
     raster_out = []
     raster_prox = []
@@ -132,7 +146,7 @@ def raster_proximity(proj_path):
         Output = None
         Image = None
         # Shapefile = None
-    #Proximity raster of 50 000 m
+    # Proximity raster of 50 000 m
     for j in range(len(raster_out)):
         src_ds = gdal.Open(raster_out[j])
         _, filename = os.path.split(raster_list[j])
@@ -157,28 +171,6 @@ def raster_proximity(proj_path):
         # dst_ds = None
 
     return(raster_prox)
-
-# def near_calculations_point(point, proj_path):
-#     """
-#     Calculates the nearest distance to points in relation to population points (1kmx1km)
-#     """
-#     sub = gpd.read_file(proj_path + '/UMT37S_Primary_Substations.shp')
-#     print(sub.crs)
-#     point['Distance_to_substations'] = point.geometry.apply(lambda x: sub.distance(x).min())
-#     print("Distance to substations")
-#
-#     trans = gpd.read_file(proj_path + '/UMT37S_Distribution_Transformers.shp')
-#     print(trans.crs)
-#     point['Distance_to_transformers'] = point.geometry.apply(lambda x: trans.distance(x).min())
-#     print("Distance to transformers")
-#
-#     minigrid = gpd.read_file(proj_path + '/Concat_Mini-grid_UMT37S.shp')
-#     print(minigrid.crs)
-#     point['Distance_to_Mini-grid'] = point.geometry.apply(lambda x: minigrid.distance(x).min())
-#     print("Distance to minigrid")
-#
-#     point.to_file("../Projected_files/settlements_distance.shp")
-#     return(point)
 
 if __name__ == "__main__":
     pop_shp, Projected_files_path = sys.argv[1], sys.argv[2]
