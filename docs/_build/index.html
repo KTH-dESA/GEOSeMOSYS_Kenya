@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>GEOSeMOSYS Kenya &#8212; GEOSeMOSYS Kenya 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Download_files" href="Download_files.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="geosemosys-kenya">
+<h1>GEOSeMOSYS Kenya<a class="headerlink" href="#geosemosys-kenya" title="Permalink to this headline">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#module-Download_files" title="Download_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Download_files</span></code></a></p></td>
+<td><p>Module: Download_files</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#module-Project_GIS" title="Project_GIS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project_GIS</span></code></a></p></td>
+<td><p>Module: Project_GIS</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#module-settlement_build" title="settlement_build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settlement_build</span></code></a></p></td>
+<td><p>Module: settlement_build</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#module-elec_start" title="elec_start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">elec_start</span></code></a></p></td>
+<td><p>Module: elec_start</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#module-Build_csv_files" title="Build_csv_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Build_csv_files</span></code></a></p></td>
+<td><p>Module: Build_csv_files</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#module-Demand" title="Demand"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Demand</span></code></a></p></td>
+<td><p>Module: Demand</p></td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+<span class="target" id="module-Download_files"></span><section id="module-download-files">
+<h2>Module: Download_files<a class="headerlink" href="#module-download-files" title="Permalink to this headline">¶</a></h2>
+<section id="a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data">
+<h3>A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder “GIS-data”<a class="headerlink" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data" title="Permalink to this headline">¶</a></h3>
+<p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="Download_files.download_url_data">
+<span class="sig-prename descclassname"><span class="pre">Download_files.</span></span><span class="sig-name descname"><span class="pre">download_url_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Download_files.download_url_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function downloads the data from URL in url (comma separated file) and place them in temp</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – </p></li>
+<li><p><strong>temp</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Download_files.unzip_all">
+<span class="sig-prename descclassname"><span class="pre">Download_files.</span></span><span class="sig-name descname"><span class="pre">unzip_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Download_files.unzip_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function unzips the data from URL (url) and place them in GIS_data folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+<span class="target" id="module-Project_GIS"></span><section id="module-project-gis">
+<h2>Module: Project_GIS<a class="headerlink" href="#module-project-gis" title="Permalink to this headline">¶</a></h2>
+<section id="a-module-for-projecting-the-gis-data-to-the-appropriate-epsg-crs">
+<h3>A module for projecting the GIS data to the appropriate EPSG CRS<a class="headerlink" href="#a-module-for-projecting-the-gis-data-to-the-appropriate-epsg-crs" title="Permalink to this headline">¶</a></h3>
+<p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.clip_vector">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">clip_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">admin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectordata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputvector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.clip_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function clips the vector data (vectordata) to admin boundaries and save it with the name extension “UMT37S_%s” (outputvector)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.main">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">GIS_files_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This main function reads the GIS-layers in GIS_files_path and separates them by raster and vector data.
+Projects the data to WGS84 UMT37S
+Moves all files to ../Projected_files
+Merges the files named ‘kV’ to one merged shape file
+Merges the files named ‘MiniGrid’ to one merged shape file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>GIS_files_path</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.masking">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">masking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">admin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tif_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.masking" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function masks the raster data (tif-file) with the GADM Admin 0 boundaries (admin)
+:param admin:
+:param tif_file:
+:return: tif_file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.merge_minigrid">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">merge_minigrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.merge_minigrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function concatinates the shapefiles which contains the keyword ‘MiniGrid’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>proj_path</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.merge_mv">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">merge_mv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.merge_mv" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function concatinates the shapefiles which contains the keyword ‘33kV’ and ‘66kV’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>proj_path</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.merge_transmission">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">merge_transmission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.merge_transmission" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function concatinates the shapefiles which contains the keyword ‘132kV’ and ‘220kV’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>proj_path</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.project_raster">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">project_raster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rasterdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_raster</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.project_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function projects the raster data (rasterdata) to EPSG:32737 and save it with the name extension “masked_UMT37S_%s” (outputraster)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rasterdata</strong> – </p></li>
+<li><p><strong>output_raster</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Project_GIS.project_vector">
+<span class="sig-prename descclassname"><span class="pre">Project_GIS.</span></span><span class="sig-name descname"><span class="pre">project_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectordata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Project_GIS.project_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function projects the vector data (vectordata) to EPSG:32737</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vectordata</strong> – </p></li>
+<li><p><strong>outputvector</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+<span class="target" id="module-settlement_build"></span><section id="module-settlement-build">
+<h2>Module: settlement_build<a class="headerlink" href="#module-settlement-build" title="Permalink to this headline">¶</a></h2>
+<p>A module for converting the population raster layer (GADM) to point layer
+In the point layer columns are added with proximity analysis to transmission lines, nighttimelight, mini-grid roads etc.</p>
+<hr class="docutils" />
+<p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="settlement_build.raster_proximity">
+<span class="sig-prename descclassname"><span class="pre">settlement_build.</span></span><span class="sig-name descname"><span class="pre">raster_proximity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#settlement_build.raster_proximity" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates raster file of lines an polygons and creates a proximity raster in the same resolution as population points (1kmx1km)
+:param proj_path:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="settlement_build.raster_to_point">
+<span class="sig-prename descclassname"><span class="pre">settlement_build.</span></span><span class="sig-name descname"><span class="pre">raster_to_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raster_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pop_shp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#settlement_build.raster_to_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all VIIRS files named avg_rade9h and mosaic them.
+Extract values to point layer (population layer 1kmx1km)
+:param raster_list:
+:param pop_shp:
+:param proj_path:
+:return:</p>
+</dd></dl>
+
+</section>
+<span class="target" id="module-elec_start"></span><section id="module-elec-start">
+<h2>Module: elec_start<a class="headerlink" href="#module-elec-start" title="Permalink to this headline">¶</a></h2>
+<section id="a-module-that-estimates-the-electrified-population-based-on-parameters-nighttime-light-distance-to-transmission-lines-hv-mv-lv-roads-substations-and-transformers-population-density">
+<h3>A module that estimates the electrified population based on parameters nighttime light, distance to transmission lines (HV, MV, LV), roads, substations and transformers, population density<a class="headerlink" href="#a-module-that-estimates-the-electrified-population-based-on-parameters-nighttime-light-distance-to-transmission-lines-hv-mv-lv-roads-substations-and-transformers-population-density" title="Permalink to this headline">¶</a></h3>
+<p>Module author: KTH-dES modified by Nandi Moksnes</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="elec_start.calibrate_pop_and_urban">
+<span class="sig-prename descclassname"><span class="pre">elec_start.</span></span><span class="sig-name descname"><span class="pre">calibrate_pop_and_urban</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settlement</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pop_actual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urban</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urban_cutoff</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elec_start.calibrate_pop_and_urban" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibrate the actual current population, the urban split and forecast the future population</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="elec_start.elec_current_and_future">
+<span class="sig-prename descclassname"><span class="pre">elec_start.</span></span><span class="sig-name descname"><span class="pre">elec_current_and_future</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settlement</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elec_actual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pop_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_to_trans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_to_sub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_minig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_night_lights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_grid_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urban_elec_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rural_elec_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_road_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pop_actual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pop_cutoff2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_mv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_lv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#elec_start.elec_current_and_future" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calibrate the current electrification status, and future ‘pre-electrification’ status
+:param settlement:
+:param elec_actual:
+:param pop_cutoff:
+:param dist_to_trans:
+:param dist_to_sub:
+:param dist_minig:
+:param min_night_lights:
+:param max_grid_dist:
+:param urban_elec_ratio:
+:param rural_elec_ratio:
+:param max_road_dist:
+:param pop_actual:
+:param pop_cutoff2:
+:param start_year:
+:return:</p>
+</dd></dl>
+
+</section>
+</section>
+<span class="target" id="module-renewable_ninja_download"></span><section id="module-renewable-ninja-download">
+<h2>Module: renewable_ninja_download<a class="headerlink" href="#module-renewable-ninja-download" title="Permalink to this headline">¶</a></h2>
+<p>A module for downloading data from Renewable ninja. You need to have a token (account) and also a shape file of the points that you want to download.</p>
+<p>Usage limits <a class="reference external" href="https://www.renewables.ninja/documentation">https://www.renewables.ninja/documentation</a>
+Anonymous users are limited to a maximum of 5 requests per day.
+To increase this limit to 50 per hour, please register for a free user account on renewable.ninja</p>
+<hr class="docutils" />
+<p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="renewable_ninja_download.csv_make">
+<span class="sig-prename descclassname"><span class="pre">renewable_ninja_download.</span></span><span class="sig-name descname"><span class="pre">csv_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#renewable_ninja_download.csv_make" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function extracts the coordinates for the csv build to renewable ninja</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coordinates</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="renewable_ninja_download.download">
+<span class="sig-prename descclassname"><span class="pre">renewable_ninja_download.</span></span><span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#renewable_ninja_download.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function downloads the renewable ninja data according to the limit of the</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – </p></li>
+<li><p><strong>wind</strong> – </p></li>
+<li><p><strong>solar</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="renewable_ninja_download.project_vector">
+<span class="sig-prename descclassname"><span class="pre">renewable_ninja_download.</span></span><span class="sig-name descname"><span class="pre">project_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vectordata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#renewable_ninja_download.project_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function projects the vectordata to EPSG: 4326 as the renewable ninja data is in that CRS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vectordata</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<span class="target" id="module-Build_csv_files"></span><section id="module-build-csv-files">
+<h2>Module: Build_csv_files<a class="headerlink" href="#module-build-csv-files" title="Permalink to this headline">¶</a></h2>
+<p>A module for building the csv-files for GEOSeMOSYS <a class="reference external" href="https://github.com/KTH-dESA/GEOSeMOSYS">https://github.com/KTH-dESA/GEOSeMOSYS</a> to run that code
+In this module the logic around electrified and un-electrified cells are implemented for the</p>
+<hr class="docutils" />
+<p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="Build_csv_files.capital_cost_transmission_distrib">
+<span class="sig-prename descclassname"><span class="pre">Build_csv_files.</span></span><span class="sig-name descname"><span class="pre">capital_cost_transmission_distrib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distribution_network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">un_elec_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmission_near</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capital_cost_HV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capital_cost_LV</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Build_csv_files.capital_cost_transmission_distrib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distribution_network</strong> – </p></li>
+<li><p><strong>elec</strong> – </p></li>
+<li><p><strong>un_elec_cells</strong> – </p></li>
+<li><p><strong>transmission_near</strong> – </p></li>
+<li><p><strong>capital_cost_HV</strong> – </p></li>
+<li><p><strong>substation</strong> – </p></li>
+<li><p><strong>capital_cost_LV</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<span class="target" id="module-Demand"></span><section id="module-demand">
+<h2>Module: Demand<a class="headerlink" href="#module-demand" title="Permalink to this headline">¶</a></h2>
+<p>A module for joining the larger polygons with the electrification algorithm for demand</p>
+<hr class="docutils" />
+<p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="Demand.join">
+<span class="sig-prename descclassname"><span class="pre">Demand.</span></span><span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tif</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Demand.join" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elec</strong> – </p></li>
+<li><p><strong>tif</strong> – </p></li>
+<li><p><strong>cells</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">GEOSeMOSYS Kenya</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Download_files.html">Download_files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Project_GIS.html">Project_GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settlement_build.html">settlement_build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elec_start.html">elec_start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Build_csv_files.html">Build_csv_files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Demand.html">Demand</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="Download_files.html" title="next chapter">Download_files</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Nandi Moksnes, Mark Howells, Will Usher.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
