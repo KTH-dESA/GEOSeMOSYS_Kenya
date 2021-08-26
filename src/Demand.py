@@ -1,8 +1,9 @@
 """
-Module: Build_data_files
+Module: Demand
 =============================
 
-A module for building the csv-files for GEOSeMOSYS https://github.com/KTH-dESA/GEOSeMOSYS to run that code
+A module for joining the larger polygons with the electrification algorithm for demand
+
 ----------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
@@ -47,7 +48,7 @@ def join(elec, tif, cells):
     path = 'run/Demand/demand_cells.csv'
     return(path)
 
-##This function is not used in the current version
+#This function is not used in the current version
 def calculate_demand(settlements):
     demand_cell = pd.read_csv(settlements, index_col=[0])
     demand_cell["pointid_right"] = demand_cell["pointid_right"].astype("category")
@@ -91,7 +92,6 @@ def calculate_demand(settlements):
                     #This needs to be revised and also to sum over the electrified only. Also adding gdp is difficult here. Cannot be added like this at least.
                     demand[i][j] = (0.5*split['pop'][elec] / total_pop_elec[0] + 0.5*split['GDP_PPP'][elec]/total_gdp_elec[0]) * demand_emop[i][0]
                 j +=1
-
             elif elec==0 and split['pop']!=0:
                 demand['Fuel'][j] = 'EL3_%i_0' % (cell_id)
                 for i in demand_emop.columns:

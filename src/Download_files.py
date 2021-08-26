@@ -2,8 +2,8 @@
 Module: Download_files
 =============================
 
-A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them
----------------------------------------------------------------------------------------------------------
+A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder "GIS-data"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -16,7 +16,6 @@ import tarfile
 import os
 import pandas as pd
 import sys
-
 
 def download_url_data(url,temp):
     """ This function downloads the data from URL in url (comma separated file) and place them in temp
@@ -59,8 +58,8 @@ def unzip_all(url):
         for item in tar:
             tar.extract(item, out_path)
             if item.name.find(".tgz") != -1 or item.name.find(".tar") != -1:
-                extract(item.name, "./" + item.name[:item.name.rfind('/')])
 
+                extract(item.name, "./" + item.name[:item.name.rfind('/')])
     for i, row in url_adress.iterrows():
         _, filename = os.path.split(row[1])
         name, ending = os.path.splitext(filename)
@@ -74,6 +73,6 @@ def unzip_all(url):
 if __name__ == "__main__":
     current = os.getcwd()
     url_adress,temp = sys.argv[1], sys.argv[2]
-    #download = download_url_data(url_adress, temp)
+    download = download_url_data(url_adress, temp)
     unzip = unzip_all(url_adress)
 

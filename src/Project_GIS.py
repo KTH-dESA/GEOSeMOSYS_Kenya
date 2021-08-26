@@ -2,8 +2,8 @@
 Module: Project_GIS
 =============================
 
-A module for projecting GIS data for
---------------------------------------------------
+A module for projecting the GIS data to the appropriate EPSG CRS
+-----------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -11,8 +11,6 @@ Module author: Nandi Moksnes <nandi@kth.se>
 """
 
 import geopandas as gpd
-import rioxarray
-import xarray
 from shapely.geometry import mapping
 import pandas as pd
 import os
@@ -76,7 +74,7 @@ def project_vector(vectordata):
     :return:
     """
     gdf = gpd.read_file(vectordata)
-    gdf_umt37 = gdf.to_crs({'init':'epsg:32737'})
+    gdf_umt37 = gdf.to_crs("EPSG:32737")
     return(gdf_umt37)
 
 def clip_vector(admin, vectordata, outputvector):
@@ -169,7 +167,7 @@ def merge_minigrid(proj_path):
             minigr_list += [shpfile]
 
     gdf = pd.concat([shp for shp in minigr_list]).pipe(gpd.GeoDataFrame)
-    gdf.set_crs(epsg=32737, inplace=True)
+    #gdf.set_crs(epsg=32737, inplace=True)
     gdf.to_file("../Projected_files/Concat_Mini-grid_UMT37S.shp")
     os.chdir(current)
 
@@ -183,44 +181,39 @@ def main(GIS_files_path):
     :param GIS_files_path:
     :return:
     """
+    print(os.getcwd())
     basedir = os.getcwd()
-    try:
-        basedir = os.getcwd()
-        os.chdir(GIS_files_path)
-        current = os.getcwd()
-        #All shp-files in all folders in dir current
-        adm = project_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'))
-        adm.to_file(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'))
-        shpFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
-                 os.path.splitext(f)[1] == '.shp']
-        for s in shpFiles:
-            path, filename = os.path.split(s)
-            projected = project_vector(s)
-            clip_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'), projected, os.path.join(path, "UMT37S_%s" % (filename)))
+    os.chdir(GIS_files_path)
+    current = os.getcwd()
+    print(os.getcwd())
+    #All shp-files in all folders in dir current
+    adm = project_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'))
+    adm.to_file(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'))
+    shpFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
+             os.path.splitext(f)[1] == '.shp']
+    for s in shpFiles:
+        path, filename = os.path.split(s)
+        projected = project_vector(s)
+        clip_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'), projected, os.path.join(path, "UMT37S_%s" % (filename)))
 
-        #All tif-files in all folders in dir current
-        tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
-                  os.path.splitext(f)[1] == '.tif']
-        for t in tifFiles:
-            path, filename = os.path.split(t)
-            masking(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'), t)
-            project_raster(os.path.join(path,'%s' % (filename)), os.path.join(path,"masked_UMT37S_%s" % (filename)))
+    #All tif-files in all folders in dir current
+    tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
+              os.path.splitext(f)[1] == '.tif']
+    for t in tifFiles:
+        path, filename = os.path.split(t)
+        masking(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0.shp'), t)
+        project_raster(os.path.join(path,'%s' % (filename)), os.path.join(path,"masked_UMT37S_%s" % (filename)))
 
-        #All files containing "UMT37S" is copied to ../Projected_files dir
-        def create_dir(dir):
-            if not os.path.exists(dir):
-                os.makedirs(dir)
-        create_dir(('../Projected_files'))
-        allFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames]
-        keyword = 'UMT37S'
-        for fname in allFiles:
-            if keyword in fname:
-                shutil.copy(fname, os.path.join(current, '..\Projected_files'))
-    except:
-        print("except")
-    finally:
-        basedir = os.getcwd()
-        os.chdir(basedir)
+    #All files containing "UMT37S" is copied to ../Projected_files dir
+    def create_dir(dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+    create_dir(('../Projected_files'))
+    allFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames]
+    keyword = 'UMT37S'
+    for fname in allFiles:
+        if keyword in fname:
+            shutil.copy(fname, os.path.join(current, '..\Projected_files'))
     os.chdir(basedir)
     merge_transmission('..\Projected_files')
     merge_minigrid('..\Projected_files')
