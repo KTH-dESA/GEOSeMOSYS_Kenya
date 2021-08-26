@@ -158,7 +158,7 @@ def adjust_timezone(path):
 
 
 if __name__ == "__main__":
-    shapefile, path= sys.argv[1],sys.argv[2]
+    shapefile, path= sys.argv[1],sys.argv[2] #shapefile = pointfile for the 378 points
     coordinates = project_vector(shapefile)
     wind, solar = csv_make(coordinates)
-    down = download(path, wind, solar)
+    down = download(path, wind, solar) #path = /temp

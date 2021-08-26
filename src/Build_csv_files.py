@@ -19,6 +19,13 @@ import fnmatch
 from geopandas.tools import sjoin
 
 def renewableninja(path):
+    """
+    This function organize the data to the required format of a matrix with the
+    location name on the x axis and hourly data on the y axis so that it can be fed into https://github.com/KTH-dESA/GEOSeMOSYS code
+    the data is saved as capacityfactor_wind.csv and capacityfactor_solar.csv
+    :param path:
+    :return:
+    """
     files = os.listdir(path)
     outwind = []
     outsolar = []
@@ -60,15 +67,15 @@ def GIS_file():
 
 ## Build files with elec/unelec aspects
 def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells, transmission_near, capital_cost_HV, substation, capital_cost_LV):
-    """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost
+    """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and diesel generators
 
-    :param distribution_network:
-    :param elec:
-    :param un_elec_cells:
-    :param transmission_near:
-    :param capital_cost_HV:
-    :param substation:
-    :param capital_cost_LV:
+    :param distribution_network: a shape file of the LV and MV infrastructure
+    :param elec: are the 40*40m cells that have at least one cell of electrified 1x1km inside it
+    :param un_elec_cells: are the 40*40m cells that have NO electrified cells 1x1km inside it
+    :param transmission_near: Is the distance to closest HV line from the center of the 40*40 cell
+    :param capital_cost_HV: kUSD/MW
+    :param substation: kUSD/MW
+    :param capital_cost_LV: kUSD/MW
     :return:
     """
 
@@ -245,30 +252,16 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
         outputactivity.loc[l] = output_temp
         output_temp = []
 
-        # outputactivity.loc[m]['Fuel'] = "EL2_%i" % (k)
-        # outputactivity.loc[m]['Technology'] = "WI_%i" %(k)
-        # outputactivity.loc[m]['Outputactivity'] = 1
-        # outputactivity.loc[m]['ModeofOperation'] = 1
 
         l = len(outputactivity)
         output_temp = [0,  "EL2_%i" % (k), "KEDSGEN_%i" %(k), 1, 1]
         outputactivity.loc[l] = output_temp
         output_temp = []
 
-        # outputactivity.loc[m]['Fuel'] = "EL2_%i" % (k)
-        # outputactivity.loc[m]['Technology'] = "KEDSGEN_%i" %(k)
-        # outputactivity.loc[m]['Outputactivity'] = 1
-        # outputactivity.loc[m]['ModeofOperation'] = 1
-
         h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(k), "SOMG_%i" %(k), 1, 1]
         inputactivity.loc[h] = input_temp
         input_temp = []
-
-        # inputactivity.loc[m]['Fuel'] = "SOLAR_%i" %(k)
-        # inputactivity.loc[m]['Technology'] =  "SOMG_%i" %(k)
-        # inputactivity.loc[m]['Inputactivity'] = 1
-        # inputactivity.loc[m]['ModeofOperation'] = 1
 
         h = len(inputactivity)
         input_temp = [0,  "KEDS", "KEDSGEN_%i" %(k), 4, 1]
@@ -277,11 +270,6 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
         #The specific fuel consumption in a diesel generator is approximately 0.324 l/kWh when operating close to the rated power (approx. 70-89%) (Yamegueu et al., 2011).
         # However, there are variations depending on the load it operates under ranging from 0.32 to 0.53 l/kWh depending on the rated power (Dufo-López et al., 2011).
         #The Fuel Energy density is for Diesel 39.6 MJ/liter which leads to a fuel consumption of 12.672 MJ/kWh – 20.988 MJ/kWh. 1 kWh is 3.6 MJ meaning that 12.672/3.6 = 3.52 MJdiesel/MJel – 5.83 MJdiesel/MJel. 4 in the model.
-        # inputactivity.loc[m]['Fuel'] = "KEDS"
-        # inputactivity.loc[m]['Technology'] =  "KEDSGEN_%i" %(k)
-        # inputactivity.loc[m]['Inputactivity'] = 4
-        # inputactivity.loc[m]['ModeofOperation'] = 1
-
 
         m +=1
 
