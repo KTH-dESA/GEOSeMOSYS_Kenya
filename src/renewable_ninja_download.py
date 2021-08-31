@@ -153,7 +153,7 @@ def adjust_timezone(path):
 
     for f in files:
         df = pd.read_csv(f)
-        df.index = df.index + time_zone_offset
+        df.index = df.index + time_zone_offset  ##Does note work properly, has been manually adjusted for the first round
         df.to_csv()
 
 

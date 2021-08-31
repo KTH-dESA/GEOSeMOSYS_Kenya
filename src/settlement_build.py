@@ -2,8 +2,10 @@
 Module: settlement_build
 =============================
 
-A module for converting the population raster layer (GADM) to point layer for the
----------------------------------------------------------------------------------------------
+A module for converting the population raster layer (GADM) to point layer
+In the point layer columns are added with proximity analysis to transmission lines, nighttimelight, mini-grid roads etc.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -43,6 +45,7 @@ def raster_to_point(raster_list, pop_shp, proj_path):
     mosaic, out_trans = merge(viirs)
     out_meta = src.meta.copy()
     out_meta.update({"driver": "GTiff", "height": mosaic.shape[1],"width": mosaic.shape[2], "transform": out_trans, "crs": ({'init': 'EPSG:32737'})})
+    print('TIF files that contain %s is now mosaicked to viirs.tif' %(keyword))
 
     with rasterio.open('%s/viirs.tif' % proj_path, "w", **out_meta) as dest:
         dest.write(mosaic)
@@ -61,12 +64,15 @@ def raster_to_point(raster_list, pop_shp, proj_path):
     settlements['Nighttime'] = [x[0] for x in nighttimelight.sample(coords)]
     print("Nighttime light")
 
+    print('The viirs.tif file is converted to a dataframe')
+
     _, filename = os.path.split(raster_list[0])
     name, ending = os.path.splitext(filename)
     trans = rasterio.open(raster_list[0])
-    print(trans.crs)
     settlements['Grid'] = [x[0] for x in trans.sample(coords)]
     print(name)
+
+    print('The %s.tif file is added to the dataframe' %(name))
 
     _, filename = os.path.split(raster_list[1])
     name, ending = os.path.splitext(filename)
@@ -75,27 +81,46 @@ def raster_to_point(raster_list, pop_shp, proj_path):
     settlements['Substation'] = [x[0] for x in subs.sample(coords)]
     print(name)
 
+    print('The %s.tif file is added to the dataframe' %(name))
+
     _, filename = os.path.split(raster_list[2])
     name, ending = os.path.splitext(filename)
     transf = rasterio.open(raster_list[2])
-    print(transf.crs)
     settlements['Transform'] = [x[0] for x in transf.sample(coords)]
-    print(name)
+
+    print('The %s.tif file is added to the dataframe' %(name))
 
     _, filename = os.path.split(raster_list[3])
     name, ending = os.path.splitext(filename)
     minig = rasterio.open(raster_list[3])
-    print(minig.crs)
     settlements['Minigrid'] = [x[0] for x in minig.sample(coords)]
-    print(name)
+
+    print('The %s.tif file is added to the dataframe' %(name))
 
     _, filename = os.path.split(raster_list[4])
     name, ending = os.path.splitext(filename)
     road = rasterio.open(raster_list[4])
-    print(road.crs)
     settlements['Road'] = [x[0] for x in road.sample(coords)]
-    print(name)
+
+    print('The %s.tif file is added to the dataframe' %(name))
+
+    _, filename = os.path.split(raster_list[5])
+    name, ending = os.path.splitext(filename)
+    mv = rasterio.open(raster_list[5])
+    settlements['MV'] = [x[0] for x in mv.sample(coords)]
+
+    print('The %s.tif file is added to the dataframe' %(name))
+
+    _, filename = os.path.split(raster_list[6])
+    name, ending = os.path.splitext(filename)
+    lv = rasterio.open(raster_list[6])
+    settlements['LV'] = [x[0] for x in lv.sample(coords)]
+
+    print('The %s.tif file is added to the dataframe' %(name))
+
     settlements.to_file(os.path.join(proj_path, 'settlements.shp'))
+    print('The dataframe is saved to settlements.shp')
+
     return()
 
 def raster_proximity(proj_path):
@@ -104,10 +129,11 @@ def raster_proximity(proj_path):
     :return:
     """
     # Rasterise the shapefile to the same projection & pixel resolution as population layer in 1x1km resolution.
-    raster_list = [os.path.join(proj_path,'Concat_Transmission_lines_UMT37S.shp'), os.path.join(proj_path,'UMT37S_Primary_Substations.shp'), os.path.join(proj_path,'UMT37S_Distribution_Transformers.shp'), os.path.join(proj_path,'Concat_Mini-grid_UMT37S.shp'),os.path.join(proj_path,'UMT37S_Roads.shp')]
+    raster_list = [os.path.join(proj_path,'Concat_Transmission_lines_UMT37S.shp'), os.path.join(proj_path,'UMT37S_Primary_Substations.shp'), os.path.join(proj_path,'UMT37S_Distribution_Transformers.shp'), os.path.join(proj_path,'Concat_Mini-grid_UMT37S.shp'),os.path.join(proj_path,'UMT37S_Roads.shp'), os.path.join(proj_path,'Concat_MV_lines_UMT37S.shp'), os.path.join(proj_path,'UMT37S_11kV.shp')]
     raster_out = []
     raster_prox = []
     for i in range(len(raster_list)):
+        print('Rasterizing %s' %(raster_list[i]))
         InputVector = raster_list[i]
         _, filename = os.path.split(raster_list[i])
         name, ending = os.path.splitext(filename)
@@ -128,7 +154,6 @@ def raster_proximity(proj_path):
         Shapefile_layer = Shapefile.GetLayer()
 
         # Rasterise
-        print("Rasterising shapefile...")
         Output = gdal.GetDriverByName(gdalformat).Create(OutputImage, Image.RasterXSize, Image.RasterYSize, 1, datatype,
                                                          options=['COMPRESS=DEFLATE'])
         Output.SetProjection(Image.GetProjectionRef())
@@ -145,9 +170,11 @@ def raster_proximity(proj_path):
         Band = None
         Output = None
         Image = None
-        # Shapefile = None
+        #Shapefile = None
+
     # Proximity raster of 50 000 m
     for j in range(len(raster_out)):
+        print('Making proximity analysis %s' %(raster_out[j]))
         src_ds = gdal.Open(raster_out[j])
         _, filename = os.path.split(raster_list[j])
         name, ending = os.path.splitext(filename)

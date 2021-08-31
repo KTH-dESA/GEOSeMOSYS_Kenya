@@ -1,11 +1,10 @@
 """
 Module: post_elec_GIS_functions
-=============================
+===========================================================================
 
-A module for joining the larger polygons with the electrification algorithm for demand
-Calculate the
+A module for joining the larger polygons with the electrification algorithm to be able to calculate the demand in Excel
 
-----------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -48,24 +47,6 @@ def join(elec, tif, cells):
     demand_cell.to_csv('run/Demand/demand_cells.csv')
     path = 'run/Demand/demand_cells.csv'
     return(path)
-
-def near_dist(pop_shp, un_elec_cells, path):
-
-    unelec = pd.read_csv(un_elec_cells, header=None)
-    point = gpd.read_file(os.path.join(path, pop_shp))
-    point.index = point['pointid']
-    unelec_shp = gpd.GeoDataFrame()
-    for i in unelec[0]:
-        unelec_point = point.loc[i]
-        unelec_shp = unelec_shp.append(unelec_point)
-
-    lines = gpd.read_file(os.path.join(path, 'Concat_Transmission_lines_UMT37S.shp'))
-
-    unelec_shp['HV_dist'] = unelec_shp.geometry.apply(lambda x: lines.distance(x).min())
-    outpath = "run/Demand/transmission.shp"
-    unelec_shp.to_file(outpath, crs= point.crs)
-
-    return(outpath)
 
 
 #This function is not used in the current version of the code
@@ -136,12 +117,4 @@ if __name__ == "__main__":
     path = 'run/Demand'
     #settlements = 'run/Demand/demand_cells.csv'
     settlements = join(elec_shp, gdp, shape)
-
-    pop_shp = 'new_40x40points_WGSUMT37S.shp'
-    un_elec_cells = 'run/un_elec_cells.csv'
-    elec = 'run/elec_cells.csv'
-    Projected_files_path = '../Projected_files/'
-    distribution_network = 'run/Demand/Distribution_network.xlsx'
-
-    transmission_near = near_dist(pop_shp, un_elec_cells, Projected_files_path)
     #demand = calculate_demand(settlements)
