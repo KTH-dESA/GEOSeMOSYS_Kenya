@@ -153,12 +153,12 @@ def adjust_timezone(path):
 
     for f in files:
         df = pd.read_csv(f)
-        df.index = df.index + time_zone_offset
+        df.index = df.index + time_zone_offset  ##Does note work properly, has been manually adjusted for the first round
         df.to_csv()
 
 
 if __name__ == "__main__":
-    shapefile, path= sys.argv[1],sys.argv[2]
+    shapefile, path= sys.argv[1],sys.argv[2] #shapefile = pointfile for the 378 points
     coordinates = project_vector(shapefile)
     wind, solar = csv_make(coordinates)
-    down = download(path, wind, solar)
+    down = download(path, wind, solar) #path = /temp
