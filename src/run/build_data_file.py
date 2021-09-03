@@ -77,7 +77,7 @@ def functions_to_run(dict_df, outPutFile):
     if 'capitalcost_RET' in dict_df:
         outPutFile = capitalcost_dynamic(dict_df['GIS_data'], outPutFile, dict_df['capitalcost_RET'],
                                          dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'],
-                                         dict_df['input_data'],dict_df['elec'])
+                                         dict_df['input_data'],dict_df['elec'], dict_df['battery'])
     else:
         print('No capitalcost_RET file')
 ###########################################################################
@@ -127,7 +127,7 @@ def functions_to_run(dict_df, outPutFile):
         outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['battery'], dict_df['input_data'],
                                     dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'], dict_df['elec'])
     else:
-       print('No capacityfactor_solar or capacityfactor_wind file')
+        print('No capacityfactor_solar or capacityfactor_wind file')
     # ###############################################################################
 
     return(outPutFile)
@@ -203,7 +203,7 @@ def emissionactivity(df, outPutFile, input_data, emissions):
     param = "param EmissionActivityRatio default 0 :=\n"
     startIndex = outPutFile.index(param) + len(param)
     for i, row in df.iterrows():
-       location = i
+       location = row['Location']
        for m, line in emissions.iterrows():
            year = int(input_data['startyear'][0])
            t = line['Technology']
@@ -945,7 +945,7 @@ def specifiedannualdemand(outPutFile, demand, input_data):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, capacityfactor_solar, input_data, elec):
+def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, capacityfactor_solar, input_data, elec, battery):
     """
     builds the Capitalcost (Region, Technology, Year, CapitalCost) where the cost is dynamic. Here when the capacity factor vary for Wind
     -------------
@@ -1025,7 +1025,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
               for battcf in battery_CF:
                   battery_tech_name = battery_tech.loc[battcf]['Technology_name_OSeMOSYS']
                   sopvcapitalcostbatt = pv_tech.loc[cf][k] + battery_tech.loc[battcf][k]
-                  techname = pv_tech_name+"_"+battery_tech_name
+                  techname = pv_tech_name+battery_tech_name
                   if elec['elec'].eq(row['Location']).any():
                     dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
@@ -1045,12 +1045,11 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
        if battery_tech is None:
            pass
        else:
-           for battcf in battery_CF:
-               for k in comm_PV_tech.columns[3:]:
-                   battery_tech_name = battery_tech.loc[battcf]['Technology_name_OSeMOSYS']
-                   somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc[battcf][k]
-                   techname = comm_PV_tech_name + "_" + battery_tech_name
-                   dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
+           for k in comm_PV_tech.columns[3:]:
+               battery_tech_name = battery_tech.loc[13]['Technology_name_OSeMOSYS']
+               somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc[13][k]
+               techname = comm_PV_tech_name + battery_tech_name
+               dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
