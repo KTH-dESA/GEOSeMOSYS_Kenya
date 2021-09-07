@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 # Set the allocation to be charged for this job
-#SBATCH -A 2020-51
+#SBATCH -A 2021-37
 
 # The name of the script is myjob
 #SBATCH -J myjob
@@ -33,7 +33,7 @@ lpName=Kenya_BIG_ALL_REF_20200826.lp
 # this command starts glpsol (GNU Mathprog) 
 # Only generate the .lp file using flag --check
 
-glpsol -m OSeMOSYS_fast.txt -d Kenya_BIG_ALL_REF_200826_revE.txt --wlp Kenya_BIG_ALL_REF_20200826.lp --check
+glpsol -m OSeMOSYS_fast.txt -d Kenya_BIG_ALL_REF_210831_revA.txt --wlp Kenya_BIG_ALL_REF_20210831.lp --check
 
 # break mean make a new empty file for mycplexcommands
 rm -f mycplexcommands
@@ -41,14 +41,14 @@ touch mycplexcommands
 
 # echo writes each line to mycplexcommands that I want to execute in CPLEX
 
-echo "read Kenya_BIG_ALL_REF_20200826.lp" >> mycplexcommands
+echo "read Kenya_BIG_ALL_REF_20210831.lp" >> mycplexcommands
 echo "set simplex tolerances optimality 1e-05" >>mycplexcommands
 echo "set simplex dgradient 5" >>mycplexcommands
 echo "set output clonelog 1" >>mycplexcommands
 echo "set threads 24"       >> mycplexcommands
 echo "optimize"             >> mycplexcommands
 echo "write"                >> mycplexcommands
-echo "Kenya_BIG_ALL_REF_200826.sol"    >> mycplexcommands
+echo "Kenya_BIG_ALL_REF_20210831.sol"    >> mycplexcommands
 echo "quit"                 >> mycplexcommands
 
 
@@ -64,7 +64,7 @@ cplex < mycplexcommands
 
 # the sol file is input to transform python script
 #
-python transform_updated.py Kenya_BIG_ALL_REF_200826.sol Kenya_BIG_ALL_REF_200826_solved.txt
+python transform_updated.py Kenya_BIG_ALL_REF_20210831.sol Kenya_BIG_ALL_REF_20210831_solved.txt
 
 # delete lp and sol files
 #rm -f Kenya_BIG_ALL.lp
