@@ -30,14 +30,14 @@ def renewableninja(path):
     outwind = []
     outsolar = []
     for file in files:
-        if fnmatch.fnmatch(file, '*out_wind*'):
+        if fnmatch.fnmatch(file, 'Kenya_timezoneout_wind*'):
             file = os.path.join(path,file)
-            wind = pd.read_csv(file, index_col='time')
+            wind = pd.read_csv(file, index_col='adjtime')
             outwind.append(wind)
     for file in files:
-        if fnmatch.fnmatch(file, '*out_solar*'):
+        if fnmatch.fnmatch(file, 'Kenya_timezoneout_solar*'):
             file = os.path.join(path,file)
-            solar = pd.read_csv(file, index_col='time')
+            solar = pd.read_csv(file, index_col='adjtime')
             outsolar.append(solar)
 
     solarbase = pd.concat(outsolar, axis=1)
@@ -66,12 +66,13 @@ def GIS_file():
     return()
 
 ## Build files with elec/unelec aspects
-def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells, transmission_near, capital_cost_HV, substation, capital_cost_LV):
+def capital_cost_transmission_distrib(distribution_network, elec, noHV_file, HV_file, unelec, transmission_near, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity, distrbution_cost, path):
     """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options
 
     :param distribution_network: a shape file of the LV and MV infrastructure
     :param elec: are the 40*40m cells that have at least one cell of electrified 1x1km inside it
-    :param un_elec_cells: are the 40*40m cells that have NO electrified cells 1x1km inside it
+    :param unelec: are the 40*40m cells that have NO electrified cells 1x1km inside it
+    :param noHV: are the cells that are electrified and not 5000 m from a minigrid and not 50,000 m from the exsiting HV-MV grid the cell are concidered electrified by transmission lines.
     :param transmission_near: Is the distance to closest HV line from the center of the 40*40 cell
     :param capital_cost_HV: kUSD/MW
     :param substation: kUSD/MW
@@ -92,7 +93,12 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
     outputactivity = pd.DataFrame(columns=['Column','Fuel',	'Technology','Outputactivity','ModeofOperation'])
 
     elec = pd.read_csv(elec)
-    un_elec = pd.read_csv(un_elec_cells)
+    elec.pointid_right = elec.pointid_right.astype(int)
+    un_elec = pd.read_csv(unelec)
+    un_elec.pointid_right = un_elec.pointid_right.astype(int)
+    noHV = pd.read_csv(noHV_file)
+    HV = pd.read_csv(HV_file)
+    noHV.pointid_right = noHV.pointid_right.astype(int)
     distribution = pd.read_excel(distribution_network, index_col="ID")
 
     m = 0
@@ -101,19 +107,20 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
     capital_temp = []
 
     ## Electrified cells
-    for i in elec['elec']:
+    for i in elec['pointid_right']:
 
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(i)+"_1",'Tier2_LV_length_(km)']*capital_cost_LV + substation
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(i)+"_1",distrbution_cost]*capital_cost_LV + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_1" %(i)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(i)+"_0",'Tier2_LV_length_(km)']*capital_cost_LV*0.035 + substation*0.035
+
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(i)+"_0",distrbution_cost]*capital_cost_LV*0.035 + substation*0.035
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" %(i)
 
         m +=1
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(i)+"_0",'Tier2_LV_length_(km)']*capital_cost_LV + substation
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(i)+"_0",distrbution_cost]*capital_cost_LV + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" %(i)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(i)+"_1",'Tier2_LV_length_(km)']*capital_cost_LV*0.035 + substation*0.035
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(i)+"_1",distrbution_cost]*capital_cost_LV*0.035 + substation*0.035
         fixedcost.loc[m]['Technology'] = "TRLV_%i_1" %(i)
 
         h = len(inputactivity)
@@ -238,20 +245,46 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
         m +=1
 
     ## Unelectrified cells
-    for j in un_elec['unelec']:
-        capitalcost.loc[m]['Capitalcost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV + substation  #kUSD/MW
+    for j in noHV['pointid_right']:
+        capitalcost.loc[m]['Capitalcost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
         capitalcost.loc[m]['Technology'] = "TRHV_%i" %(j)
 
 
-        fixedcost.loc[m]['Fixed Cost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV*0.035 + substation*0.035  #kUSD/MW
+        fixedcost.loc[m]['Fixed Cost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV*0.035 + substation*0.035  #kUSD/MW divided by 1000 as it is in meters
         fixedcost.loc[m]['Technology'] = "TRHV_%i" %(j)
 
+        h = len(inputactivity)
+        input_temp = [0, "KEEL2_%i" %(j), "TRHV_%i" %(j), 1, 1]
+        inputactivity.loc[h] = input_temp
+        input_temp = []
+
+        l = len(outputactivity)
+        output_temp = [0,  "EL2_%i" % (j),"TRHV_%i" %(j), 1, 1]
+        outputactivity.loc[l] = output_temp
+        output_temp = []
+
         m +=1
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(j)+"_0",'Tier2_LV_length_(km)']*capital_cost_LV + substation
+
+    k = 0
+    for k in HV['pointid_right']:
+
+        h = len(inputactivity)
+        input_temp = [0, "KEEL2_%i" %(k), "TRLV_%i_0" %(k), 1, 1]
+        inputactivity.loc[h] = input_temp
+        input_temp = []
+
+        h = len(inputactivity)
+        input_temp = [0, "KEEL2_%i" %(k), "TRLV_%i_1" %(k), 1, 1]
+        inputactivity.loc[h] = input_temp
+        input_temp = []
+
+    for j in un_elec['pointid_right']:
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(j)+"_0",distrbution_cost]*capital_cost_LV + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" %(j)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(j)+"_0",'Tier2_LV_length_(km)']*capital_cost_LV*0.035 + substation*0.035
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(j)+"_0",distrbution_cost]*capital_cost_LV*0.035 + substation*0.035
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" %(j)
+
 
         h = len(inputactivity)
         input_temp = [0, "EL2_%i" %(j),"TRLV_%i_0" %(j), 1, 1]
@@ -273,11 +306,6 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
         inputactivity.loc[h] = input_temp
         input_temp = []
 
-        h = len(inputactivity)
-        input_temp = [0, "KEEL2_%i" %(j), "TRHV_%i" %(j), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
-
         h = len(outputactivity)
         input_temp = [0, "KEEL2_%i" %(j), "KEEL00t00", 0.95, 1]
         inputactivity.loc[h] = input_temp
@@ -293,10 +321,7 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
         outputactivity.loc[l] = output_temp
         output_temp = []
 
-        l = len(outputactivity)
-        output_temp = [0,  "EL2_%i" % (j),"TRHV_%i" %(j), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+
 
         l = len(outputactivity)
         output_temp = [0,"EL3_%i_0" % (j),"SOPV12h_%i_0" % (j), 1, 1]
@@ -375,33 +400,42 @@ def capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells,
     df4 = inputactivity['Technology']
 
     technologies = pd.concat([df3, df4]).drop_duplicates().reset_index(drop=True)
-    #solar = technologies.str.startswith('SO_')
-    techno = technologies[~technologies.str.startswith('SO_')]
-    techno.columns = 'Capacitytoactivity'
+    techno = pd.Series(technologies[~technologies.str.startswith('SO_')])
+    techno = pd.DataFrame(techno, columns = ['Technology'])
 
-    fixedcost.to_csv('run/data/fixed_cost_tnd.csv')
-    capitalcost.to_csv('run/data/capitalcost.csv')
-    inputactivity.to_csv('run/data/inputactivity.csv')
-    outputactivity.to_csv('run/data/outputactivity.csv')
-    techno.to_csv('run/data/capacitytoactivity.csv')
-    fuels.to_csv('run/data/fuels.csv')
-    technolgies.to_csv('run/data/technologies.csv')
+
+    capacitytoa = pd.DataFrame(columns=['Capacitytoactivity'], index= range(0,len(techno)))
+    capacitytoact = pd.concat([capacitytoa, techno], axis=1, ignore_index=True)
+    #nan_value = float("NaN")
+    #capacitytoact.replace("", nan_value, inplace=True)
+    #capacitytoact = capacitytoact.dropna(subset = [1], inplace=True)
+    #capacitytoact = capacitytoa.assign(Technology = techno)
+    capacitytoactiv = capacitytoact.assign(Capacitytoactivity = capacitytoactivity)
+
+    fixedcost.to_csv(os.path.join(path, 'fixed_cost_tnd.csv'))
+    capitalcost.to_csv(os.path.join(path, 'capitalcost.csv'))
+    inputactivity.to_csv(os.path.join(path, 'inputactivity.csv'))
+    outputactivity.to_csv(os.path.join(path, 'outputactivity.csv'))
+    capacitytoactiv.to_csv(os.path.join(path, 'capacitytoactivity.csv'))
+    fuels.to_csv(os.path.join(path, 'fuels.csv'))
+    technolgies.to_csv(os.path.join(path, 'technologies.csv'))
 
     return()
 
 def near_dist(pop_shp, un_elec_cells, path):
 
-    unelec = pd.read_csv(un_elec_cells)
+    unelec = pd.read_csv(un_elec_cells, usecols= ["pointid_right"])
     point = gpd.read_file(os.path.join(path, pop_shp))
     point.index = point['pointid']
     unelec_shp = gpd.GeoDataFrame()
-    for i in unelec['unelec']:
+    for i in unelec['pointid_right']:
         unelec_point = point.loc[i]
         unelec_shp = unelec_shp.append(unelec_point)
 
     lines = gpd.read_file(os.path.join(path, 'Concat_Transmission_lines_UMT37S.shp'))
 
     unelec_shp['HV_dist'] = unelec_shp.geometry.apply(lambda x: lines.distance(x).min())
+    unelec_shp.set_crs(32737)
     outpath = "run/Demand/transmission.shp"
     unelec_shp.to_file(outpath)
 
@@ -409,18 +443,29 @@ def near_dist(pop_shp, un_elec_cells, path):
 
 if __name__ == "__main__":
     #path = sys.argv[1]
+    renewable_path = 'temp'
     pop_shp = 'new_40x40points_WGSUMT37S.shp'
-    un_elec_cells = 'run/un_elec_cells.csv'
-    elec = 'run/elec_cells.csv'
+    unelec = 'run/un_elec.csv'
+    noHV = 'run/noHV_cells.csv'
+    HV = 'run/HV_cells.csv'
+    elec = 'run/elec.csv'
     Projected_files_path = '../Projected_files/'
     distribution_network = 'run/Demand/Distribution_network.xlsx'
 
-    capital_cost_HV = 2.5 #kUSD MW-km
-    substation = 1.5 #kUSD/MW
-    capital_cost_LV = 4 #kUSD/MW
+    capital_cost_HV = 2.5  # kUSD MW-km
+    substation = 1.5  # kUSD/MW
+    capital_cost_LV = 4  # kUSD/MW
+    capacitytoactivity = 31.536  # coversion MW to TJ
+    distribution_cost = 'Tier2_LV_length_(km)'
+    path = 'run/ref/'
 
-    #renewableninja(path)
-    #GIS_file()
-    #transmission_near = "run/Demand/transmission.shp"
-    transmission_near = near_dist(pop_shp, un_elec_cells, Projected_files_path)
-    capital_cost_transmission_distrib(distribution_network, elec, un_elec_cells, transmission_near, capital_cost_HV, substation, capital_cost_LV)
+    # Solar and wind csv files
+    renewableninja(renewable_path)
+    # Location file
+    GIS_file()
+
+    # calculates the shortest distance to the HV line from the center of the 40x40 cells
+    transmission_near = "run/Demand/transmission.shp"
+    #transmission_near = near_dist(pop_shp, noHV, Projected_files_path)
+    capital_cost_transmission_distrib(distribution_network, elec, noHV, HV, unelec, transmission_near, capital_cost_HV,
+                                      substation, capital_cost_LV, capacitytoactivity, distribution_cost, path)
