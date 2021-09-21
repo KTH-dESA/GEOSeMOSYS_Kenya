@@ -11,11 +11,11 @@ Module author: Nandi Moksnes <nandi@kth.se>
 """
 
 import geopandas as gpd
-from shapely.geometry import mapping
 import pandas as pd
 import os
 import fiona
 import rasterio
+import win32api
 rasterio.gdal_version()
 import rasterio.fill
 from rasterio.mask import mask
@@ -213,7 +213,7 @@ def main(GIS_files_path):
     keyword = 'UMT37S'
     for fname in allFiles:
         if keyword in fname:
-            shutil.copy(fname, os.path.join(current, '..\Projected_files'))
+            shutil.copy("\\\\?\\"+fname, os.path.join(current, r'..\Projected_files')) #Due to really long name the \\\\?\\ can trick Windows accepting it
     os.chdir(basedir)
     merge_transmission('..\Projected_files')
     merge_minigrid('..\Projected_files')

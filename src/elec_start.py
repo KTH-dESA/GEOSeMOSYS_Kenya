@@ -118,6 +118,11 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
                                                    row["Road"] < road_cutoff2))
                                                   else 0, axis=1)
 
+        settlement['grid_bool'] = settlement.apply(lambda row:
+                                              1
+                                              if  row['Grid'] < max_grid_dist
+                                              else 0, axis=1)
+
         # Get the calculated electrified ratio, and limit it to within reasonable boundaries
         pop_elec = settlement.loc[settlement['elec'] == 1, 'pop'].sum()
         elec_modelled = pop_elec / total_pop

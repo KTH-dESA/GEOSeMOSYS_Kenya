@@ -22,11 +22,6 @@ import geopandas as gpd
 import pandas as pd
 import subprocess
 
-### Parameters setting##
-token = 'ed519952eff7850cece8c746347fee2d068ab988' #add your token for API from your own log in on Renewable Ninja
-time_zone_offset = 3 #Kenya is UTC + 3hours to adjust for the time zone
-######
-
 def project_vector(vectordata):
     """This function projects the vectordata to EPSG: 4326 as the renewable ninja data is in that CRS
 
@@ -111,7 +106,7 @@ def csv_make(coordinates):
 
     return(wind_csv, solar_csv)
 
-def download(path, wind, solar):
+def download(path, wind, solar, token):
     """This function downloads the renewable ninja data according to the limit of the
 
     :param path:
@@ -147,18 +142,26 @@ def download(path, wind, solar):
         j += 8
 
 ## The renewable.ninja dataset is in UCT timezone
-def adjust_timezone(path):
-    files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(path) for f in filenames if
-               os.path.splitext(f)[1] == '_out']
+def adjust_timezone(path, time_zone_offset):
+    files = [i for i in os.listdir(path) if os.path.isfile(os.path.join(path, i)) and \
+             'out_' in i]
 
     for f in files:
-        df = pd.read_csv(f)
-        df.index = df.index + time_zone_offset  ##Does note work properly, has been manually adjusted for the first round
-        df.to_csv()
+        df = pd.read_csv(path+"/"+f)
+        time = df["time"]
+        time = time.iloc[time_zone_offset:]
+        new_index = range(0,8781)
+        time.index = new_index
+        df["adjtime"] = time
+        df = df.drop(columns=['Unnamed: 0','time'])
+        df.to_csv(path+"/Kenya_timezone"+f)
 
 
 if __name__ == "__main__":
     shapefile, path= sys.argv[1],sys.argv[2] #shapefile = pointfile for the 378 points
+    token = 'ed519952eff7850cece8c746347fee2d068ab988'  # add your token for API from your own log in on Renewable Ninja
+    time_zone_offset = 3  # Kenya is UTC + 3hours to adjust for the time zone
     coordinates = project_vector(shapefile)
     wind, solar = csv_make(coordinates)
-    down = download(path, wind, solar) #path = /temp
+    down = download(path, wind, solar, token) #path = /temp
+    adjust_timezone(path, time_zone_offset)
