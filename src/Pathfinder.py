@@ -1,20 +1,14 @@
-#Copyright 2019 Facebook, Inc.
+"""
+Copyright (c) Facebook, Inc. and its affiliates.
 
-#Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-#The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+This source code is licensed under the MIT license found in the
+LICENSE file in the root directory of this source tree.
+"""
 
 """
 The pathfinder algorithm.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import with_statement
+
 import heapq
 import os
 import sys
@@ -23,26 +17,23 @@ import time
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from numba import autojit
+#from numba import autojit
 import numpy as np
-import pandas as pd
-import csv
-
 
 
 def seek(
     origins,
-    targets,
-    weights,
+    targets=None,
+    weights=None,
     path_handling='link',
     debug=False,
-    film=True,
+    film=False,
 ):
     """
     Find the shortest paths between *any* origin and *each* target.
 
     Pathfinder is a modified version of Dijkstra's algorithm
-    (https://fburl.com/is86jvbn) for finding
+    (https://en.wikipedia.org/wiki/Dijkstra's_algorithm) for finding
     the shortest distance between two points in a graph. It differs in
     a few important ways:
 
@@ -64,7 +55,7 @@ def seek(
         be removed, once paths to them are found and origins may be
         augmented (see path_handling param below).
         If targets is not supplied, no targets are assumed and a targets
-        array of all zeros is created. This is when calculating minimum
+        array of all zeros is created. This is useful for calculating minimum
         distances from a set of origins to all points of the grid.
     @param weights: 2D numpy array of floats
         The cost of visiting a grid square, zero or greater.
@@ -77,20 +68,20 @@ def seek(
         Determines how to handle paths between target and origins,
         once they are found.
 
-        * 'link' or 'l'  adds the target to the origins, as well as the path
-            connecting them
-        * 'assimilate' or 'a' adds the target to the origins, but does not
-            add the path.
-        * 'none' or 'n' doesn't add anything to the origins.
+        * 'link' or 'l'  adds a target to the origins once it is found,
+            as well as the path connecting them. This mode
+            is good for growing a network by connecting nodes, as we do here
+            when planning or estimating an electrical grid.
+        * 'assimilate' or 'a' adds a target to the origins once it is found,
+            but does not add the path connecting them. This mode
+            is good for growing a network by adding nodes that
+            have no physical connection between them, as in planning an
+            ad-hoc wireless network.
+        * 'none' or 'n' doesn't add a target to the to the origins
+            once it is found. This mode is good for finding a path
+            from a backbone or trunk to many leaf nodes,
+            as in planning fiber backhaul routing.
 
-        These options allow for a variety of use cases.
-        'link' is good for growing a network by connecting nodes,
-        as in planning an electrical grid.
-        'assimilate' is good for growing a network by adding nodes that
-        have no physical connection between them, as in planning an
-        ad-hoc wireless network.
-        'none' is good for finding a path from a backbone or trunk
-        to many leaf nodes, as in planning fiber backhaul routing.
     @param debug: boolean
         If True, provide text updates on the algorithm's progress.
     @param film: boolean
@@ -98,11 +89,11 @@ def seek(
 
     @retun results: dict
         'paths': 2D numpy array of ints
-            One, where paths have been found, and zero everywhere else.
+            1 where paths have been found, and 0 everywhere else.
         'distance: 2D numpy array of floats
             The length of the shortest path (the sum of the weights of grid
             cells traversed) from the nearest origin point to every point
-            on the grid. Origin points have a distance of zero and it
+            on the grid. Origin points have a distance of zero, and it
             goes up from there the further away you get.
         'rendering': 2D numpy array of floats
             An image representing the final state of the algorithm, including
@@ -123,7 +114,6 @@ def seek(
         path_handling = 1
     if path_handling[0] == 'l':
         path_handling = 2
-    print(weights.shape)
 
     iteration = 0
     not_visited = 9999999999.
@@ -378,7 +368,9 @@ def nb_loop(
     weights,
 ):
     """
-
+    This is the meat of the computation.
+    Pull the computationally expensive operations from seek()
+    out into their own function that can be pre-compiled using numba.
     """
     # Calculate the distance for each of the 8 neighbors.
     neighbors = [
@@ -422,20 +414,3 @@ def nb_loop(
                 new_locs[n_new_locs, 2] = neighbor[1]
                 n_new_locs += 1
     return n_new_locs, n_targets_remaining
-
-
-#dfweights = pd.read_excel('weights.xlsx')
-#dftargets = pd.read_csv('file.csv', header=0, index_col=0)
-#df = pd.read_excel('origins.xlsx', "Sheet1", header=0, index_col=0)
-
-#for m, row in dftargets.iterrows():
-#    y_coord = row['Y']
-#    x_coord = m
-#    df.loc[x_coord][y_coord] = row['Target']
-#    #df.to_csv('file.csv', sep='\t')
-
-#weights = np.array(dfweights)
-#targets = np.array(dftargets)
-
-#calc = seek(targets, targets, weights)
-
