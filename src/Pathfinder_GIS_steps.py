@@ -18,7 +18,7 @@ import rasterio.mask
 import ogr
 import pandas as pd
 import subprocess
-subprocess.call('gdal_translate -of GTiff -ot Int16')
+#subprocess.call('gdal_translate -of GTiff -ot Int16')
 #from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
 gdal.UseExceptions()
@@ -90,15 +90,17 @@ def merge_road_grid(proj_path):
         if file.endswith('.shp'):
             f = os.path.abspath(file)
             shapefiles += [f]
-    keyword = ['Concat_MV_lines_UMT37S', 'Concat_Transmission_lines_UMT37S','11kV', 'UMT37S_Roads']
+    keyword = ['UMT37S_Roads', 'Concat_MV_lines_UMT37S', 'Concat_Transmission_lines_UMT37S','11kV']
     dijkstraweight = []
     out = [f for f in shapefiles if any(xs in f for xs in keyword)]
     for f in out:
         shpfile = gpd.read_file(f)
         dijkstraweight += [shpfile]
 
-    gdf = pd.concat([shp for shp in dijkstraweight], sort=False).pipe(gpd.GeoDataFrame)
-    gdf.to_file("../Projected_files/dijkstraweight.shp")
+    grid = pd.concat([shp for shp in dijkstraweight], sort=False).pipe(gpd.GeoDataFrame)
+    #road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
+    #gdf = grid.append(road)
+    grid.to_file("../Projected_files/dijkstraweight.shp")
     os.chdir(current)
     return("../Projected_files/dijkstraweight.shp")
 
@@ -106,6 +108,9 @@ def highway_weights(path_highw, path):
     path_highway = os.path.join(path,'highways_weights.shp')
     highways = gpd.read_file(path_highw)
     #Length_m_ represents all lines that are grid and Length_km represents road
+
+    #road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
+    #gdf = pd.concat([highways, road], sort=False, ignore_index=True).pipe(gpd.GeoDataFrame)
     keep = ['Length_km', 'Length_m_']
     highways_col = highways[keep]
     pd.options.mode.chained_assignment = None
@@ -137,24 +142,24 @@ def make_raster(pathfinder, s):
     wkt_projection = zoom_20.GetProjection()
 
     driver = gdal.GetDriverByName('GTiff')
-    dataset = driver.Create(
+    dataset3 = driver.Create(
         dst_filename,
         x_pixels,
         y_pixels,
         1,
         gdal.GDT_Float32, )
 
-    dataset.SetGeoTransform((
+    dataset3.SetGeoTransform((
         x_min, PIXEL_SIZE,
         0,
         y_max,
         0,
         -PIXEL_SIZE))
 
-    dataset.SetProjection(wkt_projection)
-    dataset.GetRasterBand(1).WriteArray(pathfinder)
-    dataset.FlushCache()  # Write to disk.
-    return
+    dataset3.SetProjection(wkt_projection)
+    dataset3.GetRasterBand(1).WriteArray(pathfinder)
+    dataset3.FlushCache()  # Write to disk.
+    return dst_filename
 
 def make_weight_numpyarray(file, s):
     raster = gdal.Open(file)
@@ -219,11 +224,11 @@ def rasterize_road(file, proj_path):
     InputVector = file
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
-    OutputImage = os.path.join(proj_path, 'weights.tif')
+    OutputImage2 = os.path.join(proj_path, 'weig.tif')
     RefImage = os.path.join('../Projected_files', 'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
 
     gdalformat = 'GTiff'
-    datatype = gdal.GDT_Float32
+    datatype2 = gdal.GDT_Float32
     burnVal = 1  # value for the output image pixels
     # Get projection info from reference image
     Image2 = gdal.Open(RefImage, gdal.GA_ReadOnly)
@@ -233,7 +238,7 @@ def rasterize_road(file, proj_path):
     Shapefile_layer = Shapefile.GetLayer()
 
     # Rasterise
-    Output2 = gdal.GetDriverByName(gdalformat).Create(OutputImage, Image2.RasterXSize, Image2.RasterYSize, 1, datatype, options=['COMPRESS=DEFLATE'] ) #
+    Output2 = gdal.GetDriverByName(gdalformat).Create(OutputImage2, Image2.RasterXSize, Image2.RasterYSize, 1, datatype2, options=['COMPRESS=DEFLATE'] ) #
     Output2.SetProjection(Image2.GetProjectionRef())
     Output2.SetGeoTransform(Image2.GetGeoTransform())
 
@@ -243,14 +248,29 @@ def rasterize_road(file, proj_path):
     gdal.RasterizeLayer(Output2, [1], Shapefile_layer, options = ["ATTRIBUTE=weight"])
 
     # Build image overviews
-    subprocess.call("gdaladdo --config COMPRESS_OVERVIEW DEFLATE " + OutputImage + " 2 4 8 16 32 64", shell=True)
+    subprocess.call("gdaladdo --config COMPRESS_OVERVIEW DEFLATE " + OutputImage2 + " 2 4 8 16 32 64", shell=True)
     # Close datasets
     band2 = None
     Output2 = None
     Image2 = None
     Shapefile = None
 
-    return OutputImage
+    return OutputImage2
+
+def removing_grid(elec_path, weights):
+    if elec_path.shape == weights.shape:
+        row = range(1,elec_path.shape[0])
+        col = range(1,elec_path.shape[1])
+        i = 0
+        for i in row:
+            j = 0
+            for j in col:
+                if weights[i][j] < 0.55:
+                    elec_path[i][j] =0
+                j += 1
+            i += 1
+
+    return elec_path
 
 def masking(shape,tif_file, s):
     """ This function masks the raster data (tif-file) with the GADM Admin 0 boundaries (admin)
