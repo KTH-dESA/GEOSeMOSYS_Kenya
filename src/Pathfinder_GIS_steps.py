@@ -18,8 +18,8 @@ import rasterio.mask
 import ogr
 import pandas as pd
 import subprocess
-#subprocess.call('gdal_translate -of GTiff -ot Int16')
-#from rasterio.merge import merge
+
+from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
 gdal.UseExceptions()
 #from shapely.geometry import MultiLineString
@@ -76,7 +76,7 @@ def rasterize_elec(file, proj_path):
     Shapefile= None
     return (OutputImage)
 
-def merge_road_grid(proj_path):
+def merge_grid(proj_path):
     """This function concatinates the shapefiles which contains the keyword '33kV' and '66kV'
 
     :param proj_path:
@@ -90,7 +90,7 @@ def merge_road_grid(proj_path):
         if file.endswith('.shp'):
             f = os.path.abspath(file)
             shapefiles += [f]
-    keyword = ['UMT37S_Roads', 'Concat_MV_lines_UMT37S', 'Concat_Transmission_lines_UMT37S','11kV']
+    keyword = ['Concat_MV_lines_UMT37S', 'Concat_Transmission_lines_UMT37S','11kV']
     dijkstraweight = []
     out = [f for f in shapefiles if any(xs in f for xs in keyword)]
     for f in out:
@@ -100,30 +100,42 @@ def merge_road_grid(proj_path):
     grid = pd.concat([shp for shp in dijkstraweight], sort=False).pipe(gpd.GeoDataFrame)
     #road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
     #gdf = grid.append(road)
-    grid.to_file("../Projected_files/dijkstraweight.shp")
+    grid.to_file("../Projected_files/grid_weight.shp")
     os.chdir(current)
-    return("../Projected_files/dijkstraweight.shp")
+    return("../Projected_files/grid_weight.shp")
 
-def highway_weights(path_highw, path):
-    path_highway = os.path.join(path,'highways_weights.shp')
-    highways = gpd.read_file(path_highw)
+def highway_weights(path_grid, path):
+    weight_grid = os.path.join(path,'grid_weights.shp')
+    weight_highway = os.path.join(path,'road_weights.shp')
+    grid = gpd.read_file(path_grid)
     #Length_m_ represents all lines that are grid and Length_km represents road
 
-    #road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
-    #gdf = pd.concat([highways, road], sort=False, ignore_index=True).pipe(gpd.GeoDataFrame)
     keep = ['Length_km', 'Length_m_']
-    highways_col = highways[keep]
+    grid_col = grid[keep]
+    pd.options.mode.chained_assignment = None
+    grid_col['weight'] = 1
+    grid_col = grid_col.astype('float64')
+    grid_col.loc[grid_col['Length_km']>0, ['weight']] = 0.01
+    grid_col.loc[grid_col['Length_m_']>0, ['weight']] = 0.01
+
+    schema = grid.geometry  #the geometry same as highways
+    gdf = gpd.GeoDataFrame(grid_col, crs=32737, geometry=schema)
+    gdf.to_file(driver = 'ESRI Shapefile', filename= weight_grid)
+
+    road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
+    keep = ['Length_km']
+    highways_col = road[keep]
     pd.options.mode.chained_assignment = None
     highways_col['weight'] = 1
     highways_col = highways_col.astype('float64')
-    highways_col.loc[highways_col['Length_km']>0, ['weight']] = 1/2
-    highways_col.loc[highways_col['Length_m_']>0, ['weight']] = 0.01
+    highways_col.loc[highways_col['Length_km']>0, ['weight']] = 0.5
 
-    schema = highways.geometry  #the geometry same as highways
-    gdf = gpd.GeoDataFrame(highways_col, crs=32737, geometry=schema)
-    gdf.to_file(driver = 'ESRI Shapefile', filename= path_highway)
+    schema = road.geometry  #the geometry same as highways
+    gdf_road = gpd.GeoDataFrame(highways_col, crs=32737, geometry=schema)
+    gdf_road.to_file(driver = 'ESRI Shapefile', filename= weight_highway)
 
-    return (path_highway)
+
+    return (weight_highway, weight_grid)
 
 # Pathfinder results to raster
 def make_raster(pathfinder, s):
@@ -147,7 +159,7 @@ def make_raster(pathfinder, s):
         x_pixels,
         y_pixels,
         1,
-        gdal.GDT_Float32, )
+        gdal.GDT_Float32 )
 
     dataset3.SetGeoTransform((
         x_min, PIXEL_SIZE,
@@ -167,8 +179,14 @@ def make_weight_numpyarray(file, s):
     NoValue = weight < -3.4*10**38  #related to GDAL which sets NoValue to -3.4e+38
     weight[NoValue] = 1
 
+    #Pathfinder cannot handle tagerts that are on the edge, therefore two extra rows and columns is added (on top and bottom) as all need to have the same shape
     if np.count_nonzero(weight) != 0:
-        np.savetxt(os.path.join('temp/dijkstra', "%s_weight.csv" %(s)), weight, delimiter=',')
+        b = np.ones((weight.shape[0], weight.shape[1] + 2))
+        b[:, 1:-1] = weight
+        c = np.ones((b.shape[0] +2, b.shape[1]))
+        c[1:-1,:] = b
+        print(c.shape)
+        np.savetxt(os.path.join('temp/dijkstra', "%s_weight.csv" %(s)), c, delimiter=',')
     raster = None # close the raster
 
     return None
@@ -183,7 +201,8 @@ def make_origin_numpyarray(file, s):
         origins[row,col] = 1
     else:
         origin_found = False
-        maxrow = nparray.shape[0] - row
+        maxrow = nparray.shape[0] - row-1
+        maxcol = nparray.shape[1] - col-1
         j = row
         for i in (range(1, maxrow)):
             j = j +1
@@ -193,7 +212,7 @@ def make_origin_numpyarray(file, s):
                 origin_found = True
                 break
         k = col
-        for i in (range(1, maxrow)):
+        for i in (range(1, maxcol)):
             if origin_found == True:
                 break
             row = row
@@ -202,7 +221,26 @@ def make_origin_numpyarray(file, s):
                 origins[row,k] = 1
                 origin_found = True
                 break
-
+        j = row
+        for i in (range(1, maxrow)):
+            if origin_found == True:
+                break
+            j = j -1
+            col = col
+            if nparray[j, col] == 0:
+                origins[j,col] = 1
+                origin_found = True
+                break
+        k = col
+        for i in (range(1, maxcol)):
+            if origin_found == True:
+                break
+            row = row
+            k = k - 1
+            if nparray[row, k] == 0:
+                origins[row, k] = 1
+                origin_found = True
+                break
     if np.count_nonzero(origins) != 0:
         np.savetxt(os.path.join('temp/dijkstra', "%s_origin.csv" %(s)), origins, delimiter=',')
     return None
@@ -213,8 +251,14 @@ def make_target_numpyarray(file, s):
     NoValue = target > 2
     target[NoValue] = 0
 
+    #Pathfinder cannot handle tagerts that are on the edge, therefore two extra rows and columns is added (on top and bottom)
     if np.count_nonzero(target) != 0:
-        np.savetxt(os.path.join('temp/dijkstra', "%s_target.csv" %(s)), target, delimiter=',')
+        b = np.zeros((target.shape[0], target.shape[1] + 2))
+        b[:,1 :-1] = target
+        c = np.zeros((b.shape[0] +2, b.shape[1]))
+        c[1:-1,:] = b
+        print(c.shape)
+        np.savetxt(os.path.join('temp/dijkstra', "%s_target.csv" %(s)), c, delimiter=',')
     raster = None # close the raster
 
     return os.path.join('temp/dijkstra', "%s_target.csv" %(s))
@@ -224,7 +268,7 @@ def rasterize_road(file, proj_path):
     InputVector = file
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
-    OutputImage2 = os.path.join(proj_path, 'weig.tif')
+    OutputImage2 = os.path.join(proj_path, 'road.tif')
     RefImage = os.path.join('../Projected_files', 'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
 
     gdalformat = 'GTiff'
@@ -257,6 +301,61 @@ def rasterize_road(file, proj_path):
 
     return OutputImage2
 
+def rasterize_transmission(file, proj_path):
+    # Rasterizing the point file
+    InputVector = file
+    #_, filename = os.path.split(file)
+    #name, ending = os.path.splitext(filename)
+    OutputImage3 = os.path.join(proj_path, 'transmission.tif')
+    RefImage = os.path.join('../Projected_files', 'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
+
+    gdalformat = 'GTiff'
+    datatype2 = gdal.GDT_Float32
+    burnVal = 1  # value for the output image pixels
+    # Get projection info from reference image
+    Image2 = gdal.Open(RefImage, gdal.GA_ReadOnly)
+
+    # Open Shapefile
+    Shapefile = ogr.Open(InputVector)
+    Shapefile_layer = Shapefile.GetLayer()
+
+    # Rasterise
+    Output2 = gdal.GetDriverByName(gdalformat).Create(OutputImage3, Image2.RasterXSize, Image2.RasterYSize, 1, datatype2, options=['COMPRESS=DEFLATE'] ) #
+    Output2.SetProjection(Image2.GetProjectionRef())
+    Output2.SetGeoTransform(Image2.GetGeoTransform())
+
+    # Write data to band 1
+    band2 = Output2.GetRasterBand(1)
+    band2.SetNoDataValue(1)
+    gdal.RasterizeLayer(Output2, [1], Shapefile_layer, options = ["ATTRIBUTE=weight"])
+
+    # Build image overviews
+    subprocess.call("gdaladdo --config COMPRESS_OVERVIEW DEFLATE " + OutputImage3 + " 2 4 8 16 32 64", shell=True)
+    # Close datasets
+    band2 = None
+    Output2 = None
+    Image2 = None
+    Shapefile = None
+
+    return OutputImage3
+
+def merge_raster(transmission_raster, highway_raster):
+    out_fp = '../Projected_files/weights.tif'
+    transmission = rasterio.open(transmission_raster)
+    road = rasterio.open(highway_raster)
+
+    def custom_merge_works(old_data, new_data, old_nodata, new_nodata, index=None, roff=None, coff=None):
+        old_data[:] = np.minimum(old_data, new_data)  # <== NOTE old_data[:] updates the old data array *in place*
+
+    weights, out_trans = merge([transmission, road], method=(custom_merge_works))
+    out_meta = transmission.meta.copy()
+    out_meta.update({"driver": "GTiff","height": weights.shape[1],"width": weights.shape[2],"transform": out_trans,"crs":32737})
+
+    with rasterio.open(out_fp, "w", **out_meta) as dest:
+        dest.write(weights)
+
+    return out_fp
+
 def removing_grid(elec_path, weights):
     if elec_path.shape == weights.shape:
         row = range(1,elec_path.shape[0])
@@ -265,7 +364,7 @@ def removing_grid(elec_path, weights):
         for i in row:
             j = 0
             for j in col:
-                if weights[i][j] < 0.55:
+                if weights[i][j] < 0.45:
                     elec_path[i][j] =0
                 j += 1
             i += 1
