@@ -23,6 +23,7 @@ import gdal
 import warnings
 warnings.filterwarnings('ignore')
 from osgeo import gdal
+import numpy as np
 import sys
 import shutil
 gdal.UseExceptions()
@@ -34,21 +35,24 @@ def masking(admin,tif_file):
     :param tif_file:
     :return: tif_file
     """
-    try:
-        with fiona.open(admin, "r") as shapefile:
-            shapes = [feature["geometry"] for feature in shapefile]
-        with rasterio.open(tif_file) as src:
-            out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
-            out_meta = src.meta
-        out_meta.update({"driver": "GTiff",
-                         "height": out_image.shape[1],
-                         "width": out_image.shape[2],
-                         "transform": out_transform})
+    #try:
+    with fiona.open(admin, "r") as shapefile:
+        shapes = [feature["geometry"] for feature in shapefile]
+    with rasterio.open(tif_file) as src:
+        out_image, out_transform = rasterio.mask.mask(src, shapes, crop = True)
+        out_meta = src.meta
+    out_meta.update({"driver": "GTiff",
+                     "height": out_image.shape[1],
+                     "width": out_image.shape[2],
+                     "transform": out_transform})
 
-        with rasterio.open(tif_file, "w", **out_meta) as dest:
-            dest.write(out_image)
-    except:
-        print("Already masked")
+    with rasterio.open(tif_file, "w", **out_meta) as dest:
+        dest.write(out_image)
+    src = None
+    dest = None
+
+    #except:
+        #print("Already masked")
     return(tif_file)
 
 def project_raster(rasterdata, output_raster):
@@ -144,6 +148,7 @@ def merge_mv(proj_path):
     os.chdir(current)
 
     return()
+
 
 def merge_minigrid(proj_path):
     """This function concatinates the shapefiles which contains the keyword 'MiniGrid'

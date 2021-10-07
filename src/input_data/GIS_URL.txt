@@ -1,9 +1,6 @@
 https://zenodo.org/record/4736323/files/GDP_PPP_Layer2015.tif?download=1,GDP_PPP_2015_WGS_84.tif
 https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_KEN_shp.zip,gadm36_KEN_shp.zip
-https://data.worldpop.org/GIS/Population/Global_2000_2020_1km/2018/KEN/ken_ppp_2018_1km_Aggregated.tif,ken_ppp_2018_1km_Aggregated.tif
 https://energydata.info/dataset/b71146ac-0330-40f5-bd47-e0d20a761e48/resource/caf4f528-e982-4db8-811c-fdbf5322352f/download/roads.zip,roadsKenya.zip
-https://data.ngdc.noaa.gov/instruments/remote-sensing/passive/spectrometers-radiometers/imaging/viirs/dnb_composites/v10//201904/vcmslcfg/SVDNB_npp_20190401-20190430_00N060W_vcmslcfg_v10_c201905191000.tgz,SVDNB_npp_20190401-20190430_00N060W_vcmslcfg_v10_c201905191000.tgz
-https://data.ngdc.noaa.gov/instruments/remote-sensing/passive/spectrometers-radiometers/imaging/viirs/dnb_composites/v10//201904/vcmslcfg/SVDNB_npp_20190401-20190430_75N060W_vcmslcfg_v10_c201905191000.tgz,SVDNB_npp_20190401-20190430_75N060W_vcmslcfg_v10_c201905191000.tgz
 https://energydata.info/dataset/43e26a70-66be-419d-8fd0-5ed53fa98fd5/resource/ce311dec-c757-42da-86b8-de58160627e0/download/transmission-lines-11kv.zip,11kVtransmissionKenya.zip
 https://energydata.info/dataset/43e26a70-66be-419d-8fd0-5ed53fa98fd5/resource/28c470ef-a34f-4010-82e5-c743e5e395a1/download/transmission-lines-33kv.zip,33kVtransmissionKenya.zip
 https://energydata.info/dataset/43e26a70-66be-419d-8fd0-5ed53fa98fd5/resource/bf437ae3-866b-4229-9234-06e04c30368a/download/transmission-lines-66kv.zip,66kVtransmissionKenya.zip

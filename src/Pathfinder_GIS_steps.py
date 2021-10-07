@@ -30,8 +30,8 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 def convert_zero_to_one(file, cut_off):
     gpdf = gpd.read_file(file)
 
-    gpdf.loc[(gpdf.elec == 1) | ((gpdf.elec ==0) & (gpdf.grid_code < cut_off)),'dijkstra'] = 0
-    gpdf.loc[((gpdf.elec == 0) & (gpdf.grid_code >= cut_off)),'dijkstra'] = 1
+    gpdf.loc[(gpdf.elec == 1), 'dijkstra'] = 0 #| ((gpdf.elec ==0) & (gpdf.hrslmultip <= cut_off)),
+    gpdf.loc[(gpdf.elec == 0),'dijkstra'] = 1 #& (gpdf.pop >= cut_off))
 
     gpdf.to_file('../Projected_files/zero_to_one_elec.shp')
     return ('../Projected_files/zero_to_one_elec.shp')
@@ -44,7 +44,7 @@ def rasterize_elec(file, proj_path):
 
     OutputImage = os.path.join(proj_path, name + '.tif')
 
-    RefImage = os.path.join('../Projected_files', 'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
+    RefImage = os.path.join('../Projected_files', 'ken_ppp_2018_1km_Aggregated.tif')
 
     gdalformat = 'GTiff'
     datatype = gdal.GDT_Int32
@@ -140,15 +140,15 @@ def highway_weights(path_grid, path):
 # Pathfinder results to raster
 def make_raster(pathfinder, s):
     dst_filename = os.path.join('temp/dijkstra','path_%s.tif' %(s))
-    path = os.path.join('../Projected_files','zero_to_one_elec.tif')
+    path = os.path.join('../Projected_files','%s_elec.tif' %(s))
     zoom_20 = gdal.Open(path)
     geo_trans = zoom_20.GetGeoTransform()
-    pixel_width = 924
+    pixel_width = geo_trans[1]
 
     # You need to get those values like you did.
     x_pixels = zoom_20.RasterXSize  # number of pixels in x
     y_pixels = zoom_20.RasterYSize # number of pixels in y
-    PIXEL_SIZE = 924  # size of the pixel...
+    PIXEL_SIZE = -geo_trans[5]  # size of the pixel...
     x_min = geo_trans[0]
     y_max = geo_trans[3]
     wkt_projection = zoom_20.GetProjection()
@@ -185,7 +185,6 @@ def make_weight_numpyarray(file, s):
         b[:, 1:-1] = weight
         c = np.ones((b.shape[0] +2, b.shape[1]))
         c[1:-1,:] = b
-        print(c.shape)
         np.savetxt(os.path.join('temp/dijkstra', "%s_weight.csv" %(s)), c, delimiter=',')
     raster = None # close the raster
 
@@ -206,41 +205,37 @@ def make_origin_numpyarray(file, s):
         j = row
         for i in (range(1, maxrow)):
             j = j +1
-            col = col
-            if nparray[j, col] == 0:
-                origins[j,col] = 1
-                origin_found = True
-                break
-        k = col
-        for i in (range(1, maxcol)):
-            if origin_found == True:
-                break
-            row = row
-            k = k +1
-            if nparray[row, k] == 0:
-                origins[row,k] = 1
-                origin_found = True
-                break
+            k = col
+            for m in (range(1, maxcol)):
+                if origin_found == True:
+                    break
+                k = k + 1
+                if nparray[j, k] == 0:
+                    origins[j, k] = 1
+                    origin_found = True
+                    break
+            #if nparray[j, col] == 0:
+             #   origins[j,col] = 1
+             #   origin_found = True
+             #   break
+
         j = row
         for i in (range(1, maxrow)):
             if origin_found == True:
                 break
             j = j -1
-            col = col
-            if nparray[j, col] == 0:
-                origins[j,col] = 1
-                origin_found = True
-                break
-        k = col
-        for i in (range(1, maxcol)):
-            if origin_found == True:
-                break
-            row = row
-            k = k - 1
-            if nparray[row, k] == 0:
-                origins[row, k] = 1
-                origin_found = True
-                break
+            k = col
+            for m in (range(1, maxcol)):
+                if origin_found == True:
+                    break
+                k = k - 1
+                if nparray[j, k] == 0:
+                    origins[j, k] = 1
+                    origin_found = True
+            #if nparray[j, col] == 0:
+             #   origins[j,col] = 1
+              #  origin_found = True
+              #  break
     if np.count_nonzero(origins) != 0:
         np.savetxt(os.path.join('temp/dijkstra', "%s_origin.csv" %(s)), origins, delimiter=',')
     return None
@@ -257,7 +252,6 @@ def make_target_numpyarray(file, s):
         b[:,1 :-1] = target
         c = np.zeros((b.shape[0] +2, b.shape[1]))
         c[1:-1,:] = b
-        print(c.shape)
         np.savetxt(os.path.join('temp/dijkstra', "%s_target.csv" %(s)), c, delimiter=',')
     raster = None # close the raster
 
@@ -269,7 +263,7 @@ def rasterize_road(file, proj_path):
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
     OutputImage2 = os.path.join(proj_path, 'road.tif')
-    RefImage = os.path.join('../Projected_files', 'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
+    RefImage = os.path.join('../Projected_files', 'ken_ppp_2018_1km_Aggregated.tif')
 
     gdalformat = 'GTiff'
     datatype2 = gdal.GDT_Float32
@@ -307,7 +301,7 @@ def rasterize_transmission(file, proj_path):
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
     OutputImage3 = os.path.join(proj_path, 'transmission.tif')
-    RefImage = os.path.join('../Projected_files', 'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
+    RefImage = os.path.join('../Projected_files', 'ken_ppp_2018_1km_Aggregated.tif')
 
     gdalformat = 'GTiff'
     datatype2 = gdal.GDT_Float32
