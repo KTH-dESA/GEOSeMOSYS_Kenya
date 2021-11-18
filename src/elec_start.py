@@ -19,10 +19,10 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff):
     """
     # Calculate the ratio between the actual population and the total population from the GIS layer
     print('Calibrate current population')
-    pop_ratio = pop_actual / settlement['grid_code'].sum()
+    pop_ratio = pop_actual / settlement['hrslmultip'].sum()
 
     # And use this ratio to calibrate the population in a new column
-    settlement['pop'] = settlement.apply(lambda row: row['grid_code'] * pop_ratio, axis=1)
+    settlement['pop'] = settlement.apply(lambda row: row['hrslmultip'] * pop_ratio, axis=1)
 
     # Calculate the urban split, by calibrating the cutoff until the target ratio is achieved
     # Keep looping until it is satisfied or another break conditions is reached
@@ -104,24 +104,16 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
     while True:
         settlement['elec'] = settlement.apply(lambda row:
                                                   1
-                                                  if (row['Nighttime'] > min_night_lights and
-                                                       (row['Minigrid'] < dist_minig or
-                                                       row['Grid'] < max_grid_dist or
+                                                  if (row['Nighttime'] > min_night_lights or
+                                                      row['Grid'] < max_grid_dist or
+                                                       row['Minigrid'] < dist_minig or
                                                        row['MV'] < dist_mv or
-                                                       row['LV'] < dist_lv and
+                                                       row['LV'] < dist_lv) and
                                                        (row['Transform'] < dist_to_trans or
                                                        row['Substation'] < dist_to_sub or
                                                        row['Road'] < max_road_dist or
-                                                       row['pop'] > pop_cutoff)))
-                                                   or (row['pop'] > pop_cutoff2 and
-                                                   (row["Grid"] < grid_cutoff2 or
-                                                   row["Road"] < road_cutoff2))
+                                                       row['pop'] > pop_cutoff)
                                                   else 0, axis=1)
-
-        settlement['grid_bool'] = settlement.apply(lambda row:
-                                              1
-                                              if  row['Grid'] < max_grid_dist
-                                              else 0, axis=1)
 
         # Get the calculated electrified ratio, and limit it to within reasonable boundaries
         pop_elec = settlement.loc[settlement['elec'] == 1, 'pop'].sum()
@@ -134,26 +126,62 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
             elec_modelled = 0.99
 
         if abs(elec_modelled - elec_actual) < accuracy:
+            settlement['Grid_bool'] = settlement.apply(lambda row:
+                                                       max_grid_dist
+                                                       if row['Grid'] < max_grid_dist
+                                                       else 0, axis=1)
+            settlement['Nighttime_bool'] = settlement.apply(lambda row:
+                                                            min_night_lights
+                                                            if row['Nighttime'] > min_night_lights
+                                                            else 0, axis=1)
+            settlement['Minigrid_bool'] = settlement.apply(lambda row:
+                                                           dist_minig
+                                                           if row['Minigrid'] < dist_minig
+                                                           else 0, axis=1)
+            settlement['MV_bool'] = settlement.apply(lambda row:
+                                                     dist_mv
+                                                     if row['MV'] < dist_mv
+                                                     else 0, axis=1)
+            settlement['LV_bool'] = settlement.apply(lambda row:
+                                                     dist_lv
+                                                     if row['LV'] < dist_lv
+                                                     else 0, axis=1)
+            settlement['Transform_bool'] = settlement.apply(lambda row:
+                                                            dist_to_trans
+                                                            if row['Transform'] < dist_to_trans
+                                                            else 0, axis=1)
+            settlement['Substation_bool'] = settlement.apply(lambda row:
+                                                             dist_to_sub
+                                                             if row['Substation'] < dist_to_sub
+                                                             else 0, axis=1)
+            settlement['Road_bool'] = settlement.apply(lambda row:
+                                                       max_road_dist
+                                                       if row['Road'] < max_road_dist
+                                                       else 0, axis=1)
+            settlement['pop_bool'] = settlement.apply(lambda row:
+                                                      pop_cutoff
+                                                      if row['pop'] > pop_cutoff
+                                                      else 0, axis=1)
             break
         elif not is_round_two:
             min_night_lights = \
-            sorted([0, min_night_lights - min_night_lights * 0.5 * (elec_actual - elec_modelled) / elec_actual, 150])[1]
+            sorted([0.1, min_night_lights - min_night_lights * 0.5 * (elec_actual - elec_modelled) / elec_actual, 15])[1]
             pop_cutoff = \
-            sorted([400, pop_cutoff - pop_cutoff *2* (elec_actual - elec_modelled) / elec_actual, 10000])[1]
+            sorted([1000, pop_cutoff - pop_cutoff *2* (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             max_grid_dist = \
-            sorted([500, max_grid_dist + max_grid_dist *2* (elec_actual - elec_modelled) / elec_actual, 10000])[1]
+            sorted([3000, max_grid_dist + max_grid_dist *2* (elec_actual - elec_modelled) / elec_actual, 20000])[1]
             max_road_dist = \
-            sorted([500, max_road_dist + max_road_dist * 0.5 * (elec_actual - elec_modelled) / elec_actual, 3000])[1]
+            sorted([500, max_road_dist + max_road_dist * 0.5 * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_minig = \
-            sorted([100, dist_minig - dist_minig  * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([500, dist_minig - dist_minig  * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_to_trans = \
-            sorted([100, dist_to_trans - dist_to_trans * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([1000, dist_to_trans - dist_to_trans * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
             dist_to_sub = \
-            sorted([500, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
+            sorted([1000, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             dist_mv = \
-            sorted([100, dist_to_trans - dist_to_trans * (elec_actual - elec_modelled) / elec_actual, 5000])[1]
+            sorted([1000, dist_to_trans - dist_to_trans * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             dist_lv = \
-            sorted([100, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 3000])[1]
+            sorted([500, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 3000])[1]
         elif elec_modelled - elec_actual < 0:
             pop_cutoff2 = sorted([0.01, pop_cutoff2 - pop_cutoff2 *
                                   (elec_actual - elec_modelled) / elec_actual, 100000])[1]

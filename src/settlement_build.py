@@ -35,7 +35,7 @@ def raster_to_point(raster_list, pop_shp, proj_path):
         if file.endswith('.tif'):
             f = os.path.abspath(file)
             tiffiles += [f]
-    keyword = 'avg_rade9h'  #	(avg_rade9h) nW/cm2/sr https://eogdata.mines.edu/products/vnl/#annual_v2
+    keyword = 'average_masked'  #	(avergage_masked) nW/cm2/sr https://eogdata.mines.edu/products/vnl/#annual_v2 doi:10.3390/rs13050922
     viirs = []
     for fname in tiffiles:
         if keyword in fname:
@@ -52,7 +52,7 @@ def raster_to_point(raster_list, pop_shp, proj_path):
 
     settlements = gpd.read_file(pop_shp)
     print(settlements.crs)
-    settlements = settlements[['pointid', 'grid_code', 'geometry']]
+    settlements = settlements[['ID', 'hrslmultipl', 'geometry']]
     settlements.index = range(len(settlements))
     coords = [(x, y) for x, y in zip(settlements.geometry.x, settlements.geometry.y)]
 
@@ -141,7 +141,7 @@ def raster_proximity(proj_path):
         OutputImage = os.path.join(proj_path, name+'.tif')
         raster_out.append(OutputImage)
 
-        RefImage = os.path.join(proj_path,'masked_UMT37S_ken_ppp_2018_1km_Aggregated.tif')
+        RefImage = os.path.join(proj_path,'projected_HRSL_2019_UMT37S.tif')
 
         gdalformat = 'GTiff'
         datatype = gdal.GDT_Byte

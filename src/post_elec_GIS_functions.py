@@ -51,44 +51,44 @@ def join(elec, tif, cells):
 def elec(demandcells):
     demand_cell = pd.read_csv(demandcells)
 
-    allcells = demand_cell.groupby(["pointid_right"])
+    allcells = demand_cell.groupby(["pointid"])
     HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) & ((x['Minigrid'].min() > 5000) ))
-    HV = HV_all.groupby(["pointid_right"])
-    HV.sum().reset_index()[['pointid_right']].to_csv(os.path.join(os.getcwd(),'run/HV_cells.csv'))
+    HV = HV_all.groupby(["pointid"])
+    HV.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/HV_cells.csv'))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
-    elec = elec_all.groupby(["pointid_right"])
-    elec.sum().reset_index()[['pointid_right']].to_csv(os.path.join(os.getcwd(),'run/elec.csv'))
-    elec.sum().reset_index()[['pointid_right']].to_csv(os.path.join(os.getcwd(),'run/data/elec.csv'))
+    elec = elec_all.groupby(["pointid"])
+    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/elec.csv'))
+    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/data/elec.csv'))
 
     #noHV_all = allcells.filter()
     noHV_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ) | (x['Minigrid'].min() < 5000))
-    noHV = noHV_all.groupby(["pointid_right"])
-    noHV.sum().reset_index()[['pointid_right']].to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
+    noHV = noHV_all.groupby(["pointid"])
+    noHV.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
 
     minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ) & ((x['Minigrid'].min() < 5000) ))
-    minigrid_all = minigrid.groupby(["pointid_right"])
-    minigrid_all.sum().reset_index()[['pointid_right']].to_csv(os.path.join(os.getcwd(),'run/minigridcells.csv'))
+    minigrid_all = minigrid.groupby(["pointid"])
+    minigrid_all.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/minigridcells.csv'))
 
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
-    unelec = unelec_all.groupby(["pointid_right"])
-    unelec.sum().reset_index()[['pointid_right']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
+    unelec = unelec_all.groupby(["pointid"])
+    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
 
 
 #This function is not used in the current version of the code
 # def calculate_demand(settlements):
 #     demand_cell = pd.read_csv(settlements, index_col=[0])
-#     demand_cell["pointid_right"] = demand_cell["pointid_right"].astype("category")
+#     demand_cell["pointid"] = demand_cell["pointid"].astype("category")
 #
 #     totals_elec = pd.pivot_table(demand_cell, index=["elec"],
-#                           aggfunc={'GDP_PPP': np.average, "Grid": np.min, "pop": np.sum, "pointid_right": np.sum}, margins=True,
-#                           values=['GDP_PPP', "Grid", "pop", "pointid_right"])
+#                           aggfunc={'GDP_PPP': np.average, "Grid": np.min, "pop": np.sum, "pointid": np.sum}, margins=True,
+#                           values=['GDP_PPP', "Grid", "pop", "pointid"])
 #     total_gdp_elec = totals_elec['GDP_PPP'][1]
 #     total_gdp_unelec = totals_elec['GDP_PPP'][0]
 #     total_pop_elec = totals_elec['pop'][1]
 #     total_pop_unelec = totals_elec['pop'][0]
 #
-#     cell = pd.pivot_table(demand_cell, index=["pointid_right", "elec"], aggfunc= {'GDP_PPP' : np.average, "Grid": np.min, "pop": np.sum}, margins = True, values= ['GDP_PPP', "Grid","pop"])
+#     cell = pd.pivot_table(demand_cell, index=["pointid", "elec"], aggfunc= {'GDP_PPP' : np.average, "Grid": np.min, "pop": np.sum}, margins = True, values= ['GDP_PPP', "Grid","pop"])
 #
 #     pd.concat(
 #         [cell, cell.sum(level=[0, 1]).assign(iten_name='popsum').set_index('popsum', append=True)]).sort_index(
@@ -136,14 +136,11 @@ def elec(demandcells):
 #     return ()
 
 if __name__ == "__main__":
-    #shape = '../Projected_files/new_40x40polygon_WGSUMT37S.shp'
+
     shape = '../Projected_files/Final_Polygons_Kenya.shp'
     gdp = '../Projected_files/masked_UMT37S_GDP_PPP_2015_WGS_84.tif'
     elec_shp = '../Projected_files/elec.shp'
-    path = 'run/Demand'
-    #settlements = 'run/Demand/demand_cells.csv'
-    #settlements = join(elec_shp, gdp, shape)
-
     demandcells = os.path.join(os.getcwd(), 'run/Demand/demand_cells.csv')
+
+    join(elec_shp, gdp, shape)
     elec(demandcells)
-    #demand = calculate_demand(settlements)

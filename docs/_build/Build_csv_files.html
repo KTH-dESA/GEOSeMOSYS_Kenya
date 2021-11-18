@@ -15,7 +15,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Demand" href="Demand.html" />
+    <link rel="next" title="renewable_ninja_download" href="renewable_ninja_download.html" />
     <link rel="prev" title="elec_start" href="elec_start.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -38,7 +38,7 @@
 <section id="module-build-csv-files">
 <h2>Module: Build_csv_files<a class="headerlink" href="#module-build-csv-files" title="Permalink to this headline">¶</a></h2>
 <p>A module for building the csv-files for GEOSeMOSYS <a class="reference external" href="https://github.com/KTH-dESA/GEOSeMOSYS">https://github.com/KTH-dESA/GEOSeMOSYS</a> to run that code
-In this module the logic around electrified and un-electrified cells are implemented for the</p>
+In this module the logic around electrified and un-electrified cells are implemented for the 378 cells</p>
 <hr class="docutils" />
 <p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
 <p class="rubric">Functions</p>
@@ -48,17 +48,20 @@ In this module the logic around electrified and un-electrified cells are impleme
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GIS_file</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GIS_file</span></code>(dest)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="index.html#Build_csv_files.capital_cost_transmission_distrib" title="Build_csv_files.capital_cost_transmission_distrib"><code class="xref py py-obj docutils literal notranslate"><span class="pre">capital_cost_transmission_distrib</span></code></a>(…)</p></td>
-<td><p>Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">capital_cost_transmission_distrib</span></code>(…)</p></td>
+<td><p>Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">near_dist</span></code>(pop_shp, un_elec_cells, path)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">renewableninja</span></code>(path)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">noHV_polygons</span></code>(polygons, noHV)</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">renewableninja</span></code>(path, dest)</p></td>
+<td><p>This function organize the data to the required format of a matrix with the location name on the x axis and hourly data on the y axis so that it can be fed into <a class="reference external" href="https://github.com/KTH-dESA/GEOSeMOSYS">https://github.com/KTH-dESA/GEOSeMOSYS</a> code the data is saved as capacityfactor_wind.csv and capacityfactor_solar.csv :param path: :return:</p></td>
 </tr>
 </tbody>
 </table>
@@ -91,7 +94,10 @@ In this module the logic around electrified and un-electrified cells are impleme
 <li class="toctree-l2"><a class="reference internal" href="#module-build-csv-files">Module: Build_csv_files</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Demand.html">Demand</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renewable_ninja_download.html">renewable_ninja_download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="post_elec_GIS_functions.html">post_elec_GIS_functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Pathfinder.html">Pathfinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Pathfinder_GIS_steps.html">Pathfinder_GIS_steps</a></li>
 </ul>
 
 <div class="relations">
@@ -99,7 +105,7 @@ In this module the logic around electrified and un-electrified cells are impleme
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="elec_start.html" title="previous chapter">elec_start</a></li>
-      <li>Next: <a href="Demand.html" title="next chapter">Demand</a></li>
+      <li>Next: <a href="renewable_ninja_download.html" title="next chapter">renewable_ninja_download</a></li>
   </ul></li>
 </ul>
 </div>

@@ -47,28 +47,28 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="index.html#Project_GIS.clip_vector" title="Project_GIS.clip_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_vector</span></code></a>(admin, vectordata, outputvector)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip_vector</span></code>(admin, vectordata, outputvector)</p></td>
 <td><p>This function clips the vector data (vectordata) to admin boundaries and save it with the name extension “UMT37S_%s” (outputvector)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="index.html#Project_GIS.main" title="Project_GIS.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(GIS_files_path)</p></td>
-<td><p>This main function reads the GIS-layers in GIS_files_path and separates them by raster and vector data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="index.html#Project_GIS.masking" title="Project_GIS.masking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">masking</span></code></a>(admin, tif_file)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">masking</span></code>(admin, tif_file)</p></td>
 <td><p>This function masks the raster data (tif-file) with the GADM Admin 0 boundaries (admin) :param admin: :param tif_file: :return: tif_file</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="index.html#Project_GIS.merge_minigrid" title="Project_GIS.merge_minigrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_minigrid</span></code></a>(proj_path)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_minigrid</span></code>(proj_path)</p></td>
 <td><p>This function concatinates the shapefiles which contains the keyword ‘MiniGrid’</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="index.html#Project_GIS.merge_mv" title="Project_GIS.merge_mv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_mv</span></code></a>(proj_path)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_mv</span></code>(proj_path)</p></td>
 <td><p>This function concatinates the shapefiles which contains the keyword ‘33kV’ and ‘66kV’</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="index.html#Project_GIS.merge_transmission" title="Project_GIS.merge_transmission"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_transmission</span></code></a>(proj_path)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_transmission</span></code>(proj_path)</p></td>
 <td><p>This function concatinates the shapefiles which contains the keyword ‘132kV’ and ‘220kV’</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="index.html#Project_GIS.project_raster" title="Project_GIS.project_raster"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_raster</span></code></a>(rasterdata, output_raster)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_main</span></code>(GIS_files_path, topath)</p></td>
+<td><p>This main function reads the GIS-layers in GIS_files_path and separates them by raster and vector data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_raster</span></code>(rasterdata, output_raster)</p></td>
 <td><p>This function projects the raster data (rasterdata) to EPSG:32737 and save it with the name extension “masked_UMT37S_%s” (outputraster)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="index.html#Project_GIS.project_vector" title="Project_GIS.project_vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_vector</span></code></a>(vectordata)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_vector</span></code>(vectordata)</p></td>
 <td><p>This function projects the vector data (vectordata) to EPSG:32737</p></td>
 </tr>
 </tbody>
@@ -106,7 +106,10 @@
 <li class="toctree-l1"><a class="reference internal" href="settlement_build.html">settlement_build</a></li>
 <li class="toctree-l1"><a class="reference internal" href="elec_start.html">elec_start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Build_csv_files.html">Build_csv_files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Demand.html">Demand</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renewable_ninja_download.html">renewable_ninja_download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="post_elec_GIS_functions.html">post_elec_GIS_functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Pathfinder.html">Pathfinder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Pathfinder_GIS_steps.html">Pathfinder_GIS_steps</a></li>
 </ul>
 
 <div class="relations">
