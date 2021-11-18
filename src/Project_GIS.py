@@ -2,8 +2,8 @@
 Module: Project_GIS
 =============================
 
-A module for projecting the GIS data to the appropriate EPSG CRS
------------------------------------------------------------------------------------------
+A module for projecting and clipping the GIS data to the appropriate EPSG CRS
+-----------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -35,24 +35,24 @@ def masking(admin,tif_file):
     :param tif_file:
     :return: tif_file
     """
-    #try:
-    with fiona.open(admin, "r") as shapefile:
-        shapes = [feature["geometry"] for feature in shapefile]
-    with rasterio.open(tif_file) as src:
-        out_image, out_transform = rasterio.mask.mask(src, shapes, crop = True)
-        out_meta = src.meta
-    out_meta.update({"driver": "GTiff",
-                     "height": out_image.shape[1],
-                     "width": out_image.shape[2],
-                     "transform": out_transform})
+    try:
+        with fiona.open(admin, "r") as shapefile:
+            shapes = [feature["geometry"] for feature in shapefile]
+        with rasterio.open(tif_file) as src:
+            out_image, out_transform = rasterio.mask.mask(src, shapes, crop = True)
+            out_meta = src.meta
+        out_meta.update({"driver": "GTiff",
+                         "height": out_image.shape[1],
+                         "width": out_image.shape[2],
+                         "transform": out_transform})
 
-    with rasterio.open(tif_file, "w", **out_meta) as dest:
-        dest.write(out_image)
-    src = None
-    dest = None
+        with rasterio.open(tif_file, "w", **out_meta) as dest:
+            dest.write(out_image)
+        src = None
+        dest = None
 
-    #except:
-        #print("Already masked")
+    except:
+        print("Already masked")
     return(tif_file)
 
 def project_raster(rasterdata, output_raster):
@@ -62,12 +62,12 @@ def project_raster(rasterdata, output_raster):
     :param output_raster:
     :return:
     """
-    try:
-        print(rasterdata)
-        input_raster = gdal.Open(rasterdata)
-        gdal.Warp(output_raster, input_raster, dstSRS="EPSG:32737")
-    except:
-        print("Already projected")
+    #try:
+    print(rasterdata)
+    input_raster = gdal.Open(rasterdata)
+    gdal.Warp(output_raster, input_raster, dstSRS="EPSG:32737")
+    #except:
+     #   print("Already projected")
     return()
 
 def project_vector(vectordata):
@@ -75,7 +75,7 @@ def project_vector(vectordata):
 
     :param vectordata:
     :param outputvector:
-    :return:
+    :return: vector
     """
     gdf = gpd.read_file(vectordata)
     gdf_umt37 = gdf.to_crs("EPSG:32737")
@@ -84,7 +84,7 @@ def project_vector(vectordata):
 def clip_vector(admin, vectordata, outputvector):
     """This function clips the vector data (vectordata) to admin boundaries and save it with the name extension "UMT37S_%s" (outputvector)
 
-    :return:
+    :return: vector
     """
     adm_multi = gpd.read_file(admin)
     adm = adm_multi.explode()
@@ -98,7 +98,7 @@ def clip_vector(admin, vectordata, outputvector):
     return(vector)
 
 def merge_transmission(proj_path):
-    """This function concatinates the shapefiles which contains the keyword '132kV' and '220kV'
+    """This function concatinates the shapefiles which contains the keyword '132kV' and '220kV' to "Concat_Transmission_lines_UMT37S.shp"
 
     :param proj_path:
     :return:
@@ -119,11 +119,11 @@ def merge_transmission(proj_path):
         tmiss_list += [shpfile]
 
     gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
-    gdf.to_file("../Projected_files/Concat_Transmission_lines_UMT37S.shp")
+    gdf.to_file(os.path.join(proj_path,"Concat_Transmission_lines_UMT37S.shp"))
     os.chdir(current)
 
 def merge_mv(proj_path):
-    """This function concatinates the shapefiles which contains the keyword '33kV' and '66kV'
+    """This function concatinates the shapefiles which contains the keyword '33kV' and '66kV' to "Concat_MV_lines_UMT37S.shp"
 
     :param proj_path:
     :return:
@@ -144,14 +144,14 @@ def merge_mv(proj_path):
         tmiss_list += [shpfile]
 
     gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
-    gdf.to_file("../Projected_files/Concat_MV_lines_UMT37S.shp")
+    gdf.to_file(os.path.join(proj_path,"Concat_MV_lines_UMT37S.shp"))
     os.chdir(current)
 
     return()
 
 
 def merge_minigrid(proj_path):
-    """This function concatinates the shapefiles which contains the keyword 'MiniGrid'
+    """This function concatinates the shapefiles which contains the keyword 'MiniGrid' to Concat_Mini-grid_UMT37S.shp"
 
     :param proj_path:
     :return:
@@ -173,14 +173,14 @@ def merge_minigrid(proj_path):
 
     gdf = pd.concat([shp for shp in minigr_list]).pipe(gpd.GeoDataFrame)
     #gdf.set_crs(epsg=32737, inplace=True)
-    gdf.to_file("../Projected_files/Concat_Mini-grid_UMT37S.shp")
+    gdf.to_file(os.path.join(proj_path,"Concat_Mini-grid_UMT37S.shp"))
     os.chdir(current)
 
-def main(GIS_files_path):
+def project_main(GIS_files_path, topath):
     """ This main function reads the GIS-layers in GIS_files_path and separates them by raster and vector data.
     Projects the data to WGS84 UMT37S
     Moves all files to ../Projected_files
-    Merges the files named 'kV' to one merged shape file
+    Merges the files named 'kV' to two merged shape file of Transmission and Medium Voltage lines
     Merges the files named 'MiniGrid' to one merged shape file
 
     :param GIS_files_path:
@@ -213,21 +213,22 @@ def main(GIS_files_path):
     def create_dir(dir):
         if not os.path.exists(dir):
             os.makedirs(dir)
-    create_dir(('../Projected_files'))
+    create_dir((topath))
     allFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames]
     keyword = 'UMT37S'
     for fname in allFiles:
         if keyword in fname:
-            shutil.copy("\\\\?\\"+fname, os.path.join(current, r'..\Projected_files')) #Due to really long name the \\\\?\\ can trick Windows accepting it
+            shutil.copy("\\\\?\\"+fname, os.path.join(current, topath)) #Due to really long name the \\\\?\\ can trick Windows accepting it
     os.chdir(basedir)
-    merge_transmission('..\Projected_files')
-    merge_minigrid('..\Projected_files')
-    merge_mv('..\Projected_files')
+    merge_transmission(topath)
+    merge_minigrid(topath)
+    merge_mv(topath)
     return ()
 
 if __name__ == "__main__":
     basedir = os.getcwd()
-    GIS_files_path = sys.argv[1]
-    main(GIS_files_path)
+    #GIS_files_path, topath = sys.argv[1:2]
+    GIS_files_path, topath = '../GIS_data', '../Projected_files'
+    project_main(GIS_files_path, topath)
     os.chdir(basedir)
 

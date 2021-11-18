@@ -14,4 +14,4 @@ https://zenodo.org/record/5543774/files/raster_to_point_HRSL_UTM_37S.dbf?downloa
 https://zenodo.org/record/5543774/files/raster_to_point_HRSL_UTM_37S.prj?download=1,raster_to_point_UMT37S_Kenya.prj
 https://zenodo.org/record/5543774/files/raster_to_point_HRSL_UTM_37S.shp?download=1,raster_to_point_UMT37S_Kenya.shp
 https://zenodo.org/record/5543774/files/raster_to_point_HRSL_UTM_37S.shx?download=1,raster_to_point_UMT37S_Kenya.shx
-https://zenodo.org/record/5543828/files/projected_HRSL_2019_UMT37S.tif?download=1,ken_ppp_2018_1km_Aggregated.tif
+https://zenodo.org/record/5543828/files/projected_HRSL_2019_UMT37S.tif?download=1,projected_HRSL_2019_UMT37S.tif

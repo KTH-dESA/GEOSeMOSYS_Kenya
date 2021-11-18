@@ -26,7 +26,7 @@ def mosaic(dict_raster, proj_path):
     print('Pathfinder is now mosaicked to pathfinder.tif')
     return ()
 
-def remove_grid_from_results(dict_pathfinder, dict_weight):
+def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight):
     sum_distribution = {}
     for key in dict_pathfinder:
         elec_path = dict_pathfinder[key]
@@ -52,30 +52,28 @@ def remove_grid_from_results(dict_pathfinder, dict_weight):
 
     return dict_pathfinder
 
-
-
-def main(path,proj_path, elec_shp):
+def pathfinder_main(path,proj_path, elec_shp):
     #Only settlements with population over pop_cutoff are concidered to be part of the distribution network
-    #elec_shape = convert_zero_to_one(elec_shp, pop_cutoff)
+    elec_shape = convert_zero_to_one(elec_shp)
     #The elec_raster will serve as the points to connect and the roads will create the weights
     #Returns the path to elec_raster
-    #elec_raster = rasterize_elec(elec_shape, path)
+    elec_raster = rasterize_elec(elec_shape, path)
 
     #Concatinate the highway with high- medium and low voltage lines
-    #grid_weight = merge_grid(path)
+    grid_weight = merge_grid(path)
 
     #returns the path to highway_weights
 
-    #highway_shp, grid_shp = highway_weights(grid_weight, path)
+    highway_shp, grid_shp = highway_weights(grid_weight, path)
     #highway_shp =  "../Projected_files/road_weights.shp"
-    #highway_raster = rasterize_road(highway_shp, path)
+    highway_raster = rasterize_road(highway_shp, path)
     #grid_shp =  "../Projected_files/grid_weights.shp"
-    #transmission_raster = rasterize_transmission(grid_shp, path)
+    transmission_raster = rasterize_transmission(grid_shp, path)
     #transmission_raster = "../Projected_files/transmission.tif"
     #highway_raster = "../Projected_files/road.tif"
-    #weights_raster = merge_raster(transmission_raster, highway_raster)
-    weights_raster = "../Projected_files/weights.tif"
-    elec_raster = "../Projected_files/zero_to_one_elec.tif"
+    weights_raster = merge_raster(transmission_raster, highway_raster)
+    #weights_raster = "../Projected_files/weights.tif"
+    #elec_raster = "../Projected_files/zero_to_one_elec.tif"
 
     #print("Calculating Pathfinder for all of Kenya, used to benchmark the decentralized results")
     #name = 'Kenya'
@@ -149,12 +147,11 @@ def main(path,proj_path, elec_shp):
     print("Make raster of pathfinder")
     mosaic(dict_raster, path)
     print("Remove pathfinder where grid is passed to not double count")
-    elec_without_grid =remove_grid_from_results(dict_pathfinder, dict_weight)
+    remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight)
 
 
 path = '../Projected_files/'
 proj_path = 'temp'
 elec_shp = '../Projected_files/elec.shp'
 
-
-main(path,proj_path, elec_shp)
+pathfinder_main(path,proj_path, elec_shp)

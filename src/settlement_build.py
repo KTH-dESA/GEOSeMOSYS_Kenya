@@ -141,7 +141,7 @@ def raster_proximity(proj_path):
         OutputImage = os.path.join(proj_path, name+'.tif')
         raster_out.append(OutputImage)
 
-        RefImage = os.path.join(proj_path,'ken_ppp_2018_1km_Aggregated.tif')
+        RefImage = os.path.join(proj_path,'projected_HRSL_2019_UMT37S.tif')
 
         gdalformat = 'GTiff'
         datatype = gdal.GDT_Byte

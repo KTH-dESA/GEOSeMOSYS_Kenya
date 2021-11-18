@@ -27,7 +27,7 @@ gdal.UseExceptions()
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
-def convert_zero_to_one(file, cut_off):
+def convert_zero_to_one(file):
     gpdf = gpd.read_file(file)
 
     gpdf.loc[(gpdf.elec == 1), 'dijkstra'] = 0 #| ((gpdf.elec ==0) & (gpdf.hrslmultip <= cut_off)),
@@ -44,7 +44,7 @@ def rasterize_elec(file, proj_path):
 
     OutputImage = os.path.join(proj_path, name + '.tif')
 
-    RefImage = os.path.join('../Projected_files', 'ken_ppp_2018_1km_Aggregated.tif')
+    RefImage = os.path.join('../Projected_files', 'projected_HRSL_2019_UMT37S.tif')
 
     gdalformat = 'GTiff'
     datatype = gdal.GDT_Int32
@@ -263,7 +263,7 @@ def rasterize_road(file, proj_path):
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
     OutputImage2 = os.path.join(proj_path, 'road.tif')
-    RefImage = os.path.join('../Projected_files', 'ken_ppp_2018_1km_Aggregated.tif')
+    RefImage = os.path.join('../Projected_files', 'projected_HRSL_2019_UMT37S.tif')
 
     gdalformat = 'GTiff'
     datatype2 = gdal.GDT_Float32
@@ -301,7 +301,7 @@ def rasterize_transmission(file, proj_path):
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
     OutputImage3 = os.path.join(proj_path, 'transmission.tif')
-    RefImage = os.path.join('../Projected_files', 'ken_ppp_2018_1km_Aggregated.tif')
+    RefImage = os.path.join('../Projected_files', 'projected_HRSL_2019_UMT37S.tif')
 
     gdalformat = 'GTiff'
     datatype2 = gdal.GDT_Float32
