@@ -18,7 +18,7 @@ import os
 import fnmatch
 from geopandas.tools import sjoin
 
-def renewableninja(path):
+def renewableninja(path, dest):
     """
     This function organize the data to the required format of a matrix with the
     location name on the x axis and hourly data on the y axis so that it can be fed into https://github.com/KTH-dESA/GEOSeMOSYS code
@@ -48,28 +48,28 @@ def renewableninja(path):
     solarbase.columns = new_header
 
     solarbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    solarbase.to_csv('run/data/capacityfactor_solar.csv')
+    solarbase.to_csv(os.path.join(dest, 'capacityfactor_solar.csv'))
 
     header = windbase.columns
     new_header = [x.replace('X','') for x in header]
     windbase.columns = new_header
     windbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    windbase.to_csv('run/data/capacityfactor_wind.csv')
+    windbase.to_csv(os.path.join(dest, 'capacityfactor_wind.csv'))
     return()
 
-def GIS_file():
+def GIS_file(dest):
     point = gpd.read_file('../Projected_files/new_40x40points_WGSUMT37S.shp')
     GIS_data = point['pointid']
     grid = pd.DataFrame(GIS_data, copy=True)
     grid.columns = ['Location']
-    grid.to_csv('run/data/GIS_data.csv', index=False)
+    grid.to_csv(os.path.join(dest, 'GIS_data.csv'), index=False)
     return()
 
 ## Build files with elec/unelec aspects
-def capital_cost_transmission_distrib(distribution_network, elec, noHV_file, HV_file, unelec, transmission_near, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity, distrbution_cost, path):
+def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV_file, HV_file, unelec, transmission_near, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity, distrbution_cost, path, distribution_length_cell):
     """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options
 
-    :param distribution_network: a shape file of the LV and MV infrastructure
+    :param distribution_network: a csv file with number of cells included in Pathfinder
     :param elec: are the 40*40m cells that have at least one cell of electrified 1x1km inside it
     :param unelec: are the 40*40m cells that have NO electrified cells 1x1km inside it
     :param noHV: are the cells that are electrified and not 5000 m from a minigrid and not 50,000 m from the exsiting HV-MV grid the cell are concidered electrified by transmission lines.
@@ -84,22 +84,25 @@ def capital_cost_transmission_distrib(distribution_network, elec, noHV_file, HV_
     transm = pd.DataFrame(gdf)
     transm.index = transm['pointid']
 
-    capitalcost = pd.DataFrame(columns=['Technology', 'Capitalcost'], index= range(0,10000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
+    capitalcost = pd.DataFrame(columns=['Technology', 'Capitalcost'], index=range(0,5000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
 
-    fixedcost = pd.DataFrame(columns=['Technology', 'Fixed Cost'], index= range(0,10000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
+    fixedcost = pd.DataFrame(columns=['Technology', 'Fixed Cost'], index=range(0,5000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
 
-    inputactivity = pd.DataFrame(columns=['Column','Fuel','Technology','Inputactivity','ModeofOperation'])
+    inputactivity = pd.DataFrame(columns=['Column','Fuel','Technology','Inputactivity','ModeofOperation'], index=range(0,10000))
 
-    outputactivity = pd.DataFrame(columns=['Column','Fuel',	'Technology','Outputactivity','ModeofOperation'])
+    outputactivity = pd.DataFrame(columns=['Column','Fuel',	'Technology','Outputactivity','ModeofOperation'], index=range(0,10000))
 
     elec = pd.read_csv(elec)
-    elec.pointid_right = elec.pointid_right.astype(int)
+    elec.pointid = elec.pointid.astype(int)
     un_elec = pd.read_csv(unelec)
-    un_elec.pointid_right = un_elec.pointid_right.astype(int)
+    un_elec.pointid = un_elec.pointid.astype(int)
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
-    noHV.pointid_right = noHV.pointid_right.astype(int)
-    distribution = pd.read_excel(distribution_network, index_col="ID")
+    noHV.pointid = noHV.pointid.astype(int)
+    distribution = pd.read_csv(distribution_network, index_col=0)
+    xls = pd.ExcelFile(distribution_length_cell)
+    dist_length = pd.read_excel(xls, 'distance_average', index_col='Row Labels')
+
 
     m = 0
     input_temp = []
@@ -107,286 +110,269 @@ def capital_cost_transmission_distrib(distribution_network, elec, noHV_file, HV_
     capital_temp = []
 
     ## Electrified cells
-    for i in elec['pointid_right']:
+    for i in elec['pointid']:
 
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(i)+"_1",distrbution_cost]*capital_cost_LV + substation
-        capitalcost.loc[m]['Technology'] = "TRLV_%i_1" %(i)
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * dist_length.loc[i, 'Average of Tier2_LV_length_(km)'] + substation
+        capitalcost.loc[m]['Technology'] = "TRLV_%i_0" % (i)
+
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV *  dist_length.loc[i, 'Average of Tier2_LV_length_(km)']* 0.025 + substation * 0.025
+        fixedcost.loc[m]['Technology'] = "TRLV_%i_0" % (i)
+
+        m = m+1
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV_strengthening * dist_length.loc[i, 'Average of Tier2_LV_length_(km)'] + substation
+        capitalcost.loc[m]['Technology'] = "TRLV_%i_1" % (i)
 
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(i)+"_0",distrbution_cost]*capital_cost_LV*0.035 + substation*0.035
-        fixedcost.loc[m]['Technology'] = "TRLV_%i_0" %(i)
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * 0.025*  dist_length.loc[i, 'Average of Tier2_LV_length_(km)']+ substation * 0.025
+        fixedcost.loc[m]['Technology'] = "TRLV_%i_1" % (i)
 
-        m +=1
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(i)+"_0",distrbution_cost]*capital_cost_LV + substation
-        capitalcost.loc[m]['Technology'] = "TRLV_%i_0" %(i)
-
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(i)+"_1",distrbution_cost]*capital_cost_LV*0.035 + substation*0.035
-        fixedcost.loc[m]['Technology'] = "TRLV_%i_1" %(i)
-
-        h = len(inputactivity)
         input_temp = [0,"EL2_%i" %(i),"TRLV_%i_1" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0,"EL2_%i" %(i),"TRLV_%i_0" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-
-        h = len(inputactivity)
-        input_temp = [0, "KEEL2","KEEL00d_%i" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
-
-
-        h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(i), "SOPV_%i_1" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(i), "SOPV_%i_0" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(i), "SOPV8h_%i_1" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
+
         input_temp = [0, "SOLAR_%i" %(i), "SOPV8h_%i_0" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
+        #input_temp = [0, "SOLAR_%i" %(i), "SOPV13h_%i_1" %(i), 1, 1]
+        #inputactivity.loc[-1] = input_temp  # adding a row
+        #inputactivity.index = inputactivity.index + 1  # shifting index
+        #inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
-        input_temp = [0, "SOLAR_%i" %(i), "SOPV12h_%i_1" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        #input_temp = [0, "SOLAR_%i" %(i), "SOPV13h_%i_0" %(i), 1, 1]
+        #inputactivity.loc[-1] = input_temp  # adding a row
+        #inputactivity.index = inputactivity.index + 1  # shifting index
+        #inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
-        input_temp = [0, "SOLAR_%i" %(i), "SOPV12h_%i_0" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
-
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_1" % (i), "TRLV_%i_1" % (i), 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_1" % (i), "BACKSTOP", 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_0" % (i), "TRLV_%i_0" % (i), 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_0" % (i), "BACKSTOP", 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0, "EL3_%i_1" % (i), "KEEL00d_%i" % (i), 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        #output_temp = [0, "EL3_%i_1" % (i),  "SOPV13h_%i_1" % (i), 1, 1]
+        #outputactivity.loc[-1] = output_temp  # adding a row
+        #outputactivity.index = outputactivity.index + 1  # shifting index
+        #outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0, "EL3_%i_1" % (i),  "SOPV12h_%i_1" % (i), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        #output_temp = [0, "EL3_%i_0" % (i),  "SOPV13h_%i_0" % (i), 1, 1]
+        #outputactivity.loc[-1] = output_temp  # adding a row
+        #outputactivity.index = outputactivity.index + 1  # shifting index
+        #outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0, "EL3_%i_0" % (i),  "SOPV12h_%i_0" % (i), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
-
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_1" % (i),  "SOPV8h_%i_1" % (i), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_0" % (i),  "SOPV8h_%i_0" % (i), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_1" % (i),  "SOPV_%i_1" % (i), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0, "EL3_%i_0" % (i),  "SOPV_%i_0" % (i), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        h = len(outputactivity)
-        input_temp = [0, "KEEL2_%i" %(i), "KEEL00t00", 0.95, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        output_temp = [0, "KEEL2_%i" %(i), "KEEL00t00", 0.95, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        h = len(inputactivity)
-        input_temp = [0,"KEEL2_%i" %(i),"TRLV_%i_1" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
-
-        h = len(inputactivity)
-        input_temp = [0,"KEEL2_%i" %(i),"TRLV_%i_0" %(i), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
-
-        m +=1
+        m = m+1
 
     ## Unelectrified cells
-    for j in noHV['pointid_right']:
+    for j in noHV['pointid']:
+
         capitalcost.loc[m]['Capitalcost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
         capitalcost.loc[m]['Technology'] = "TRHV_%i" %(j)
 
-
-        fixedcost.loc[m]['Fixed Cost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV*0.035 + substation*0.035  #kUSD/MW divided by 1000 as it is in meters
+        fixedcost.loc[m]['Fixed Cost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
         fixedcost.loc[m]['Technology'] = "TRHV_%i" %(j)
 
-        h = len(inputactivity)
-        input_temp = [0, "KEEL2_%i" %(j), "TRHV_%i" %(j), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
 
-        l = len(outputactivity)
+        input_temp = [0, "KEEL2_%i" % (j), "TRHV_%i" % (j), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
         output_temp = [0,  "EL2_%i" % (j),"TRHV_%i" %(j), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+        m = m+1
 
-        m +=1
+    for k in HV['pointid']:
 
-    k = 0
-    for k in HV['pointid_right']:
-
-        h = len(inputactivity)
         input_temp = [0, "KEEL2_%i" %(k), "TRLV_%i_0" %(k), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0, "KEEL2_%i" %(k), "TRLV_%i_1" %(k), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-    for j in un_elec['pointid_right']:
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[str(j)+"_0",distrbution_cost]*capital_cost_LV + substation
+        input_temp = [0, "KEEL2","KEEL00d_%i" %(k), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (k), "KEEL00d_%i" % (k), 0.865, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+    for j in un_elec['pointid']:
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[j,distrbution_cost]*capital_cost_LV* dist_length.loc[j, 'Average of Tier2_LV_length_(km)']+ substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" %(j)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[str(j)+"_0",distrbution_cost]*capital_cost_LV*0.035 + substation*0.035
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[j,distrbution_cost]*capital_cost_LV*0.025* dist_length.loc[j, 'Average of Tier2_LV_length_(km)'] + substation*0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" %(j)
 
+        m = m+1
 
-        h = len(inputactivity)
         input_temp = [0, "EL2_%i" %(j),"TRLV_%i_0" %(j), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(j),"SOPV_%i_0" %(j), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(j),"SOPV8h_%i_0" %(j), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
-        input_temp = [0, "SOLAR_%i" %(j),"SOPV12h_%i_0" %(j), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        #input_temp = [0, "SOLAR_%i" %(j),"SOPV13h_%i_0" %(j), 1, 1]
+        #inputactivity.loc[-1] = input_temp  # adding a row
+        #inputactivity.index = inputactivity.index + 1  # shifting index
+        #inputactivity = inputactivity.sort_index()
 
-        h = len(outputactivity)
-        input_temp = [0, "KEEL2_%i" %(j), "KEEL00t00", 0.95, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        output_temp = [0, "KEEL2_%i" %(j), "KEEL00t00", 0.95, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0,  "EL3_%i_0" % (j), "TRLV_%i_0" % (j), 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        output_temp = [0, "EL3_%i_0" % (j), "TRLV_%i_0" % (j), 0.865, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0,  "EL3_%i_0" % (j), "BACKSTOP", 0.865, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
+        #output_temp = [0,"EL3_%i_0" % (j),"SOPV13h_%i_0" % (j), 1, 1]
+        #outputactivity.loc[-1] = output_temp  # adding a row
+        #outputactivity.index = outputactivity.index + 1  # shifting index
+        #outputactivity = outputactivity.sort_index()
 
-
-        l = len(outputactivity)
-        output_temp = [0,"EL3_%i_0" % (j),"SOPV12h_%i_0" % (j), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
-
-        l = len(outputactivity)
         output_temp = [0,"EL3_%i_0" % (j),"SOPV8h_%i_0" % (j), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0,"EL3_%i_0" % (j),"SOPV_%i_0" % (j), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0, "KEEL2_%i" % (j),"KEEL00t00", 0.95, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
-
-        m += 1
     #For all cells
     for k in range(1,379):
 
-        l = len(outputactivity)
         output_temp = [0,  "SOLAR_%i" % (k),"SO_%i" %(k), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0,  "EL2_%i" % (k),"SOMG_%i" %(k), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0,  "EL2_%i" % (k),"SOMG12h_%i" %(k), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        output_temp = [0,  "EL2_%i" % (k),"SOMG8h_%i" %(k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0,  "EL2_%i" % (k),"WI_%i" %(k), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
-        output_temp = [0,  "EL2_%i" % (k),"WI13h_%i" %(k), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        output_temp = [0,  "EL2_%i" % (k),"WI8h_%i" %(k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        l = len(outputactivity)
         output_temp = [0,  "EL2_%i" % (k), "KEDSGEN_%i" %(k), 1, 1]
-        outputactivity.loc[l] = output_temp
-        output_temp = []
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
 
-        h = len(inputactivity)
         input_temp = [0, "SOLAR_%i" %(k), "SOMG_%i" %(k), 1, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
-        h = len(inputactivity)
+        input_temp = [0, "SOLAR_%i" %(k), "SOMG8h_%i" %(k), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
         input_temp = [0,  "KEDS", "KEDSGEN_%i" %(k), 4, 1]
-        inputactivity.loc[h] = input_temp
-        input_temp = []
-        m +=1
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
     df1 = outputactivity['Fuel']
     df2 = inputactivity['Fuel']
@@ -400,16 +386,11 @@ def capital_cost_transmission_distrib(distribution_network, elec, noHV_file, HV_
     df4 = inputactivity['Technology']
 
     technologies = pd.concat([df3, df4]).drop_duplicates().reset_index(drop=True)
-    techno = pd.Series(technologies[~technologies.str.startswith('SO_')])
+    techno = pd.Series(technologies[~technologies.str.startswith('SO_', na=False)])
     techno = pd.DataFrame(techno, columns = ['Technology'])
-
 
     capacitytoa = pd.DataFrame(columns=['Capacitytoactivity'], index= range(0,len(techno)))
     capacitytoact = pd.concat([capacitytoa, techno], axis=1, ignore_index=True)
-    #nan_value = float("NaN")
-    #capacitytoact.replace("", nan_value, inplace=True)
-    #capacitytoact = capacitytoact.dropna(subset = [1], inplace=True)
-    #capacitytoact = capacitytoa.assign(Technology = techno)
     capacitytoactiv = capacitytoact.assign(Capacitytoactivity = capacitytoactivity)
 
     fixedcost.to_csv(os.path.join(path, 'fixed_cost_tnd.csv'))
@@ -424,11 +405,11 @@ def capital_cost_transmission_distrib(distribution_network, elec, noHV_file, HV_
 
 def near_dist(pop_shp, un_elec_cells, path):
 
-    unelec = pd.read_csv(un_elec_cells, usecols= ["pointid_right"])
+    unelec = pd.read_csv(un_elec_cells, usecols= ["pointid"])
     point = gpd.read_file(os.path.join(path, pop_shp))
     point.index = point['pointid']
-    unelec_shp = gpd.GeoDataFrame()
-    for i in unelec['pointid_right']:
+    unelec_shp = gpd.GeoDataFrame(crs=32737)
+    for i in unelec['pointid']:
         unelec_point = point.loc[i]
         unelec_shp = unelec_shp.append(unelec_point)
 
@@ -441,6 +422,19 @@ def near_dist(pop_shp, un_elec_cells, path):
 
     return(outpath)
 
+def noHV_polygons(polygons, noHV):
+    unelec = pd.read_csv(noHV, usecols= ["pointid"])
+    point = gpd.read_file(polygons)
+    point.index = point['pointid']
+    unelec_shp = gpd.GeoDataFrame(crs=32737)
+    for i in unelec['pointid']:
+        unelec_point = point.loc[i]
+        unelec_shp = unelec_shp.append(unelec_point)
+
+    #unelec_shp.set_crs(32737)
+    outpath = "run/Demand/un_elec_polygons.shp"
+    unelec_shp.to_file(outpath)
+
 if __name__ == "__main__":
     #path = sys.argv[1]
     renewable_path = 'temp'
@@ -450,22 +444,25 @@ if __name__ == "__main__":
     HV = 'run/HV_cells.csv'
     elec = 'run/elec.csv'
     Projected_files_path = '../Projected_files/'
-    distribution_network = 'run/Demand/Distribution_network.xlsx'
+    distribution_network = 'run/Demand/distributionlines.csv'
+    distribution_length_cell = 'run/Demand/Distribution_network.xlsx'
 
     capital_cost_HV = 2.5  # kUSD MW-km
     substation = 1.5  # kUSD/MW
     capital_cost_LV = 4  # kUSD/MW
+    capital_cost_LV_strengthening = 1  # kUSD/MW Assumed 25% of the cost
     capacitytoactivity = 31.536  # coversion MW to TJ
-    distribution_cost = 'Tier2_LV_length_(km)'
+    distribution_cost = '0'
     path = 'run/ref/'
 
     # Solar and wind csv files
-    renewableninja(renewable_path)
+    #renewableninja(renewable_path, path)
     # Location file
-    GIS_file()
+    #GIS_file(path)
 
     # calculates the shortest distance to the HV line from the center of the 40x40 cells
     transmission_near = "run/Demand/transmission.shp"
-    #transmission_near = near_dist(pop_shp, noHV, Projected_files_path)
-    capital_cost_transmission_distrib(distribution_network, elec, noHV, HV, unelec, transmission_near, capital_cost_HV,
-                                      substation, capital_cost_LV, capacitytoactivity, distribution_cost, path)
+    # transmission_near = near_dist(pop_shp, noHV, Projected_files_path)
+    capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV, HV, unelec,
+                                      transmission_near, capital_cost_HV, substation, capital_cost_LV,
+                                      capacitytoactivity, distribution_cost, path, distribution_length_cell)
