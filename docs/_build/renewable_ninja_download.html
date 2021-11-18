@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Download_files &#8212; GEOSeMOSYS Kenya 0.1 documentation</title>
+    <title>renewable_ninja_download &#8212; GEOSeMOSYS Kenya 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -15,8 +15,8 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Project_GIS" href="Project_GIS.html" />
-    <link rel="prev" title="GEOSeMOSYS Kenya" href="index.html" />
+    <link rel="next" title="post_elec_GIS_functions" href="post_elec_GIS_functions.html" />
+    <link rel="prev" title="Build_csv_files" href="Build_csv_files.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,12 +33,15 @@
 
           <div class="body" role="main">
             
-  <section id="module-Download_files">
-<span id="download-files"></span><h1>Download_files<a class="headerlink" href="#module-Download_files" title="Permalink to this headline">¶</a></h1>
-<section id="module-download-files">
-<h2>Module: Download_files<a class="headerlink" href="#module-download-files" title="Permalink to this headline">¶</a></h2>
-<section id="a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data">
-<h3>A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder “GIS-data”<a class="headerlink" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data" title="Permalink to this headline">¶</a></h3>
+  <section id="module-renewable_ninja_download">
+<span id="renewable-ninja-download"></span><h1>renewable_ninja_download<a class="headerlink" href="#module-renewable_ninja_download" title="Permalink to this headline">¶</a></h1>
+<section id="module-renewable-ninja-download">
+<h2>Module: renewable_ninja_download<a class="headerlink" href="#module-renewable-ninja-download" title="Permalink to this headline">¶</a></h2>
+<p>A module for downloading data from Renewable ninja. You need to have a token (account) and also a shape file of the points that you want to download.</p>
+<p>Usage limits <a class="reference external" href="https://www.renewables.ninja/documentation">https://www.renewables.ninja/documentation</a>
+Anonymous users are limited to a maximum of 5 requests per day.
+To increase this limit to 50 per hour, please register for a free user account on renewable.ninja</p>
+<hr class="docutils" />
 <p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
 <p class="rubric">Functions</p>
 <table class="longtable docutils align-default">
@@ -47,18 +50,20 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_data</span></code>(url, temp)</p></td>
-<td><p>This function downloads the data from URL in url (comma separated file) and place them in temp</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_viirs</span></code>(url_viirs, temp)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust_timezone</span></code>(path, time_zone_offset)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unzip_all</span></code>(url)</p></td>
-<td><p>This function unzips the data from URL (url) and place them in GIS_data folder</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">csv_make</span></code>(coordinates)</p></td>
+<td><p>This function extracts the coordinates for the csv build to renewable ninja</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code>(path, wind, solar, token)</p></td>
+<td><p>This function downloads the renewable ninja data according to the limit of the</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_vector</span></code>(vectordata)</p></td>
+<td><p>This function projects the vectordata to EPSG: 4326 as the renewable ninja data is in that CRS</p></td>
 </tr>
 </tbody>
 </table>
-</section>
 </section>
 </section>
 
@@ -80,18 +85,15 @@
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Download_files</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-download-files">Module: Download_files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data">A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder “GIS-data”</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="Download_files.html">Download_files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Project_GIS.html">Project_GIS</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settlement_build.html">settlement_build</a></li>
 <li class="toctree-l1"><a class="reference internal" href="elec_start.html">elec_start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Build_csv_files.html">Build_csv_files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="renewable_ninja_download.html">renewable_ninja_download</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">renewable_ninja_download</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-renewable-ninja-download">Module: renewable_ninja_download</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="post_elec_GIS_functions.html">post_elec_GIS_functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Pathfinder.html">Pathfinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Pathfinder_GIS_steps.html">Pathfinder_GIS_steps</a></li>
@@ -101,8 +103,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">GEOSeMOSYS Kenya</a></li>
-      <li>Next: <a href="Project_GIS.html" title="next chapter">Project_GIS</a></li>
+      <li>Previous: <a href="Build_csv_files.html" title="previous chapter">Build_csv_files</a></li>
+      <li>Next: <a href="post_elec_GIS_functions.html" title="next chapter">post_elec_GIS_functions</a></li>
   </ul></li>
 </ul>
 </div>
@@ -136,7 +138,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/Download_files.rst.txt"
+      <a href="_sources/renewable_ninja_download.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
