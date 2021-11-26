@@ -10,6 +10,7 @@ In this module the logic around electrified and un-electrified cells are impleme
 Module author: Nandi Moksnes <nandi@kth.se>
 
 """
+from typing import Any, Union
 
 import pandas as pd
 import geopandas as gpd
@@ -17,6 +18,11 @@ import sys
 import os
 import fnmatch
 from geopandas.tools import sjoin
+from numpy import ndarray
+from pandas import Series, DataFrame
+from pandas.core.arrays import ExtensionArray
+pd.options.mode.chained_assignment = None
+
 
 def renewableninja(path, dest):
     """
@@ -66,7 +72,7 @@ def GIS_file(dest):
     return()
 
 ## Build files with elec/unelec aspects
-def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV_file, HV_file, unelec, transmission_near, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity, distrbution_cost, path, distribution_length_cell):
+def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV_file, HV_file, unelec, transmission_near, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity, distrbution_cost, path, distribution_length_cell, adjacencymatrix):
     """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options
 
     :param distribution_network: a csv file with number of cells included in Pathfinder
@@ -93,6 +99,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     outputactivity = pd.DataFrame(columns=['Column','Fuel',	'Technology','Outputactivity','ModeofOperation'], index=range(0,10000))
 
     elec = pd.read_csv(elec)
+    matrix = pd.read_csv(adjacencymatrix)
     elec.pointid = elec.pointid.astype(int)
     un_elec = pd.read_csv(unelec)
     un_elec.pointid = un_elec.pointid.astype(int)
@@ -136,36 +143,6 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        input_temp = [0, "SOLAR_%i" %(i), "SOPV_%i_1" %(i), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        input_temp = [0, "SOLAR_%i" %(i), "SOPV_%i_0" %(i), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        input_temp = [0, "SOLAR_%i" %(i), "SOPV8h_%i_1" %(i), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-
-        input_temp = [0, "SOLAR_%i" %(i), "SOPV8h_%i_0" %(i), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        #input_temp = [0, "SOLAR_%i" %(i), "SOPV13h_%i_1" %(i), 1, 1]
-        #inputactivity.loc[-1] = input_temp  # adding a row
-        #inputactivity.index = inputactivity.index + 1  # shifting index
-        #inputactivity = inputactivity.sort_index()
-
-        #input_temp = [0, "SOLAR_%i" %(i), "SOPV13h_%i_0" %(i), 1, 1]
-        #inputactivity.loc[-1] = input_temp  # adding a row
-        #inputactivity.index = inputactivity.index + 1  # shifting index
-        #inputactivity = inputactivity.sort_index()
 
         output_temp = [0, "EL3_%i_1" % (i), "TRLV_%i_1" % (i), 0.865, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -186,16 +163,6 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
-
-        #output_temp = [0, "EL3_%i_1" % (i),  "SOPV13h_%i_1" % (i), 1, 1]
-        #outputactivity.loc[-1] = output_temp  # adding a row
-        #outputactivity.index = outputactivity.index + 1  # shifting index
-        #outputactivity = outputactivity.sort_index()
-
-        #output_temp = [0, "EL3_%i_0" % (i),  "SOPV13h_%i_0" % (i), 1, 1]
-        #outputactivity.loc[-1] = output_temp  # adding a row
-        #outputactivity.index = outputactivity.index + 1  # shifting index
-        #outputactivity = outputactivity.sort_index()
 
         output_temp = [0, "EL3_%i_1" % (i),  "SOPV8h_%i_1" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -224,26 +191,6 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
 
         m = m+1
 
-    ## Unelectrified cells
-    for j in noHV['pointid']:
-
-        capitalcost.loc[m]['Capitalcost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
-        capitalcost.loc[m]['Technology'] = "TRHV_%i" %(j)
-
-        fixedcost.loc[m]['Fixed Cost'] = transm.loc[j,'HV_dist']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
-        fixedcost.loc[m]['Technology'] = "TRHV_%i" %(j)
-
-
-        input_temp = [0, "KEEL2_%i" % (j), "TRHV_%i" % (j), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        output_temp = [0,  "EL2_%i" % (j),"TRHV_%i" %(j), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-        m = m+1
 
     for k in HV['pointid']:
 
@@ -281,21 +228,6 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        input_temp = [0, "SOLAR_%i" %(j),"SOPV_%i_0" %(j), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        input_temp = [0, "SOLAR_%i" %(j),"SOPV8h_%i_0" %(j), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        #input_temp = [0, "SOLAR_%i" %(j),"SOPV13h_%i_0" %(j), 1, 1]
-        #inputactivity.loc[-1] = input_temp  # adding a row
-        #inputactivity.index = inputactivity.index + 1  # shifting index
-        #inputactivity = inputactivity.sort_index()
-
         output_temp = [0, "KEEL2_%i" %(j), "KEEL00t00", 0.95, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -311,11 +243,6 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        #output_temp = [0,"EL3_%i_0" % (j),"SOPV13h_%i_0" % (j), 1, 1]
-        #outputactivity.loc[-1] = output_temp  # adding a row
-        #outputactivity.index = outputactivity.index + 1  # shifting index
-        #outputactivity = outputactivity.sort_index()
-
         output_temp = [0,"EL3_%i_0" % (j),"SOPV8h_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -328,12 +255,6 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
 
     #For all cells
     for k in range(1,379):
-
-        output_temp = [0,  "SOLAR_%i" % (k),"SO_%i" %(k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
         output_temp = [0,  "EL2_%i" % (k),"SOMG_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -354,25 +275,31 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k), "KEDSGEN_%i" %(k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        input_temp = [0, "SOLAR_%i" %(k), "SOMG_%i" %(k), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
-        input_temp = [0, "SOLAR_%i" %(k), "SOMG8h_%i" %(k), 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
-
         input_temp = [0,  "KEDS", "KEDSGEN_%i" %(k), 4, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
+
+    for l in matrix.index:
+        input_temp = [0,  matrix.loc[l]['INFUEL'], matrix.loc[l]['INTECH'], 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
+        output_temp = [0,  matrix.loc[l]['OUTFUEL'], matrix.loc[l]['INTECH'], 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+    tech_matrix = matrix.drop(['SendTech','INFUEL','OUTFUEL','ReceiveTech','Unnamed: 0'], axis=1)
+    tech_matr = tech_matrix.drop_duplicates()
+    for h in tech_matr.index:
+        capitalcost.loc[m]['Capitalcost'] = 39210/1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
+        capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+
+        fixedcost.loc[m]['Fixed Cost'] = 39210/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
+        fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+        m = m+1
 
     df1 = outputactivity['Fuel']
     df2 = inputactivity['Fuel']
@@ -401,7 +328,51 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     fuels.to_csv(os.path.join(path, 'fuels.csv'))
     technolgies.to_csv(os.path.join(path, 'technologies.csv'))
 
-    return()
+
+def adjacency_matrix(path, noHV_file, HV_file, topath):
+    noHV = pd.read_csv(noHV_file)
+    HV = pd.read_csv(HV_file)
+    neartable = pd.read_csv(path)
+    # The table includes the raw data from ArcMap function
+    near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
+
+    near_adj_points.loc[(near_adj_points.SENDID.isin(HV.pointid)), 'SendTech'] = 'KEEL00t00'
+
+    #add input fuel and inputtech to central exisitng grid
+    central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.pointid))]
+    for m in central.index:
+        near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL1_1'
+        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_" + str(int(near_adj_points.NEARID[m]))
+        near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
+    #add fuels to the adjacent cells
+    nan_intech = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
+
+    for l in nan_intech.index:
+        near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
+        near_adj_points.loc[(near_adj_points.index == l , 'INTECH')] = "TRHV_" + str(int(near_adj_points.NEARID[l]))
+        near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
+
+    for i in noHV.pointid:
+        near_adj_points.loc[near_adj_points.SENDID == i, 'SendTech'] = "TRHV_"+ str(int(i))
+        near_adj_points.loc[near_adj_points.NEARID == i, 'ReceiveTech'] = "TRHV_" + str(int(i))
+
+    #Allow for connections over cells with no population ("nan")
+    nan = near_adj_points.loc[near_adj_points.SendTech.isnull()]
+
+    for j in nan.SENDID:
+        near_adj_points.loc[near_adj_points.SENDID == j, 'SendTech'] = "TRHV_" + str(int(j))
+
+    #Allow for connections over cells with no population ("nan")
+    nannear = near_adj_points.loc[near_adj_points.ReceiveTech.isnull()]
+
+    for k in nannear.NEARID:
+        near_adj_points.loc[near_adj_points.NEARID == k, 'ReceiveTech'] = "TRHV_" + str(int(k))
+
+    adjacencydf = near_adj_points.drop(['OBJECTID *','INPUT_FID','NEAR_FID','DISTANCE','NEARID','SENDID'], axis=1)
+    adjacencydf = adjacencydf.drop_duplicates()
+
+    adjacencydf.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
+    return(os.path.join(topath,'adjacencymatrix.csv'))
 
 def near_dist(pop_shp, un_elec_cells, path):
 
@@ -454,6 +425,7 @@ if __name__ == "__main__":
     capacitytoactivity = 31.536  # coversion MW to TJ
     distribution_cost = '0'
     path = 'run/ref/'
+    neartable = 'run/Demand/Near_table.csv'
 
     # Solar and wind csv files
     #renewableninja(renewable_path, path)
@@ -463,6 +435,7 @@ if __name__ == "__main__":
     # calculates the shortest distance to the HV line from the center of the 40x40 cells
     transmission_near = "run/Demand/transmission.shp"
     # transmission_near = near_dist(pop_shp, noHV, Projected_files_path)
+    matrix = adjacency_matrix(neartable, noHV, HV, path)
     capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV, HV, unelec,
                                       transmission_near, capital_cost_HV, substation, capital_cost_LV,
-                                      capacitytoactivity, distribution_cost, path, distribution_length_cell)
+                                      capacitytoactivity, distribution_cost, path, distribution_length_cell,matrix)

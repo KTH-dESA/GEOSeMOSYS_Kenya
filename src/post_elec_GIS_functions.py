@@ -52,9 +52,10 @@ def elec(demandcells):
     demand_cell = pd.read_csv(demandcells)
 
     allcells = demand_cell.groupby(["pointid"])
-    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) & ((x['Minigrid'].min() > 5000) ))
+    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) and ((x['Minigrid'].min() > 5000)) or ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
     HV = HV_all.groupby(["pointid"])
-    HV.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/HV_cells.csv'))
+    HV_df = HV.sum().reset_index()[['pointid']]
+    HV_df.to_csv(os.path.join(os.getcwd(),'run/HV_cells.csv'))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
     elec = elec_all.groupby(["pointid"])
@@ -62,11 +63,12 @@ def elec(demandcells):
     elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/data/elec.csv'))
 
     #noHV_all = allcells.filter()
-    noHV_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ) | (x['Minigrid'].min() < 5000))
-    noHV = noHV_all.groupby(["pointid"])
-    noHV.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
+    #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
+    all_pointid = demand_cell['pointid'].drop_duplicates().dropna()
+    noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
+    noHV.to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
 
-    minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ) & ((x['Minigrid'].min() < 5000) ))
+    minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ) and ((x['Minigrid'].min() < 5000) ))
     minigrid_all = minigrid.groupby(["pointid"])
     minigrid_all.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/minigridcells.csv'))
 
@@ -142,5 +144,5 @@ if __name__ == "__main__":
     elec_shp = '../Projected_files/elec.shp'
     demandcells = os.path.join(os.getcwd(), 'run/Demand/demand_cells.csv')
 
-    join(elec_shp, gdp, shape)
+    #join(elec_shp, gdp, shape)
     elec(demandcells)

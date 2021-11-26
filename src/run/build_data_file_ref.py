@@ -116,6 +116,11 @@ def functions_to_run(dict_df, outPutFile):
         outPutFile = inputact(outPutFile, dict_df['inputactivity'], dict_df['input_data'])
     else:
         print('No inputactivity file')
+#################################################################
+    if 'adjacencymatrix' in dict_df:
+        outPutFile = adjacency_matrix(outPutFile, dict_df['adjacencymatrix'], dict_df['input_data'])
+    else:
+        print('No adjacencymatrix file')
 ################################################################
     if 'outputactivity' in dict_df:
         outPutFile = outputactivity(outPutFile, dict_df['outputactivity'], dict_df['input_data'])
@@ -1121,6 +1126,26 @@ def capitalcost(outPutFile, trade_cost, input_data):
             while year <= int(input_data['endyear'][0]):
                 dataToInsert += "%s\t%s\t%i\t%f\n" % (input_data['region'][0], tech, year, cost)
                 year += 1
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+    return(outPutFile)
+
+def adjacency_matrix(outPutFile, adjacencymatrix, input_data):
+    """
+    builds the AdjacencyMatrix (region,technology,technology)
+    -------------
+
+    """
+    dataToInsert = ""
+
+    print("Capital cost", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param 	AdjacencyMatrix default 0 :=\n"
+    startIndex = outPutFile.index(param) + len(param)
+
+    for m, row in adjacencymatrix.iterrows():
+        recieving = row['ReceiveTech']
+        send = row['SendTech']
+        dataToInsert += "%s\t%s\t%s\t1\n" % (input_data['region'][0], recieving, send)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
