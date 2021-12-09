@@ -17,7 +17,7 @@ Obtain the miniconda package (https://docs.conda.io/en/latest/miniconda.html):
 3) Activate the new environment: **conda activate geosemosys**
 
 # Required accounts (free to register)
-To run the code you need to create accounts in the following plances:
+To run the code you need to create accounts in the following places:
 - https://www.renewables.ninja/ and get the token to download several files per hour
 - https://payneinstitute.mines.edu/eog/nighttime-lights/ and the password is entered in the first cell in the notebook
 
