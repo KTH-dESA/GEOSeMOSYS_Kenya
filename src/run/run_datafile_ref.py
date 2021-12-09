@@ -15,7 +15,7 @@ import sys
 import logging
 from datetime import datetime
 from build_data_file_ref import load_csvs, make_outputfile, functions_to_run, write_to_file
- 
+
 logger = logging.getLogger(__name__)
 
 def parse_args(args):
