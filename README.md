@@ -24,4 +24,4 @@ To run the code you need to create accounts in the following places:
 To run the code go the folder where the code is place and write: ****juputer notebook**** and the 
 open the src/GEOSeMOSYS - exploring linear programming geospatial modelling.ipynb
 
-Run the code step by step. The building of the model takes about 24 hours to run. This is related to several aspects but several of the functions that are calculating how near distance to the 11 kV transmission lines is very heavy. The renewables.ninja account only allows for 50 dowinload per hour which (if you have many locations and technologies) makes the run longer.
+Run the code step by step. The building of the model takes about 24 hours to run. This is related to several aspects. One of the functions calculating the distance to the 11 kV transmission lines is very heavy. The renewables.ninja account only allows for 50 download per hour which (if you have many locations and technologies) makes the run longer.
