@@ -121,6 +121,7 @@ def unzip_all(url):
         if not os.path.exists(dir):
             os.makedirs(dir)
     create_dir(('../GIS_data'))
+    print(os.getcwd())
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:
