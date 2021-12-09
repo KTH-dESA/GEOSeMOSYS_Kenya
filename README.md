@@ -1,8 +1,8 @@
 # GEOSeMOSYS_Kenya
-This repository is for paper GEOSeMOSYS Kenya, by: Nandi Moksnes, Mark Howells, Will Usher
+This repository is for paper ****High spatial and temporal resolution in linear programming - the case of Kenya****, by: Nandi Moksnes, Mark Howells, Will Usher
 
-To be able to run the model you need to run it on a HPC computer with at least 512 GB RAM - 24 cores.
-This code is adjusted for the cluster at PDC Tegner from SNIC (Swedish National Infrastructure for Computing).
+To be able to run the model you need to have approx 512 GB RAM. This model has been run on a High performance cluster at KTH.
+The shell file is therefor applicable for the HPC at PDC Tegner from SNIC (Swedish National Infrastructure for Computing).
 
 The whole workflow is run in Jupyter Notebook.
 
