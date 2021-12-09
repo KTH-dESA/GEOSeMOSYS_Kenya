@@ -129,10 +129,10 @@ def functions_to_run(dict_df, outPutFile):
 
     ################################################################
     if 'capacityfactor_solar' or 'capacityfactor_wind' in dict_df:
-        outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['battery'], dict_df['input_data'],
-                                  dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'], dict_df['elec'], dict_df['un_elec'])
+       outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['battery'], dict_df['input_data'],
+                                 dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'], dict_df['elec'], dict_df['un_elec'])
     else:
-       print('No capacityfactor_solar or capacityfactor_wind file')
+        print('No capacityfactor_solar or capacityfactor_wind file')
     ###############################################################################
 
     return(outPutFile)
@@ -1012,11 +1012,12 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
     wind_tech_name = wind_tech.loc[1]['Technology_name_OSeMOSYS']
     comm_PV_tech =  cf_tech.get_group('Comm PV')
     comm_PV_CF = comm_PV_tech['CF']
-    comm_PV_tech_name = comm_PV_tech.loc[10]['Technology_name_OSeMOSYS']
+    comm_PV_tech_name = comm_PV_tech.loc[2]['Technology_name_OSeMOSYS']
     pv_tech = cf_tech.get_group('PV')
     pv_CF = pv_tech['CF']
-    pv_tech_name = pv_tech.loc[11]['Technology_name_OSeMOSYS']
+    pv_tech_name = pv_tech.loc[2]['Technology_name_OSeMOSYS']
     battery_tech = cf_tech.get_group('Battery')
+    battery_tech_name = battery_tech.loc[3:6]['Technology_name_OSeMOSYS']
     battery_CF = battery_tech['CF']
     battery_tech.index = battery_tech['CF']
 
@@ -1044,8 +1045,8 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
            pass
        else:
            for k in wind_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
-               windcapitalcostbatt = wind_tech.loc[cf][k] + battery_tech.loc[8][k]
-               techname = wind_tech_name + "8h"
+               windcapitalcostbatt = wind_tech.loc[cf][k] + battery_tech.loc[6][k]
+               techname = wind_tech_name + battery_tech_name[2]
                dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, windcapitalcostbatt))
 
        #Solar PV
@@ -1067,10 +1068,10 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
             pass
        else:
            for k in pv_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
-              for battcf in battery_CF:
-                  battery_tech_name = battery_tech.loc[battcf]['Technology_name_OSeMOSYS']
+              for battcf in battery_CF == "res":
+                  battery_tech_n = battery_tech_name.loc[battcf]['Technology_name_OSeMOSYS']
                   sopvcapitalcostbatt = pv_tech.loc[cf][k] + battery_tech.loc[battcf][k]
-                  techname = pv_tech_name+battery_tech_name
+                  techname = pv_tech_name+battery_tech_n
                   if elec['pointid'].eq(row['Location']).any():
                       dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
                       dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (
@@ -1094,9 +1095,9 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
            pass
        else:
            for k in comm_PV_tech.columns[3:]:
-               battery_tech_name = battery_tech.loc[8]['Technology_name_OSeMOSYS']
-               somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc[8][k]
-               techname = comm_PV_tech_name + battery_tech_name
+               battery_tech_n = battery_tech_name.loc[2]['Technology_name_OSeMOSYS']
+               somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc[4][k]
+               techname = comm_PV_tech_name + battery_tech_n
                dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
@@ -1138,7 +1139,7 @@ def adjacency_matrix(outPutFile, adjacencymatrix, input_data):
     """
     dataToInsert = ""
 
-    print("Capital cost", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print("Adjacency matrix", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     param = "param 	AdjacencyMatrix default 0 :=\n"
     startIndex = outPutFile.index(param) + len(param)
 

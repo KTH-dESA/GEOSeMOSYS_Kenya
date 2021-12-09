@@ -143,22 +143,22 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         inputactivity = inputactivity.sort_index()
 
 
-        output_temp = [0, "EL3_%i_1" % (i), "TRLV_%i_1" % (i), 0.865, 1]
+        output_temp = [0, "EL3_%i_1" % (i), "TRLV_%i_1" % (i), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (i), "BACKSTOP", 0.865, 1]
+        output_temp = [0, "EL3_%i_1" % (i), "BACKSTOP", 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (i), "TRLV_%i_0" % (i), 0.865, 1]
+        output_temp = [0, "EL3_%i_0" % (i), "TRLV_%i_0" % (i), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (i), "BACKSTOP", 0.865, 1]
+        output_temp = [0, "EL3_%i_0" % (i), "BACKSTOP", 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -188,12 +188,12 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
 
     for k in HV['pointid']:
 
-        input_temp = [0, "KEEL2_%i" %(k), "TRLV_%i_0" %(k), 1, 1]
+        input_temp = [0, "KEEL2" %(k), "TRLV_%i_0" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        input_temp = [0, "KEEL2_%i" %(k), "TRLV_%i_1" %(k), 1, 1]
+        input_temp = [0, "KEEL2" %(k), "TRLV_%i_1" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
@@ -203,7 +203,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (k), "KEEL00d_%i" % (k), 0.865, 1]
+        output_temp = [0, "EL3_%i_1" % (k), "KEEL00d_%i" % (k), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -222,17 +222,13 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        output_temp = [0, "KEEL2_%i" %(j), "KEEL00t00", 0.95, 1]
+
+        output_temp = [0, "EL3_%i_0" % (j), "TRLV_%i_0" % (j), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (j), "TRLV_%i_0" % (j), 0.865, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0,  "EL3_%i_0" % (j), "BACKSTOP", 0.865, 1]
+        output_temp = [0,  "EL3_%i_0" % (j), "BACKSTOP", 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -433,12 +429,9 @@ if __name__ == "__main__":
 
     # Solar and wind csv files
     #renewableninja(renewable_path, path)
-    # Location file
-    #GIS_file(path)
+    # Location file which sets the spatial resolution
+    GIS_file(path)
 
-    # calculates the shortest distance to the HV line from the center of the 40x40 cells
-    #transmission_near = "run/Demand/transmission.shp"
-    # transmission_near = near_dist(pop_shp, noHV, Projected_files_path)
     matrix = adjacency_matrix(neartable, noHV, HV, path)
     capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV, HV, unelec,
                                       capital_cost_HV, substation, capital_cost_LV,
