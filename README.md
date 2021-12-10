@@ -1,8 +1,8 @@
 # GEOSeMOSYS_Kenya
-This repository is for paper GEOSeMOSYS Kenya, by: Nandi Moksnes, Mark Howells, Will Usher
+This repository is for paper ****High spatial and temporal resolution in linear programming - the case of Kenya****, by: Nandi Moksnes, Mark Howells, Will Usher
 
-To be able to run the model you need to run it on a HPC computer with at least 512 GB RAM - 24 cores.
-This code is adjusted for the cluster at PDC Tegner from SNIC (Swedish National Infrastructure for Computing).
+To be able to run the model you need to have approx 512 GB RAM. This model has been run on a High performance cluster at KTH.
+The shell file is therefor applicable for the HPC at PDC Tegner from SNIC (Swedish National Infrastructure for Computing).
 
 The whole workflow is run in Jupyter Notebook.
 
@@ -12,10 +12,16 @@ The workflow has a number packages that needs to be installed.
 The easiest way to install the Python packages is to use miniconda.
 
 Obtain the miniconda package (https://docs.conda.io/en/latest/miniconda.html):
-1) Add the conda-forge channel conda config --add channels conda-forge
-2) Create a new Python environment: conda env create -f environment.yml
-3) Activate the new environment conda activate geosemosys
+1) Add the conda-forge channel: **conda config --add channels conda-forge**
+2) Create a new Python environment: **conda env create -f environment.yml**
+3) Activate the new environment: **conda activate geosemosys**
 
-Then open the src/GEOSeMOSYS - exploring linear programming geospatial modelling.ipynb in Jupyter Notebook
+# Required accounts (free to register)
+To run the code you need to create accounts in the following places:
+- https://www.renewables.ninja/ and get the token to download several files per hour
+- https://payneinstitute.mines.edu/eog/nighttime-lights/ and the password is entered in the first cell in the notebook
 
-Run the code step by step.
+To run the code go the folder where the code is place and write: ****juputer notebook**** and the 
+open the src/GEOSeMOSYS - exploring linear programming geospatial modelling.ipynb
+
+Run the code step by step. The building of the model takes about 24 hours to run. This is related to several aspects. One of the functions clips the vector file of the 11 kV transmission lines which consists of several hundreds of lines. The renewables.ninja account only allows for 50 download per hour which (if you have many locations and technologies) makes the run longer.

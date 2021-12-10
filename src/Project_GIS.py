@@ -81,11 +81,13 @@ def project_vector(vectordata):
     gdf_umt37 = gdf.to_crs("EPSG:32737")
     return(gdf_umt37)
 
-def clip_vector(admin, vectordata, outputvector):
+def clip_vector(admin, vectordata, vectordata_location, outputvector):
     """This function clips the vector data (vectordata) to admin boundaries and save it with the name extension "UMT37S_%s" (outputvector)
 
     :return: vector
     """
+    with fiona.open(vectordata_location) as f:
+        input_schema = f.schema
     adm_multi = gpd.read_file(admin)
     adm = adm_multi.explode()
     try:
@@ -94,7 +96,8 @@ def clip_vector(admin, vectordata, outputvector):
     except:
         print("Already clipped")
         vector = vectordata
-    vector.to_file(outputvector)
+
+    vector.to_file(outputvector, schema=input_schema)
     return(vector)
 
 def merge_transmission(proj_path):
@@ -199,7 +202,7 @@ def project_main(GIS_files_path, topath):
     for s in shpFiles:
         path, filename = os.path.split(s)
         projected = project_vector(s)
-        clip_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'), projected, os.path.join(path, "UMT37S_%s" % (filename)))
+        clip_vector(os.path.join(current,'gadm36_KEN_shp\gadm36_KEN_0_UMT37S.shp'), projected, s, os.path.join(path, "UMT37S_%s" % (filename)))
 
     #All tif-files in all folders in dir current
     tifFiles = [os.path.join(dp, f) for dp, dn, filenames in os.walk(current) for f in filenames if
