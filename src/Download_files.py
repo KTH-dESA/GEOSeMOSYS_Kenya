@@ -121,7 +121,6 @@ def unzip_all(url):
         if not os.path.exists(dir):
             os.makedirs(dir)
     create_dir(('../GIS_data'))
-    print(os.getcwd())
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:
@@ -135,9 +134,11 @@ def unzip_all(url):
             if item.name.find(".tgz") != -1 or item.name.find(".tar") != -1:
 
                 extract(item.name, "./" + item.name[:item.name.rfind('/')])
-    def gzip(fin, fou):
-        zipp = r'C:\Program Files\7-Zip\7z.exe'
-        subprocess.call([zipp, 'x', fin, fou])
+    def gzip_e(fin, fou):
+        with gzopen(fin, 'rb') as s_file, \
+                open(fou, 'wb') as d_file:
+            shutil.copyfileobj(s_file, d_file)
+
 
     for i, row in url_adress.iterrows():
         _, filename = os.path.split(row[1])
@@ -145,13 +146,15 @@ def unzip_all(url):
         if ending == '.zip':
             unzip(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
         elif ending == '.gz':
-            gzip(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
+            gzip_e(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
         else:
             shutil.copy(os.path.join('../temp', row[1]), os.path.join('../GIS_data', row[1]))
 
 if __name__ == "__main__":
     current = os.getcwd()
-    url_adress,temp = sys.argv[1], sys.argv[2]
-    download = download_url_data(url_adress, temp)
+    #url_adress,temp = sys.argv[1], sys.argv[2]
+    #download = download_url_data(url_adress, temp)
     #unzip = unzip_all(url_adress)
+    url = r'C:\Users\nandi\OneDrive - KTH\box_files\PhD\Paper 3-OSeMOSYS 40x40\GIS_python_build\GEOSeMOSYS_reprod\GEOSeMOSYS_Kenya\src\input_data\GIS_unzip.txt'
+    unzip_all(url)
 
