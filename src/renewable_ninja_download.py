@@ -106,7 +106,7 @@ def csv_make(coordinates):
 
     return(wind_csv, solar_csv)
 
-def download(path, wind, solar, token):
+def download(path,  Rpath, srcpath, wind, solar, token):
     """This function downloads the renewable ninja data according to the limit of the
 
     :param path:
@@ -123,7 +123,7 @@ def download(path, wind, solar, token):
                 csvfiles = path + "/"+ wind[x]
                 csvfilesout = path + "/out_"+wind[x]
                 subprocess.call(
-                    'C:/TPFAPPS/R/R-4.0.1/bin/RScript GEOSeMOSYS_download.r '+ r'"C:\Users\nandi\Box Sync\PhD\Paper 3-OSeMOSYS 40x40\GIS_python_build\GEOSeMOSYS_reprod\GEOSeMOSYS_Kenya\src"' +" "+ token + " " + type + " " + csvfiles + " " + csvfilesout, shell=True)
+                    Rpath+" GEOSeMOSYS_download.r "+ srcpath +" "+ token + " " + type + " " + csvfiles + " " + csvfilesout, shell=True)
         print("Waiting to download next 50 data sets")
         time.sleep(3601)
         i += 8
@@ -136,7 +136,7 @@ def download(path, wind, solar, token):
                 csvfiles = path + "/"+ solar[x]
                 csvfilesout = path + "/out_"+solar[x]
                 subprocess.call(
-                    'C:/TPFAPPS/R/R-4.0.1/bin/RScript GEOSeMOSYS_download.r '+ r'"C:\Users\nandi\Box Sync\PhD\Paper 3-OSeMOSYS 40x40\GIS_python_build\GEOSeMOSYS_reprod\GEOSeMOSYS_Kenya\src"' +" "+ token + " " + type + " " + csvfiles + " " + csvfilesout, shell=True)
+                     Rpath+" GEOSeMOSYS_download.r "+ srcpath +" "+ token + " " + type + " " + csvfiles + " " + csvfilesout, shell=True)
         print("Waiting to download next 50 data sets")
         time.sleep(3601)
         j += 8
@@ -154,7 +154,7 @@ def adjust_timezone(path, time_zone_offset):
         time.index = new_index
         df["adjtime"] = time
         df = df.drop(columns=['Unnamed: 0','time'])
-        df.to_csv(path+"/Kenya_timezone"+f)
+        df.to_csv(path+"/timezoneoffset"+f)
 
 
 if __name__ == "__main__":

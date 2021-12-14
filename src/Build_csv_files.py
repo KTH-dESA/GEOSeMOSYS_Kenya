@@ -36,12 +36,12 @@ def renewableninja(path, dest):
     outwind = []
     outsolar = []
     for file in files:
-        if fnmatch.fnmatch(file, 'Kenya_timezoneout_wind*'):
+        if fnmatch.fnmatch(file, 'timezoneoffset_wind*'):
             file = os.path.join(path,file)
             wind = pd.read_csv(file, index_col='adjtime')
             outwind.append(wind)
     for file in files:
-        if fnmatch.fnmatch(file, 'Kenya_timezoneout_solar*'):
+        if fnmatch.fnmatch(file, 'timezoneoffset_solar*'):
             file = os.path.join(path,file)
             solar = pd.read_csv(file, index_col='adjtime')
             outsolar.append(solar)
@@ -163,12 +163,12 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (i),  "SOPV8h_%i_1" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_1" % (i),  "SOPV4h_%i_1" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (i),  "SOPV8h_%i_0" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_0" % (i),  "SOPV4h_%i_0" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -188,12 +188,12 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
 
     for k in HV['pointid']:
 
-        input_temp = [0, "KEEL2" %(k), "TRLV_%i_0" %(k), 1, 1]
+        input_temp = [0, "KEEL2", "TRLV_%i_0" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        input_temp = [0, "KEEL2" %(k), "TRLV_%i_1" %(k), 1, 1]
+        input_temp = [0, "KEEL2", "TRLV_%i_1" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
@@ -233,7 +233,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,"EL3_%i_0" % (j),"SOPV8h_%i_0" % (j), 1, 1]
+        output_temp = [0,"EL3_%i_0" % (j),"SOPV4h_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -250,7 +250,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k),"SOMG8h_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"SOMG4h_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -260,7 +260,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k),"WI8h_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"WI4h_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -339,7 +339,7 @@ def adjacency_matrix(path, noHV_file, HV_file, topath):
     central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.pointid))]
     central_nogrid = central.loc[central.NEARID.isin(noHV.pointid)]
     for m in central_nogrid.index:
-        near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2_1'
+        near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
         near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_" + str(int(near_adj_points.NEARID[m]))
         near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
     #add fuels to the adjacent cells
