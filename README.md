@@ -16,6 +16,11 @@ Obtain the miniconda package (https://docs.conda.io/en/latest/miniconda.html):
 2) Create a new Python environment: **conda env create -f environment.yml**
 3) Activate the new environment: **conda activate geosemosys**
 
+# R
+You can download R for free https://www.r-project.org/
+You also need to install the package "curl" which you install through the R commander
+<pre><code>install.packages("cran")</code></pre>
+
 # Required accounts (free to register)
 To run the code you need to create accounts in the following places:
 - https://www.renewables.ninja/ and get the token to download several files per hour
