@@ -26,6 +26,7 @@ To run the code you need to create accounts in the following places:
 - https://www.renewables.ninja/ and get the token to download several files per hour
 - https://payneinstitute.mines.edu/eog/nighttime-lights/ and the password is entered in the first cell in the notebook
 
+# Run the model
 To run the code go the src folder and write: ****juputer notebook**** and then 
 open the src/GEOSeMOSYS - exploring linear programming geospatial modelling.ipynb
 
