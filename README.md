@@ -26,7 +26,7 @@ To run the code you need to create accounts in the following places:
 - https://www.renewables.ninja/ and get the token to download several files per hour
 - https://payneinstitute.mines.edu/eog/nighttime-lights/ and the password is entered in the first cell in the notebook
 
-To run the code go the folder where the code is place and write: ****juputer notebook**** and the 
+To run the code go the src folder and write: ****juputer notebook**** and then 
 open the src/GEOSeMOSYS - exploring linear programming geospatial modelling.ipynb
 
 Run the code step by step. The building of the model takes about 24 hours to run. This is related to several aspects. One of the functions clips the vector file of the 11 kV transmission lines which consists of several hundreds of lines. The renewables.ninja account only allows for 50 download per hour which (if you have many locations and technologies) makes the run longer.
