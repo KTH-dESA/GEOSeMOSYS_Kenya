@@ -4,9 +4,9 @@ This repository is for paper ****High spatial and temporal resolution in linear 
 To be able to run the model you need to have approx 512 GB RAM. This model has been run on a High performance cluster at KTH.
 The shell file is therefor applicable for the HPC at PDC Tegner from SNIC (Swedish National Infrastructure for Computing).
 
-The whole workflow is run in Jupyter Notebook.
+The whole workflow is run in Jupyter Notebook. The work flow is only tested on a Windows computer, therefore there might be small adjustements needed for other OS.
 
-# Dependencies
+# Python dependencies
 The workflow has a number packages that needs to be installed.
 
 The easiest way to install the Python packages is to use miniconda.
@@ -17,6 +17,7 @@ Obtain the miniconda package (https://docs.conda.io/en/latest/miniconda.html):
 3) Activate the new environment: **conda activate geosemosys**
 
 # R
+To download the capacityfactors for solar and wind you need to have R on your computer.
 You can download R for free https://www.r-project.org/
 You also need to install the package "curl" which you install through the R commander
 <pre><code>install.packages("cran")</code></pre>
