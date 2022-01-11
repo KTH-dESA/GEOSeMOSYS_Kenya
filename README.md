@@ -20,7 +20,7 @@ Obtain the miniconda package (https://docs.conda.io/en/latest/miniconda.html):
 To download the capacityfactors for solar and wind you need to have R on your computer.
 You can download R for free https://www.r-project.org/
 You also need to install the package "curl" which you install through the R commander
-<pre><code>install.packages("cran")</code></pre>
+<pre><code>install.packages("curl")</code></pre>
 
 # Required accounts (free to register)
 To run the code you need to create accounts in the following places:
