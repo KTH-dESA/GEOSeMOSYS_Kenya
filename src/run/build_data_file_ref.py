@@ -127,11 +127,11 @@ def functions_to_run(dict_df, outPutFile):
         print('No outputactivity file')
 
     ################################################################
-    #if 'capacityfactor_solar' or 'capacityfactor_wind' in dict_df:
-    #    outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['battery'], dict_df['input_data'],
-    #                               dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'], dict_df['elec'], dict_df['un_elec'])
-    #else:
-    #    print('No capacityfactor_solar or capacityfactor_wind file')
+    if 'capacityfactor_solar' or 'capacityfactor_wind' in dict_df:
+        outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['battery'], dict_df['input_data'],
+                                   dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'], dict_df['elec'], dict_df['un_elec'])
+    else:
+        print('No capacityfactor_solar or capacityfactor_wind file')
     ###############################################################################
 
     return(outPutFile)
