@@ -122,10 +122,8 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                 type = "wind"
                 csvfiles = path + "/"+ wind[x]
                 csvfilesout = path + "/out_"+wind[x]
-                print('C:/TPFAPPS/R/R-4.0.1/bin/RScript GEOSeMOSYS_download.r '+ r'"C:\Users\nandi\Box Sync\PhD\Paper 3-OSeMOSYS 40x40\GIS_python_build\GEOSeMOSYS_reprod\GEOSeMOSYS_Kenya\src"' +" "+ token + " " + type + " " + csvfiles + " " + csvfilesout)
-                print(Rpath+"\RScript GEOSeMOSYS_download.r "+'"'+srcpath +'" '+ token + " " + type + " " + csvfiles + " " + csvfilesout)
-                subprocess.call(
-                    Rpath+"\RScript GEOSeMOSYS_download.r "+'"'+srcpath +'" '+ token + " " + type + " " + csvfiles + " " + csvfilesout, shell=True)
+                subprocess.call([
+                     Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
         print("Waiting to download next 50 data sets")
         time.sleep(3601)
         i += 8
@@ -137,8 +135,8 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                 type = "solar"
                 csvfiles = path + "/"+ solar[x]
                 csvfilesout = path + "/out_"+solar[x]
-                subprocess.call(
-                     Rpath+"\RScript GEOSeMOSYS_download.r "+'"'+srcpath +'" '+ token + " " + type + " " + csvfiles + " " + csvfilesout, shell=True)
+                subprocess.call([
+                     Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
         print("Waiting to download next 50 data sets")
         time.sleep(3601)
         j += 8
@@ -160,16 +158,5 @@ def adjust_timezone(path, time_zone_offset):
 
 
 if __name__ == "__main__":
-    #shapefile, path= sys.argv[1],sys.argv[2] #shapefile = pointfile for the 378 points
-    token =
-    time_zone_offset = 3  # Kenya is UTC + 3hours to adjust for the time zone
-    shapefile = '../Projected_files/new_40x40points_WGSUMT37S.shp'
-    # Add the path to the RScript.exe under Program Files and add here
-    Rpath =
-    srcpath = os.getcwd()
-    print(srcpath)
-    path = "temp"
-    coordinates = project_vector(shapefile)
-    wind, solar = csv_make(coordinates)
-    down = download(path, Rpath, srcpath, wind, solar, token)
-    adjust_timezone(path, time_zone_offset)
+    shapefile, path= sys.argv[1],sys.argv[2] #shapefile = pointfile for the 378 points
+
