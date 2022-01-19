@@ -36,12 +36,16 @@ def renewableninja(path, dest):
     outwind = []
     outsolar = []
     for file in files:
+
         if fnmatch.fnmatch(file, 'timezoneoffsetout_wind*'):
+
             file = os.path.join(path,file)
             wind = pd.read_csv(file, index_col='adjtime')
             outwind.append(wind)
     for file in files:
+
         if fnmatch.fnmatch(file, 'timezoneoffsetout_solar*'):
+
             file = os.path.join(path,file)
             solar = pd.read_csv(file, index_col='adjtime')
             outsolar.append(solar)
@@ -163,12 +167,12 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (i),  "SOPV4h_%i_1" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_1" % (i),  "SOPV4r_%i_1" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (i),  "SOPV4h_%i_0" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_0" % (i),  "SOPV4r_%i_0" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -233,7 +237,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,"EL3_%i_0" % (j),"SOPV4h_%i_0" % (j), 1, 1]
+        output_temp = [0,"EL3_%i_0" % (j),"SOPV4r_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -250,7 +254,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k),"SOMG4h_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"SOMG4c_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -260,7 +264,12 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k),"WI4h_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"WI4c_%i" %(k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0,  "EL2_%i" % (k),"KEDSGEN_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()

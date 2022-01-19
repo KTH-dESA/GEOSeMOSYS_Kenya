@@ -63,6 +63,7 @@ def elec(demandcells):
     elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/ref/elec.csv'))
     elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/elec.csv'))
 
+
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
     all_pointid = demand_cell['pointid'].drop_duplicates().dropna()
@@ -78,6 +79,7 @@ def elec(demandcells):
     unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
     unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/ref/un_elec.csv'))
     unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/un_elec.csv'))
+
 #This function is not used in the current version of the code
 # def calculate_demand(settlements):
 #     demand_cell = pd.read_csv(settlements, index_col=[0])
