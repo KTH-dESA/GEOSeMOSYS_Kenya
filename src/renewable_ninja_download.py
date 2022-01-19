@@ -161,11 +161,9 @@ def adjust_timezone(path, time_zone_offset):
 
 if __name__ == "__main__":
     #shapefile, path= sys.argv[1],sys.argv[2] #shapefile = pointfile for the 378 points
-    token =
     time_zone_offset = 3  # Kenya is UTC + 3hours to adjust for the time zone
     shapefile = '../Projected_files/new_40x40points_WGSUMT37S.shp'
     # Add the path to the RScript.exe under Program Files and add here
-    Rpath =
     srcpath = os.getcwd()
     print(srcpath)
     path = "temp"
