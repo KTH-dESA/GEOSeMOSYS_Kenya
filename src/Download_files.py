@@ -110,7 +110,7 @@ def download_url_data(url,temp):
             print(e)
     return()
 
-def unzip_all(url):
+def unzip_all(url, folder):
     """ This function unzips the data from URL (url) and place them in GIS_data folder.
 
     :param url:
@@ -120,7 +120,7 @@ def unzip_all(url):
     def create_dir(dir):
         if not os.path.exists(dir):
             os.makedirs(dir)
-    create_dir(('../GIS_data'))
+    create_dir((folder))
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:
