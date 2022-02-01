@@ -2,7 +2,7 @@
 Module: Download_files
 =============================
 
-A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder "GIS-data"
+A module that downloads data that is required for the GEOSeMOSYS analysis and unzips them and places them in a new folder "GIS-data"
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
@@ -10,13 +10,11 @@ Module author: Nandi Moksnes <nandi@kth.se>
 """
 
 from urllib.request import Request, urlopen
-import ssl
 import shutil
 import zipfile
 from gzip import open as gzopen
 import tarfile
 import pandas as pd
-import subprocess
 import requests
 import json
 import os
@@ -25,7 +23,7 @@ from tkinter import *
 # Retrieve access token
 def download_viirs(url_viirs, temp):
     """
-    This function downloads the night time light data from EOG. It is required a login to that webpage which is free.
+    This function downloads the night time light data from EOG and places it in param temp. It requires a login to that webpage which is free.
     :param url_viirs:
     :param temp:
     :return:
@@ -101,16 +99,13 @@ def download_url_data(url,temp):
     for i, row in url_adress.iterrows():
         try:
             req = Request(row[0], headers={'User-Agent': 'Chrome'})
-            #ctx = ssl.create_default_context()
-            #ctx.check_hostname = False
-            #ctx.verify_mode = ssl.CERT_NONE , context=ctx
             with urlopen(req) as response, open("../%s/%s" % (temp, row[1]), 'wb') as out_file:
                 shutil.copyfileobj(response, out_file)
         except Exception as e:
             print(e)
     return()
 
-def unzip_all(url):
+def unzip_all(url, fromfolder, tofolder):
     """ This function unzips the data from URL (url) and place them in GIS_data folder.
 
     :param url:
@@ -120,7 +115,7 @@ def unzip_all(url):
     def create_dir(dir):
         if not os.path.exists(dir):
             os.makedirs(dir)
-    create_dir(('../GIS_data'))
+    create_dir((tofolder))
     url_adress = pd.read_csv(url, header=None, sep=',')
     def unzip(infolder, outfolder):
         with zipfile.ZipFile(infolder, 'r') as zip_ref:
@@ -144,17 +139,10 @@ def unzip_all(url):
         _, filename = os.path.split(row[1])
         name, ending = os.path.splitext(filename)
         if ending == '.zip':
-            unzip(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
+            unzip(os.path.join(fromfolder, row[1]), os.path.join(tofolder, name))
         elif ending == '.gz':
-            gzip_e(os.path.join('../temp', row[1]), os.path.join('../GIS_data', name))
+            gzip_e(os.path.join(fromfolder, row[1]), os.path.join(tofolder, name))
         else:
-            shutil.copy(os.path.join('../temp', row[1]), os.path.join('../GIS_data', row[1]))
+            shutil.copy(os.path.join(fromfolder, row[1]), os.path.join(tofolder, row[1]))
 
-if __name__ == "__main__":
-    current = os.getcwd()
-    #url_adress,temp = sys.argv[1], sys.argv[2]
-    #download = download_url_data(url_adress, temp)
-    #unzip = unzip_all(url_adress)
-    url = r'C:\Users\nandi\OneDrive - KTH\box_files\PhD\Paper 3-OSeMOSYS 40x40\GIS_python_build\GEOSeMOSYS_reprod\GEOSeMOSYS_Kenya\src\input_data\GIS_unzip.txt'
-    unzip_all(url)
 

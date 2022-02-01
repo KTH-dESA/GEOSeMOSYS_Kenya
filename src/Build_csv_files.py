@@ -296,10 +296,10 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     tech_matrix = matrix.drop(['SendTech','INFUEL','OUTFUEL','ReceiveTech','Unnamed: 0'], axis=1)
     tech_matr = tech_matrix.drop_duplicates()
     for h in tech_matr.index:
-        capitalcost.loc[m]['Capitalcost'] = 39210/1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
+        capitalcost.loc[m]['Capitalcost'] = tech_matr['DISTANCE'] /1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
         capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
 
-        fixedcost.loc[m]['Fixed Cost'] = 39210/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
+        fixedcost.loc[m]['Fixed Cost'] = tech_matr['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
         fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
         m = m+1
 
