@@ -179,9 +179,9 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
             dist_to_sub = \
             sorted([1000, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             dist_mv = \
-            sorted([1000, dist_to_trans - dist_to_trans * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
+            sorted([1000, dist_mv - dist_mv * (elec_actual - elec_modelled) / elec_actual, 10000])[1]
             dist_lv = \
-            sorted([500, dist_to_sub + dist_to_sub * (elec_actual - elec_modelled) / elec_actual, 3000])[1]
+            sorted([500, dist_lv + dist_lv * (elec_actual - elec_modelled) / elec_actual, 3000])[1]
         elif elec_modelled - elec_actual < 0:
             pop_cutoff2 = sorted([0.01, pop_cutoff2 - pop_cutoff2 *
                                   (elec_actual - elec_modelled) / elec_actual, 100000])[1]
@@ -240,37 +240,3 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
     settlement.to_csv("../Projected_files/elec.csv")
 
     return
-
-
-if __name__ == "__main__":
-    pop_shp = '../Projected_files/settlements.shp'
-    Projected_files_path = '../Projected_files/'
-    #from settlement_build import *
-
-    #points = raster_to_point(pop_shp, Projected_files_path)
-    #point_line = near_calculations_line(points, Projected_files_path)
-    #settlements = near_calculations_point(point_line, Projected_files_path)
-    #settlements
-    #settlements = sys.argv[1]
-    elec_actual = 0.75  # percent
-    pop_cutoff = 350  # people
-    dist_to_trans = 5000  # meters
-    dist_to_sub = 5000
-    dist_mv = 5000 #meters
-    dist_lv = 2000 #meters
-    min_night_lights = 1
-    max_grid_dist = 50000  # meters
-    max_road_dist = 2000  # meters
-    dist_minig = 3000 #meters
-    pop_cutoff2 = 1000  # people
-    urban_elec_ratio = 83.5  # percent
-    rural_elec_ratio = 71.5  # percent
-    pop_actual = 52570000  # peolpe
-    urban = 0.275  # percent
-    urban_cutoff = 20000
-    start_year = 2018
-    settlement = gpd.read_file(pop_shp)
-    settlements = pd.DataFrame(settlement, copy=True)
-    urbansettlements = calibrate_pop_and_urban(settlements, pop_actual, urban, urban_cutoff)
-    elec_current_and_future(urbansettlements, elec_actual, pop_cutoff, dist_to_trans, dist_to_sub, dist_minig, min_night_lights,
-                            max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year, dist_mv, dist_lv)
