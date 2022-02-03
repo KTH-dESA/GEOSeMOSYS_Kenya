@@ -60,7 +60,9 @@ def elec(demandcells):
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
     elec = elec_all.groupby(["pointid"])
     elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/elec.csv'))
-    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/data/elec.csv'))
+    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/ref/elec.csv'))
+    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/elec.csv'))
+
 
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
@@ -75,7 +77,8 @@ def elec(demandcells):
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
     unelec = unelec_all.groupby(["pointid"])
     unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
-
+    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/ref/un_elec.csv'))
+    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/un_elec.csv'))
 
 #This function is not used in the current version of the code
 # def calculate_demand(settlements):
