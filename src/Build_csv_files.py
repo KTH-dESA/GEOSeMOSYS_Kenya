@@ -327,9 +327,9 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     capacitytoact = pd.concat([capacitytoa, techno], axis=1, ignore_index=True)
     capacitytoactiv = capacitytoact.assign(Capacitytoactivity = capacitytoactivity)
 
-    inputactivity.dropna()
-    capacitytoactiv.dropna()
-    outputactivity.dropna()
+    inputactivity.dropna(subset=['Technology'], inplace=True)
+    capacitytoactiv.dropna(subset=[1], inplace=True)
+    outputactivity.dropna(subset=['Technology'], inplace=True)
 
     fixedcost.to_csv(os.path.join(path, 'fixed_cost_tnd.csv'))
     capitalcost.to_csv(os.path.join(path, 'capitalcost.csv'))
@@ -595,9 +595,9 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
     capacitytoact = pd.concat([capacitytoa, techno], axis=1, ignore_index=True)
     capacitytoactiv = capacitytoact.assign(Capacitytoactivity=capacitytoactivity)
 
-    inputactivity.dropna()
-    capacitytoactiv.dropna()
-    outputactivity.dropna()
+    inputactivity.dropna(subset=['Technology'], inplace=True)
+    capacitytoactiv.dropna(subset=[1], inplace=True)
+    outputactivity.dropna(subset=['Technology'], inplace=True)
 
     fixedcost.to_csv(os.path.join(path, 'fixed_cost_tnd.csv'))
     capitalcost.to_csv(os.path.join(path, 'capitalcost.csv'))
