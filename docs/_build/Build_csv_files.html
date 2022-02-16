@@ -49,19 +49,25 @@ In this module the logic around electrified and un-electrified cells are impleme
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GIS_file</span></code>(dest)</p></td>
+<td><p>Creates the GIS location file which determins the spatial resolution :param dest: :return:</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjacency_matrix</span></code>(path, noHV_file, HV_file, …)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">capital_cost_transmission_distrib</span></code>(…)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">capital_cost_transmission_distrib</span></code>(…)</p></td>
 <td><p>Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dryvision_capital_cost_transmission_distrib</span></code>(…)</p></td>
+<td><p>Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options This function does not include diesel generators.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">near_dist</span></code>(pop_shp, un_elec_cells, path)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">noHV_polygons</span></code>(polygons, noHV)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">noHV_polygons</span></code>(polygons, noHV, outpath)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">renewableninja</span></code>(path, dest)</p></td>
-<td><p>This function organize the data to the required format of a matrix with the location name on the x axis and hourly data on the y axis so that it can be fed into <a class="reference external" href="https://github.com/KTH-dESA/GEOSeMOSYS">https://github.com/KTH-dESA/GEOSeMOSYS</a> code the data is saved as capacityfactor_wind.csv and capacityfactor_solar.csv :param path: :return:</p></td>
+<td><p>This function organize the data to the required format of a matrix with the location name on the x axis and hourly data on the y axis so that it can be fed into <a class="reference external" href="https://github.com/KTH-dESA/GEOSeMOSYS">https://github.com/KTH-dESA/GEOSeMOSYS</a> code the data is saved as capacityfactor_wind.csv and capacityfactor_solar.csv :param path: :param dest: :return:</p></td>
 </tr>
 </tbody>
 </table>
@@ -98,6 +104,7 @@ In this module the logic around electrified and un-electrified cells are impleme
 <li class="toctree-l1"><a class="reference internal" href="post_elec_GIS_functions.html">post_elec_GIS_functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Pathfinder.html">Pathfinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Pathfinder_GIS_steps.html">Pathfinder_GIS_steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Pathfinder_processing_steps.html">Pathfinder_processing_steps</a></li>
 </ul>
 
 <div class="relations">
