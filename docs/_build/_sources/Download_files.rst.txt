@@ -14,6 +14,7 @@
    .. autosummary::
    
       download_url_data
+      download_viirs
       unzip_all
    
    

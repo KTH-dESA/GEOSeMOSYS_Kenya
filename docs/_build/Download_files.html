@@ -37,8 +37,8 @@
 <span id="download-files"></span><h1>Download_files<a class="headerlink" href="#module-Download_files" title="Permalink to this headline">¶</a></h1>
 <section id="module-download-files">
 <h2>Module: Download_files<a class="headerlink" href="#module-download-files" title="Permalink to this headline">¶</a></h2>
-<section id="a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data">
-<h3>A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder “GIS-data”<a class="headerlink" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data" title="Permalink to this headline">¶</a></h3>
+<section id="a-module-that-downloads-data-that-is-required-for-the-geosemosys-analysis-and-unzips-them-and-places-them-in-a-new-folder">
+<h3>A module that downloads data that is required for the GEOSeMOSYS analysis and unzips them and places them in a new folder<a class="headerlink" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-analysis-and-unzips-them-and-places-them-in-a-new-folder" title="Permalink to this headline">¶</a></h3>
 <p>Module author: Nandi Moksnes &lt;<a class="reference external" href="mailto:nandi&#37;&#52;&#48;kth&#46;se">nandi<span>&#64;</span>kth<span>&#46;</span>se</a>&gt;</p>
 <p class="rubric">Functions</p>
 <table class="longtable docutils align-default">
@@ -48,13 +48,13 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_data</span></code>(url, temp)</p></td>
-<td><p>This function downloads the data from URL in url (comma separated file) and place them in temp</p></td>
+<td><p>This function downloads the data from URL in url (comma separated file) and place them in temp folder.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_viirs</span></code>(url_viirs, temp)</p></td>
-<td><p></p></td>
+<td><p>This function downloads the night time light data from EOG and places it in param temp.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unzip_all</span></code>(url)</p></td>
-<td><p>This function unzips the data from URL (url) and place them in GIS_data folder</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unzip_all</span></code>(url, fromfolder, tofolder)</p></td>
+<td><p>This function unzips the data from URL (url) in “fromfolder” and place them in  “tofolder”.</p></td>
 </tr>
 </tbody>
 </table>
@@ -82,7 +82,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Download_files</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-download-files">Module: Download_files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-kenya-analysis-and-unzips-them-and-places-them-in-a-new-folder-gis-data">A module that downloads data that is required for the GEOSeMOSYS Kenya analysis and unzips them and places them in a new folder “GIS-data”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-module-that-downloads-data-that-is-required-for-the-geosemosys-analysis-and-unzips-them-and-places-them-in-a-new-folder">A module that downloads data that is required for the GEOSeMOSYS analysis and unzips them and places them in a new folder</a></li>
 </ul>
 </li>
 </ul>
@@ -95,6 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="post_elec_GIS_functions.html">post_elec_GIS_functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Pathfinder.html">Pathfinder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Pathfinder_GIS_steps.html">Pathfinder_GIS_steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Pathfinder_processing_steps.html">Pathfinder_processing_steps</a></li>
 </ul>
 
 <div class="relations">
