@@ -7,5 +7,5 @@ jobs:
     steps:
     - uses: KTH-dESA/GEOSeMOSYS_Kenya/sphinx-pages@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.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 }}
         create_readme: true
