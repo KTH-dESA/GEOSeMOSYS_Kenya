@@ -22,12 +22,16 @@ import subprocess
 from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
 gdal.UseExceptions()
-#from shapely.geometry import MultiLineString
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
 def convert_zero_to_one(file):
+    """
+    This function converts the inputed "file" 0 to 1 in a column called "dijkstra" and saves it to a shapefile.
+    :param file:
+    :return:
+    """
     gpdf = gpd.read_file(file)
 
     gpdf.loc[(gpdf.elec == 1), 'dijkstra'] = 0 #| ((gpdf.elec ==0) & (gpdf.hrslmultip <= cut_off)),
@@ -37,6 +41,12 @@ def convert_zero_to_one(file):
     return ('../Projected_files/zero_to_one_elec.shp')
 
 def rasterize_elec(file, proj_path):
+    """
+    This function converts the shapefile that has the ones for targets in the column "dijkstra" to a raster
+    :param file:
+    :param proj_path:
+    :return:
+    """
     # Rasterizing the point file
     InputVector = file
     _, filename = os.path.split(file)
@@ -78,7 +88,6 @@ def rasterize_elec(file, proj_path):
 
 def merge_grid(proj_path):
     """This function concatinates the shapefiles which contains the keyword '33kV' and '66kV'
-
     :param proj_path:
     :return:
     """
@@ -105,6 +114,12 @@ def merge_grid(proj_path):
     return("../Projected_files/grid_weight.shp")
 
 def highway_weights(path_grid, path):
+    """
+    This function adds the weight to where the grid (0.01 weight) is located as well as road (0.5 weight) to column weight
+    :param path_grid:
+    :param path:
+    :return:
+    """
     weight_grid = os.path.join(path,'grid_weights.shp')
     weight_highway = os.path.join(path,'road_weights.shp')
     grid = gpd.read_file(path_grid)
@@ -134,11 +149,11 @@ def highway_weights(path_grid, path):
     gdf_road = gpd.GeoDataFrame(highways_col, crs=32737, geometry=schema)
     gdf_road.to_file(driver = 'ESRI Shapefile', filename= weight_highway)
 
-
     return (weight_highway, weight_grid)
 
 # Pathfinder results to raster
 def make_raster(pathfinder, s):
+
     dst_filename = os.path.join('temp/dijkstra','path_%s.tif' %(s))
     path = os.path.join('../Projected_files','%s_elec.tif' %(s))
     zoom_20 = gdal.Open(path)
@@ -174,6 +189,13 @@ def make_raster(pathfinder, s):
     return dst_filename
 
 def make_weight_numpyarray(file, s):
+    """
+    The weight from road and grid is converted to a numpy array (from raster). It is padded in all directions with ones as Pathfinder
+    cannot handel targets on the edge of the array.
+    :param file:
+    :param s:
+    :return:
+    """
     raster = gdal.Open(file)
     weight = raster.ReadAsArray()
     NoValue = weight < -3.4*10**38  #related to GDAL which sets NoValue to -3.4e+38
@@ -191,6 +213,15 @@ def make_weight_numpyarray(file, s):
     return None
 
 def make_origin_numpyarray(file, s):
+    """
+    This function creates the origin file, which indicates where the network needs to start.
+    The origin is optimally at the center of the cell as that is where the MV line is calculated. However, if the center
+    is already a 1 then the function searches for the next closest point.
+    The origin file is padded with zeros as all numpy arrays are required to be the same shape (target, weight, origin)
+    :param file:
+    :param s:
+    :return:
+    """
     nparray = np.genfromtxt((file), delimiter=',')
     row = int(round(nparray.shape[0]/2))
     col = int(round(nparray.shape[1]/2))
@@ -241,6 +272,13 @@ def make_origin_numpyarray(file, s):
     return None
 
 def make_target_numpyarray(file, s):
+    """
+    This function converts the unelectrified raster (containing ones) to a numpy array. It is also padded with zeros around in
+    all directions as Pathfinder cannot handle targets on the edge.
+    :param file:
+    :param s:
+    :return:
+    """
     raster = gdal.Open(file)
     target = raster.ReadAsArray()
     NoValue = target > 2
@@ -258,6 +296,12 @@ def make_target_numpyarray(file, s):
     return os.path.join('temp/dijkstra', "%s_target.csv" %(s))
 
 def rasterize_road(file, proj_path):
+    """
+    This function rasterize the shapefiel roads to a raster.
+    :param file:
+    :param proj_path:
+    :return:
+    """
     # Rasterizing the point file
     InputVector = file
     #_, filename = os.path.split(file)
@@ -296,6 +340,12 @@ def rasterize_road(file, proj_path):
     return OutputImage2
 
 def rasterize_transmission(file, proj_path):
+    """
+    This function rasterize the merged transmission shapefile.
+    :param file:
+    :param proj_path:
+    :return:
+    """
     # Rasterizing the point file
     InputVector = file
     #_, filename = os.path.split(file)
@@ -334,6 +384,12 @@ def rasterize_transmission(file, proj_path):
     return OutputImage3
 
 def merge_raster(transmission_raster, highway_raster):
+    """
+    This function merge the transmission and roads together into one raster with transmission overriding roads incase overlap.
+    :param transmission_raster:
+    :param highway_raster:
+    :return:
+    """
     out_fp = '../Projected_files/weights.tif'
     transmission = rasterio.open(transmission_raster)
     road = rasterio.open(highway_raster)
