@@ -118,7 +118,7 @@ def pathfinder_main(path,proj_path, elec_shp):
     shapefiles = []
     for file in files:
         if file.endswith('.shp'):
-            f = os.path.join('temp/', file)
+            f = os.path.join(proj_path, file)
             shapefiles += [f]
     #for f in shapefiles:
     #    name, end = os.path.splitext(os.path.basename(f))
