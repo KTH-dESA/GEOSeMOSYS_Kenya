@@ -5,7 +5,7 @@ Module: Build_csv_files
 A module for building the csv-files for GEOSeMOSYS https://github.com/KTH-dESA/GEOSeMOSYS to run that code
 In this module the logic around electrified and un-electrified cells are implemented for the 378 cells
 
-----------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -14,10 +14,8 @@ from typing import Any, Union
 
 import pandas as pd
 import geopandas as gpd
-import sys
 import os
 import fnmatch
-from geopandas.tools import sjoin
 from numpy import ndarray
 from pandas import Series, DataFrame
 from pandas.core.arrays import ExtensionArray
@@ -30,6 +28,7 @@ def renewableninja(path, dest):
     location name on the x axis and hourly data on the y axis so that it can be fed into https://github.com/KTH-dESA/GEOSeMOSYS code
     the data is saved as capacityfactor_wind.csv and capacityfactor_solar.csv
     :param path:
+    :param dest:
     :return:
     """
     files = os.listdir(path)
@@ -68,6 +67,11 @@ def renewableninja(path, dest):
     return()
 
 def GIS_file(dest):
+    """
+    Creates the GIS location file which determins the spatial resolution
+    :param dest:
+    :return:
+    """
     point = gpd.read_file('../Projected_files/new_40x40points_WGSUMT37S.shp')
     GIS_data = point['pointid']
     grid = pd.DataFrame(GIS_data, copy=True)
@@ -168,12 +172,12 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (i),  "SOPV4r_%i_1" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_1" % (i),  "SOPV8r_%i_1" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (i),  "SOPV4r_%i_0" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_0" % (i),  "SOPV8r_%i_0" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -238,7 +242,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,"EL3_%i_0" % (j),"SOPV4r_%i_0" % (j), 1, 1]
+        output_temp = [0,"EL3_%i_0" % (j),"SOPV8r_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -255,7 +259,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k),"SOMG4c_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"SOMG8c_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -446,12 +450,12 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (i), "SOPV4r_%i_1" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_1" % (i), "SOPV8r_%i_1" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (i), "SOPV4r_%i_0" % (i), 1, 1]
+        output_temp = [0, "EL3_%i_0" % (i), "SOPV8r_%i_0" % (i), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -515,7 +519,7 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (j), "SOPV4r_%i_0" % (j), 1, 1]
+        output_temp = [0, "EL3_%i_0" % (j), "SOPV8r_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -532,7 +536,7 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL2_%i" % (k), "SOMG4c_%i" % (k), 1, 1]
+        output_temp = [0, "EL2_%i" % (k), "SOMG8c_%i" % (k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
