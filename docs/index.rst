@@ -42,9 +42,6 @@ Python scripts
 	
 	Pathfinder_processing_steps
 	
-	run/run_datafile_ref
-	
-	run/build_data_file_ref
 	
 .. toctree::
    :maxdepth: 2

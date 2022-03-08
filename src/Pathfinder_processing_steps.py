@@ -9,9 +9,14 @@ from Pathfinder_GIS_steps import *
 import numpy as np
 import pandas as pd
 import os
-import gdal
 
 def mosaic(dict_raster, proj_path):
+    """
+    This function mosaic the tiles (dict_raster) from Pathfinder to one tif file and places it in Projected_files folder
+    :param dict_raster:
+    :param proj_path:
+    :return:
+    """
     pathfinder = []
     for key, value in dict_raster.items():
         src = rasterio.open(value)
@@ -27,6 +32,13 @@ def mosaic(dict_raster, proj_path):
     return ()
 
 def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight):
+    """
+    This function sets the results (shortest path network) from Pathfinder that are overlapping weights less than 0.5
+    so that where the grid route is utilized this is not double counted in the final results
+    :param dict_pathfinder:
+    :param dict_weight:
+    :return:
+    """
     sum_distribution = {}
     for key in dict_pathfinder:
         elec_path = dict_pathfinder[key]
@@ -53,6 +65,13 @@ def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight):
     return dict_pathfinder
 
 def pathfinder_main(path,proj_path, elec_shp):
+    """
+    This is the function which runs all GIS functions and Pathfinder
+    :param path:
+    :param proj_path:
+    :param elec_shp:
+    :return:
+    """
     #Only settlements with population over pop_cutoff are concidered to be part of the distribution network
     elec_shape = convert_zero_to_one(elec_shp)
     #The elec_raster will serve as the points to connect and the roads will create the weights
@@ -63,7 +82,6 @@ def pathfinder_main(path,proj_path, elec_shp):
     grid_weight = merge_grid(path)
 
     #returns the path to highway_weights
-
     highway_shp, grid_shp = highway_weights(grid_weight, path)
     #highway_shp =  "../Projected_files/road_weights.shp"
     highway_raster = rasterize_road(highway_shp, path)
@@ -100,7 +118,7 @@ def pathfinder_main(path,proj_path, elec_shp):
     shapefiles = []
     for file in files:
         if file.endswith('.shp'):
-            f = os.path.join('temp/', file)
+            f = os.path.join(proj_path, file)
             shapefiles += [f]
     #for f in shapefiles:
     #    name, end = os.path.splitext(os.path.basename(f))
@@ -149,9 +167,3 @@ def pathfinder_main(path,proj_path, elec_shp):
     print("Remove pathfinder where grid is passed to not double count")
     remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight)
 
-
-path = '../Projected_files/'
-proj_path = 'temp'
-elec_shp = '../Projected_files/elec.shp'
-
-pathfinder_main(path,proj_path, elec_shp)

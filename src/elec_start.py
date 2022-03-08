@@ -81,6 +81,8 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, dist_to_trans, 
     :param pop_actual:
     :param pop_cutoff2:
     :param start_year:
+    :param dist_mv:
+    :param dist_lv:
     :return:
     """
     urban_pop = (settlement.loc[settlement['urban'] == 1, 'pop'].sum())  # Calibrate current electrification
