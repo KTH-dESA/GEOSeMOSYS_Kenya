@@ -13,8 +13,10 @@
 
    .. autosummary::
    
+      calculate_demand
       elec
       join
+      network_length
    
    
 

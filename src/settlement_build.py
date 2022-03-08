@@ -19,6 +19,7 @@ import geopandas as gpd
 import subprocess
 gdal.UseExceptions()
 
+
 def raster_to_point(raster_list, pop_shp, proj_path):
     """Find all VIIRS files named avg_rade9h and mosaic them.
     Extract values to point layer (population layer 1kmx1km)
