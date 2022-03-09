@@ -1,7 +1,7 @@
-﻿renewable\_ninja\_download
+﻿Renewable\_ninja\_download
 ==========================
 
-.. automodule:: renewable_ninja_download
+.. automodule:: Renewable_ninja_download
 
    
    
