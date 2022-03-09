@@ -228,10 +228,4 @@ def project_main(GIS_files_path, topath):
     merge_mv(topath)
     return ()
 
-if __name__ == "__main__":
-    basedir = os.getcwd()
-    #GIS_files_path, topath = sys.argv[1:2]
-    GIS_files_path, topath = '../GIS_data', '../Projected_files'
-    project_main(GIS_files_path, topath)
-    os.chdir(basedir)
 

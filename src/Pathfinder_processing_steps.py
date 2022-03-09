@@ -1,3 +1,14 @@
+"""
+Module: Pathfinder_processing_steps
+===============================================
+
+A module that runs the GIS functions for Pathfinder, removes overlapping grid from the results and then mosaic the results to a tif file
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -72,7 +83,6 @@ def pathfinder_main(path,proj_path, elec_shp):
     :param elec_shp:
     :return:
     """
-    #Only settlements with population over pop_cutoff are concidered to be part of the distribution network
     elec_shape = convert_zero_to_one(elec_shp)
     #The elec_raster will serve as the points to connect and the roads will create the weights
     #Returns the path to elec_raster
@@ -83,36 +93,10 @@ def pathfinder_main(path,proj_path, elec_shp):
 
     #returns the path to highway_weights
     highway_shp, grid_shp = highway_weights(grid_weight, path)
-    #highway_shp =  "../Projected_files/road_weights.shp"
     highway_raster = rasterize_road(highway_shp, path)
-    #grid_shp =  "../Projected_files/grid_weights.shp"
     transmission_raster = rasterize_transmission(grid_shp, path)
-    #transmission_raster = "../Projected_files/transmission.tif"
-    #highway_raster = "../Projected_files/road.tif"
     weights_raster = merge_raster(transmission_raster, highway_raster)
-    #weights_raster = "../Projected_files/weights.tif"
-    #elec_raster = "../Projected_files/zero_to_one_elec.tif"
 
-    #print("Calculating Pathfinder for all of Kenya, used to benchmark the decentralized results")
-    #name = 'Kenya'
-
-    #weight_csv = make_weight_numpyarray(weights_raster, name)
-    #target_csv = make_target_numpyarray(elec_raster, name)
-    #targets = np.genfromtxt(os.path.join('temp/dijkstra', "%s_target.csv" %(name)), delimiter=',')
-    #weights = np.genfromtxt(os.path.join('temp/dijkstra', "%s_weight.csv" %(name)), delimiter=',')
-    #origin_csv = make_origin_numpyarray(target_csv, name)
-    #origin = np.genfromtxt(os.path.join('temp/dijkstra', "%s_origin.csv" %(name)), delimiter=',')
-
-    # Run the Pathfinder alogrithm seek(origins, target, weights, path_handling='link', debug=False, film=False)
-
-    #print("Calculating Pathfinder")
-    #pathfinder = seek(origin, targets, weights, path_handling='link', debug=False, film=False)
-    #elec_path = pathfinder['paths']
-    #elec_path_trimmed = elec_path[1:-1,1:-1]
-    #pd.DataFrame(elec_path_trimmed).to_csv("temp/dijkstra/elec_path_%s.csv" %(name))
-    #print("Saving results to csv from Pathfinder")
-    # print the algortihm to raster
-    #raster_pathfinder = make_raster(elec_path_trimmed, name)
 
     files = os.listdir(proj_path)
     shapefiles = []
@@ -120,9 +104,6 @@ def pathfinder_main(path,proj_path, elec_shp):
         if file.endswith('.shp'):
             f = os.path.join(proj_path, file)
             shapefiles += [f]
-    #for f in shapefiles:
-    #    name, end = os.path.splitext(os.path.basename(f))
-    #    pathmask = masking(f, raster_pathfinder, '%s_Kenya_pathfinder.tif' %(name))
 
     print("Calculating Pathfinder for each cell, used for the OSeMOSYS-file")
     #This is the final version and the other is as reference for uncertainty analysis

@@ -81,11 +81,11 @@ def network_length(demandcells, input):
 
     networkkm = pd.DataFrame(network_list, columns=ind)
     distribution =  networkkm[['elec', 'pointid', 'LV_km']]
-    average_distrbution = distribution.filter(lambda x: (x['elec'].mean() == 0))
-    distribution_aggr = average_distrbution.groupby(["pointid"]).mean
+    average_distrbution = distribution[distribution['elec'] == 0]
+    distribution_aggr = average_distrbution.groupby(["pointid"])
+    distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(),'run/Demand/distribution.csv'))
 
-
-    distribution_aggr.to_csv('run/Demand/distribution.csv')
+    return(os.path.join(os.getcwd(),'run/Demand/distribution.csv'))
 
 def elec(demandcells):
     demand_cell = pd.read_csv(demandcells)
@@ -191,6 +191,4 @@ if __name__ == "__main__":
     #elec(demandcells)
     settlements =  'run/Demand/demand_cells.csv'
     demand = 'run/Demand/demand.csv'
-    #calculate_demand(settlements, demand)
-    input_data =  os.path.join(os.getcwd(), 'run/ref/input_data.csv')
-    network_cell = network_length(demandcells, input_data)
+    calculate_demand(settlements, demand)

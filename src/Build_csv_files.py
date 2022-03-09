@@ -5,7 +5,7 @@ Module: Build_csv_files
 A module for building the csv-files for GEOSeMOSYS https://github.com/KTH-dESA/GEOSeMOSYS to run that code
 In this module the logic around electrified and un-electrified cells are implemented for the 378 cells
 
------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
 
@@ -116,8 +116,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     HV = pd.read_csv(HV_file)
     noHV.pointid = noHV.pointid.astype(int)
     distribution = pd.read_csv(distribution_network, index_col=0)
-    xls = pd.ExcelFile(distribution_length_cell)
-    dist_length = pd.read_excel(xls, 'distance_average', index_col='Row Labels')
+    dist_length = pd.read_csv(distribution_length_cell, index_col='pointid')
 
 
     m = 0
@@ -128,17 +127,17 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     ## Electrified cells
     for i in elec['pointid']:
 
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * dist_length.loc[i, 'Average of Tier2_LV_length_(km)'] + substation
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * dist_length.loc[i, 'LV_km'] + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" % (i)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV *  dist_length.loc[i, 'Average of Tier2_LV_length_(km)']* 0.025 + substation * 0.025
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV *  dist_length.loc[i, 'LV_km']* 0.025 + substation * 0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" % (i)
 
         m = m+1
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV_strengthening * dist_length.loc[i, 'Average of Tier2_LV_length_(km)'] + substation
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV_strengthening * dist_length.loc[i, 'LV_km'] + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_1" % (i)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * 0.025*  dist_length.loc[i, 'Average of Tier2_LV_length_(km)']+ substation * 0.025
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * 0.025*  dist_length.loc[i, 'LV_km']+ substation * 0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_1" % (i)
 
         input_temp = [0,"EL2_%i" %(i),"TRLV_%i_1" %(i), 1, 1]
@@ -218,10 +217,10 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity = outputactivity.sort_index()
 
     for j in un_elec['pointid']:
-        capitalcost.loc[m]['Capitalcost'] = distribution.loc[j,distrbution_cost]*capital_cost_LV* dist_length.loc[j, 'Average of Tier2_LV_length_(km)']+ substation
+        capitalcost.loc[m]['Capitalcost'] = distribution.loc[j,distrbution_cost]*capital_cost_LV* dist_length.loc[j, 'LV_km']+ substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" %(j)
 
-        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[j,distrbution_cost]*capital_cost_LV*0.025* dist_length.loc[j, 'Average of Tier2_LV_length_(km)'] + substation*0.025
+        fixedcost.loc[m]['Fixed Cost'] = distribution.loc[j,distrbution_cost]*capital_cost_LV*0.025* dist_length.loc[j, 'LV_km'] + substation*0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" %(j)
 
         m = m+1
@@ -393,8 +392,7 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
     HV = pd.read_csv(HV_file)
     noHV.pointid = noHV.pointid.astype(int)
     distribution = pd.read_csv(distribution_network, index_col=0)
-    xls = pd.ExcelFile(distribution_length_cell)
-    dist_length = pd.read_excel(xls, 'distance_average', index_col='Row Labels')
+    dist_length = pd.read_csv(distribution_length_cell, index_col='pointid')
 
     m = 0
     input_temp = []
@@ -404,20 +402,20 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
     ## Electrified cells
     for i in elec['pointid']:
         capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * dist_length.loc[
-            i, 'Average of Tier2_LV_length_(km)'] + substation
+            i, 'LV_km'] + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" % (i)
 
         fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * dist_length.loc[
-            i, 'Average of Tier2_LV_length_(km)'] * 0.025 + substation * 0.025
+            i, 'LV_km'] * 0.025 + substation * 0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" % (i)
 
         m = m + 1
         capitalcost.loc[m]['Capitalcost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV_strengthening * \
-                                            dist_length.loc[i, 'Average of Tier2_LV_length_(km)'] + substation
+                                            dist_length.loc[i, 'LV_km'] + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_1" % (i)
 
         fixedcost.loc[m]['Fixed Cost'] = distribution.loc[i, distrbution_cost] * capital_cost_LV * 0.025 * \
-                                         dist_length.loc[i, 'Average of Tier2_LV_length_(km)'] + substation * 0.025
+                                         dist_length.loc[i, 'LV_km'] + substation * 0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_1" % (i)
 
         input_temp = [0, "EL2_%i" % (i), "TRLV_%i_1" % (i), 1, 1]
@@ -495,11 +493,11 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
 
     for j in un_elec['pointid']:
         capitalcost.loc[m]['Capitalcost'] = distribution.loc[j, distrbution_cost] * capital_cost_LV * dist_length.loc[
-            j, 'Average of Tier2_LV_length_(km)'] + substation
+            j, 'LV_km'] + substation
         capitalcost.loc[m]['Technology'] = "TRLV_%i_0" % (j)
 
         fixedcost.loc[m]['Fixed Cost'] = distribution.loc[j, distrbution_cost] * capital_cost_LV * 0.025 * \
-                                         dist_length.loc[j, 'Average of Tier2_LV_length_(km)'] + substation * 0.025
+                                         dist_length.loc[j, 'LV_km'] + substation * 0.025
         fixedcost.loc[m]['Technology'] = "TRLV_%i_0" % (j)
 
         m = m + 1

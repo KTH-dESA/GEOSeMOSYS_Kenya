@@ -1,9 +1,9 @@
 """
-Module: settlement_build
+Module: Prepare_elec_start
 =============================
 
-A module for converting the population raster layer (GADM) to point layer
-In the point layer columns are added with proximity analysis to transmission lines, nighttimelight, mini-grid roads etc.
+A module for extracting values from raster to point layer (provided by the user).
+Columns are added with proximity analysis to transmission lines, nighttimelight, mini-grid roads etc.
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -199,8 +199,3 @@ def raster_proximity(proj_path):
         # dst_ds = None
 
     return(raster_prox)
-
-if __name__ == "__main__":
-    pop_shp, Projected_files_path = sys.argv[1], sys.argv[2]
-    rasterize = raster_proximity(Projected_files_path)
-    points = raster_to_point(rasterize, pop_shp, Projected_files_path)

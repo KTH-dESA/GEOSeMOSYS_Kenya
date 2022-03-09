@@ -1,5 +1,5 @@
 """
-Module: renewable_ninja_download
+Module: Renewable_ninja_download
 ===================================
 
 A module for downloading data from Renewable ninja. You need to have a token (account) and also a shape file of the points that you want to download.
