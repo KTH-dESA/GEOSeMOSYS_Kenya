@@ -6,6 +6,8 @@ The shell file is therefor applicable for the HPC at PDC Tegner from SNIC (Swedi
 
 The whole workflow is run in Jupyter Notebook. The work flow is only tested on a Windows computer, therefore there might be small adjustements needed for other OS.
 
+![Spatial information model to OSeMOSYS](Workflow.png)
+
 # Python dependencies
 The workflow has a number packages that needs to be installed.
 
