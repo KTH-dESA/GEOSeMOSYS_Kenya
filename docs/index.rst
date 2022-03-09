@@ -1,15 +1,15 @@
-GEOSeMOSYS Kenya
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             GEOSeMOSYS Kenya
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Core Functionality
---------------------------------------------------------
+			Core Functionality
+--------------------------------------------------------------------
 
-GEOSeMOSYS Kenya is a reproducible workflow built in Python and Shell to be run on a high performance cluster.
+GEOSeMOSYS Kenya is a reproducible workflow built in Python, R and Shell to be run on a high performance cluster.
 
 
 
 Data model
---------------------------
+---------------------------
 
 The flow chart for the model build is illustrated in the below chart where GIS data is used to develop the multi region model for Kenya.
 
@@ -26,13 +26,13 @@ Python scripts
 	
 	Project_GIS
 	
-	settlement_build
+	Prepare_elec_start
 	
-	elec_start
+	Elec_start
 	
 	Build_csv_files
 	
-	renewable_ninja_download
+	Renewable_ninja_download
 	
 	post_elec_GIS_functions
 

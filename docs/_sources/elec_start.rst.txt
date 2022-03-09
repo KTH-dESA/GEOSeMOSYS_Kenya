@@ -1,7 +1,7 @@
-﻿elec\_start
+﻿Elec\_start
 ===========
 
-.. automodule:: elec_start
+.. automodule:: Elec_start
 
    
    
