@@ -1,9 +1,9 @@
 """
-Module: elec_start
+Module: Elec_start
 =============================
 
 A module that estimates the electrified population based on parameters nighttime light, distance to transmission lines (HV, MV, LV), roads, substations and transformers, population density
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: KTH-dES modified by Nandi Moksnes
 

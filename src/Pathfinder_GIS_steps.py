@@ -1,10 +1,14 @@
-# Runs all the GIS-steps for Pathfinder
-#
-# Author: Nandi Moksnes
+"""
+Module: Pathfinder_GIS_steps
+===============================================
 
-# Date: 17 September 2021
-# Python version: 3.8
+A module that contains the GIS functions for Pathfinder_processing_steps
+It creates the target files (from un-electrified), creates the weights for road and grid, and identify an origin as close as possible to the center of the cell
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+Module author: Nandi Moksnes <nandi@kth.se>
+
+"""
 
 import os
 import geopandas as gpd
@@ -34,8 +38,8 @@ def convert_zero_to_one(file):
     """
     gpdf = gpd.read_file(file)
 
-    gpdf.loc[(gpdf.elec == 1), 'dijkstra'] = 0 #| ((gpdf.elec ==0) & (gpdf.hrslmultip <= cut_off)),
-    gpdf.loc[(gpdf.elec == 0),'dijkstra'] = 1 #& (gpdf.pop >= cut_off))
+    gpdf.loc[(gpdf.elec == 1), 'dijkstra'] = 0
+    gpdf.loc[(gpdf.elec == 0),'dijkstra'] = 1
 
     gpdf.to_file('../Projected_files/zero_to_one_elec.shp')
     return ('../Projected_files/zero_to_one_elec.shp')
