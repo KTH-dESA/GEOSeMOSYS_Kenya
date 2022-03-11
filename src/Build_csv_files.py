@@ -656,7 +656,7 @@ def adjacency_matrix(path, noHV_file, HV_file, topath):
     final_matrix = nan_matrix.drop(['OBJECTID *','INPUT_FID','NEAR_FID','NEARID','SENDID'], axis=1)
     final_matrix = final_matrix.drop_duplicates()
 
-    final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
+    #final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
     return(os.path.join(topath,'adjacencymatrix.csv'))
 
 def near_dist(pop_shp, un_elec_cells, path):
