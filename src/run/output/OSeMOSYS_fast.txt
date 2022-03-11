@@ -158,8 +158,6 @@ param AnnualEmissionLimit{r in REGION, e in EMISSION, y in YEAR};
 param ModelPeriodExogenousEmission{r in REGION, e in EMISSION};
 param ModelPeriodEmissionLimit{r in REGION, e in EMISSION};
 #
-#########						Network							####################
-param AdjacencyMatrix {r in REGION, t in TECHNOLOGY, m in TECHNOLOGY};
 ##############
 ##
 ########################################################################
@@ -358,10 +356,7 @@ minimize cost: sum{r in REGION, t in TECHNOLOGY, y in YEAR}
 #s.t. CAa3_TotalActivityOfEachTechnology{r in REGION, t in TECHNOLOGY, l in TIMESLICE, y in YEAR}: sum{m in MODEperTECHNOLOGY[t]} RateOfActivity[r,l,t,m,y] = RateOfTotalActivity[r,t,l,y];
 s.t. CAa4_Constraint_Capacity{r in REGION, l in TIMESLICE, t in TECHNOLOGY, y in YEAR}: sum{m in MODEperTECHNOLOGY[t]} RateOfActivity[r,l,t,m,y] <= ((sum{yy in YEAR: y-yy < OperationalLife[r,t] && y-yy>=0} NewCapacity[r,t,yy])+ ResidualCapacity[r,t,y])*CapacityFactor[r,t,l,y]*CapacityToActivityUnit[r,t];
 #s.t. CAa5_TotalNewCapacity{r in REGION, t in TECHNOLOGY, y in YEAR: CapacityOfOneTechnologyUnit[r,t,y]<>0}: CapacityOfOneTechnologyUnit[r,t,y]*NumberOfNewTechnologyUnits[r,t,y] = NewCapacity[r,t,y];
-s.t. CAa6_TotalNewCapacityTransmission{r in REGION, t in TECHNOLOGY, m in TECHNOLOGY, y in YEAR: AdjacencyMatrix[r,t,m]<>0}:
-	AdjacencyMatrix[r,t,m] * NewCapacityTransmission[r,t,y]
-	=
-	NewCapacity[r,t,y];
+
 #
 # Note that the PlannedMaintenance equation below ensures that all other technologies have a capacity great enough to at least meet the annual average.
 #
