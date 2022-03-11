@@ -91,7 +91,7 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     :param capital_cost_HV: kUSD/MW
     :param substation: kUSD/MW
     :param capital_cost_LV: kUSD/MW
-    :param adajencymatrix is the model where the
+    :param adajencymatrix is the model where the adjacent cell is located
     :return:
     """
 
