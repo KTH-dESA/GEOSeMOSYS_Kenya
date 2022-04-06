@@ -1,4 +1,7 @@
 # GEOSeMOSYS_Kenya
+
+#The repository is still under progress....
+
 This repository is for paper ****High spatial and temporal resolution in linear programming - the case of Kenya****, by: Nandi Moksnes, Mark Howells, Will Usher
 
 To be able to run the model you need to have approx 512 GB RAM. This model has been run on a High performance cluster at KTH.
