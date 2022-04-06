@@ -1,6 +1,6 @@
-# GEOSeMOSYS_Kenya
+# The repository is still under progress....
 
-#The repository is still under progress....
+## GEOSeMOSYS_Kenya
 
 This repository is for paper ****High spatial and temporal resolution in linear programming - the case of Kenya****, by: Nandi Moksnes, Mark Howells, Will Usher
 
