@@ -76,8 +76,8 @@ def GIS_file(dest):
     return()
 
 ## Build files with elec/unelec aspects
-def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV_file, HV_file, unelec, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity, distrbution_cost, path, distribution_length_cell, adjacencymatrix):
-    """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options
+def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file, unelec, capital_cost_HV, substation, capacitytoactivity, path, adjacencymatrix):
+    """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines.
 
     :param distribution_network: a csv file with number of cells included in Pathfinder
     :param elec: are the 40*40m cells that have at least one cell of electrified 1x1km inside it
@@ -110,62 +110,25 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     un_elec.pointid = un_elec.pointid.astype(int)
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
+    elec_noHV_cells = pd.read_csv(elec_noHV_cells_file)
     noHV.pointid = noHV.pointid.astype(int)
-    distribution = pd.read_csv(distribution_network, index_col=0)
-    dist_length = pd.read_csv(distribution_length_cell, index_col='pointid')
-
 
     m = 0
     input_temp = []
     output_temp = []
     capital_temp = []
 
-    ## Electrified cells
-    for i in elec['pointid']:
+    ## Electrified by HV in baseyear
+    for k in HV['pointid']:
 
-        input_temp = [0,"EL2_%i" %(i),"TRLV_%i_0" %(i), 1, 1]
+        input_temp = [0, "KEEL2", "TRLV_%i_0" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (i), "BACKSTOP", 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL3_%i_0" % (i), "TRLV_%i_0" % (i), 0.83, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL3_%i_0" % (i), "BACKSTOP", 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL3_%i_1" % (i),  "SOPV8r_%i_1" % (i), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL3_%i_0" % (i),  "SOPV8r_%i_0" % (i), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL3_%i_1" % (i),  "SOPV_%i_1" % (i), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL3_%i_0" % (i),  "SOPV_%i_0" % (i), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-    for k in HV['pointid']:
-
-        input_temp = [0, "KEEL2", "TRLV_%i_0" %(k), 1, 1]
+        #The TRLVM is introduced as one technology cannot input two fuels in the same timeslice
+        #This is for minigrid supply
+        input_temp = [0, "EL2_%i" %(k), "TRLVM_%i_0" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
@@ -180,13 +143,107 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-    for j in un_elec['pointid']:
+        output_temp = [0, "EL3_%i_0" % (k), "TRLV_%i_0" % (k), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        #The TRLVM is introduced as one technology cannot input two fuels in the same timeslice
+        #This is for minigrid supply
+        output_temp = [0, "EL3_%i_0" % (k), "TRLVM_%i_0" % (k), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (k), "BACKSTOP", 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (k), "BACKSTOP", 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (k),  "SOPV8r_%i_1" % (k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (k),  "SOPV8r_%i_0" % (k), 1,1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (k),  "SOPV_%i_1" % (k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (k),  "SOPV_%i_0" % (k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+    # Electrified by minigrid in base year
+    for m in elec_noHV_cells['pointid']:
+        input_temp = [0, "EL2_%i" %(m), "TRLV_%i_1" %(m), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (m), "TRLV_%i_1" % (m), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        input_temp = [0,"EL2_%i" %(m),"TRLV_%i_0" %(m), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (m), "BACKSTOP", 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (m), "TRLV_%i_0" % (m), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (m), "BACKSTOP", 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (m),  "SOPV8r_%i_1" % (m), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (m),  "SOPV8r_%i_0" % (m), 1,1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_1" % (m),  "SOPV_%i_1" % (m), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (m),  "SOPV_%i_0" % (m), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+    # No electrified cells in the base year
+    for j in noHV['pointid']:
 
         input_temp = [0, "EL2_%i" %(j),"TRLV_%i_0" %(j), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
-
 
         output_temp = [0, "EL3_%i_0" % (j), "TRLV_%i_0" % (j), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -301,9 +358,9 @@ def capital_cost_transmission_distrib(capital_cost_LV_strengthening, distributio
     technolgies.to_csv(os.path.join(path, 'technologies.csv'))
 
 
-def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, distribution_network, elec, noHV_file, HV_file,
-                                      unelec, capital_cost_HV, substation, capital_cost_LV, capacitytoactivity,
-                                      distrbution_cost, path, distribution_length_cell, adjacencymatrix):
+def dryvision_capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file,
+                                      unelec, capital_cost_HV, substation, capacitytoactivity,
+                                      path, adjacencymatrix):
     """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines, ditribution lines and distributed supply options
     This function does not include diesel generators.
 
@@ -331,6 +388,8 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
     capitalcost = pd.DataFrame(columns=['Technology', 'Capitalcost'],
                                index=range(0, 5000))  # dtype = {'Technology':'object', 'Capitalcost':'float64'}
 
+    capitalcostkmkw = pd.DataFrame(columns=['Technology', 'Capitalcost'],
+                               index=range(0, 5000))  # dtype = {'Technology':'object', 'Capitalcost':'float64'}
     fixedcost = pd.DataFrame(columns=['Technology', 'Fixed Cost'],
                              index=range(0, 5000))  # dtype = {'Technology':'object', 'Capitalcost':'float64'}
 
@@ -347,9 +406,8 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
     un_elec.pointid = un_elec.pointid.astype(int)
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
+    elec_noHV_cells = pd.read_csv(elec_noHV_cells_file)
     noHV.pointid = noHV.pointid.astype(int)
-    distribution = pd.read_csv(distribution_network, index_col=0)
-    dist_length = pd.read_csv(distribution_length_cell, index_col='pointid')
 
     m = 0
     input_temp = []
@@ -399,12 +457,27 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
+    for m in elec_noHV_cells['pointid']:
+        input_temp = [0, "EL2_%i" %(m), "TRLV_%i_1" %(m), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (m), "TRLV_%i_1" % (m), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
     for k in HV['pointid']:
         input_temp = [0, "KEEL2", "TRLV_%i_0" % (k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
+        input_temp = [0, "EL2_%i" % (k), "TRLVM_%i_0" % (k), 1, 1]
+        inputactivity.loc[-1] = input_temp  # adding a row
+        inputactivity.index = inputactivity.index + 1  # shifting index
+        inputactivity = inputactivity.sort_index()
 
         input_temp = [0, "KEEL2", "KEEL00d_%i" % (k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
@@ -412,6 +485,16 @@ def dryvision_capital_cost_transmission_distrib(capital_cost_LV_strengthening, d
         inputactivity = inputactivity.sort_index()
 
         output_temp = [0, "EL3_%i_1" % (k), "KEEL00d_%i" % (k), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (k), "TRLV_%i_0" % (k), 0.83, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+
+        output_temp = [0, "EL3_%i_0" % (k), "TRLVM_%i_0" % (k), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()

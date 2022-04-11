@@ -49,7 +49,7 @@ def join(elec, tif, cells):
     path = 'run/Demand/demand_cells.csv'
     return(path)
 
-def network_length(demandcells, input):
+def network_length(demandcells, input, tofolder):
     """
     This function calculates the network length for LV which is adapted from van Ruijven et al. 2012 doi:10.1016/j.energy.2011.11.037
     :param demandcells: Includes the data per 1x1km cell
@@ -85,7 +85,7 @@ def network_length(demandcells, input):
     distribution_aggr = average_distrbution.groupby(["pointid"])
     distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(),'run/Demand/distribution.csv'))
 
-    return(os.path.join(os.getcwd(),'run/Demand/distribution.csv'))
+    return(os.path.join(os.getcwd(),tofolder, 'distribution.csv'))
 
 def elec(demandcells):
     demand_cell = pd.read_csv(demandcells)
@@ -103,11 +103,17 @@ def elec(demandcells):
     elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/elec.csv'))
     elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/dryvision/elec.csv'))
 
+    elec_df = elec.sum().reset_index()[['pointid']]
+    noHV_elec = (
+        pd.merge(elec_df, HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
+    noHV_elec.to_csv(os.path.join(os.getcwd(), 'run/elec_noHV_cells.csv'))
+
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
     all_pointid = demand_cell['pointid'].drop_duplicates().dropna()
     noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV.to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
+    noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
+    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
 
     minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ) and ((x['Minigrid'].min() < 5000) ))
     minigrid_all = minigrid.groupby(["pointid"])

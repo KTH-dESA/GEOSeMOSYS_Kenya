@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import os
 from os import listdir
 from os.path import isfile, join
@@ -58,7 +57,24 @@ def functions_to_run(dict_df, outPutFile):
         outPutFile = operational_life(outPutFile, dict_df['input_data'], dict_df['operational_life'])
     else:
         print('No operational_life file')
+#######################################################################
+    if 'peakdemand' in dict_df:
+        outPutFile = peakdemand(outPutFile, dict_df['input_data'], dict_df['peakdemand'])
+    else:
+        print('No peakdemand file')
 #################################################################################
+    if 'distributionlines' in dict_df:
+        outPutFile = maxkm(outPutFile, dict_df['input_data'], dict_df['distributionlines'], dict_df['distributioncelllength'])
+    else:
+        print('No distributionlines file')
+########################################################################################################
+    if 'capitalcostkm' in dict_df:
+        outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data'], dict_df['capitalcostkm'], dict_df['peakdemand'])
+
+    else:
+        print('No distributionlines file')
+############################################################################################################
+
     if 'fixed_cost_ref' in dict_df:
         outPutFile = fixedcost(dict_df['GIS_data'], outPutFile, dict_df['input_data'], dict_df['fixed_cost_ref'])
     else:
@@ -115,11 +131,7 @@ def functions_to_run(dict_df, outPutFile):
         outPutFile = inputact(outPutFile, dict_df['inputactivity'], dict_df['input_data'])
     else:
         print('No inputactivity file')
-#################################################################
-    if 'adjacencymatrix' in dict_df:
-        outPutFile = adjacency_matrix(outPutFile, dict_df['adjacencymatrix'], dict_df['input_data'])
-    else:
-        print('No adjacencymatrix file')
+
 ################################################################
     if 'outputactivity' in dict_df:
         outPutFile = outputactivity(outPutFile, dict_df['outputactivity'], dict_df['input_data'])
@@ -161,6 +173,60 @@ def operational_life(outPutFile, input_data, operational_life):
         dataToInsert += "%s\t%s\t%i\n" % (input_data['region'][0],t, l)
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 
+    return(outPutFile)
+
+def peakdemand(outPutFile,input_data, peakdemand):
+    dataToInsert = ""
+    print("Peak demand", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param Peakdemand default 9999999999999999 :=\n"
+    startIndex = outPutFile.index(param) + len(param)
+
+    peakdemand.index = peakdemand['Fuel']
+    demand = peakdemand.drop(columns=['Fuel'])
+    for j, row in demand.iterrows():
+        year = demand.columns
+        for k in year: #year is an object so I cannot match it with a number (e.g. startyear)
+            demandForThisYearAndlocation = demand.loc[j][k]
+            dataToInsert += "%s\t%s\t%s\t%f\n" % (input_data['region'][0], j, k, demandForThisYearAndlocation)
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+    return(outPutFile)
+
+def maxkm(outPutFile,input_data, distributionlines, distributioncelllength):
+    dataToInsert = ""
+    print("Max km Distribution", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param MaxKmPerTech default 99999999999999 :=\n"
+    startIndex = outPutFile.index(param) + len(param)
+
+    distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
+    distribution = distributionlines.drop(columns ='Unnamed: 0')
+
+    distributioncelllength.index = distributioncelllength['pointid']
+    distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'pointid', 'elec'], axis = 1)
+
+    distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
+
+    for j, row in distribution_total.iterrows():
+        km = distribution_total.loc[j]['km']
+        year = int(input_data['startyear'][0])
+        while year <= int(input_data['endyear'][0]):
+            dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
+            year += 1
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+    return(outPutFile)
+
+def capitalcostkmkW(outPutFile,input_data, capitalcost_distributionlines, peakdemand):
+    dataToInsert = ""
+    print("Captialcost per km", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param CapitalCostkmkW default 0 :=\n"
+    startIndex = outPutFile.index(param) + len(param)
+
+    peakdemand.index = peakdemand['Fuel']
+    demand = peakdemand.drop(columns=['Fuel'])
+    for j, row in peakdemand.iterrows():
+        year = demand.columns
+        for k in year:
+            dataToInsert += "%s\t%s\t%s\t%f\n" % (input_data['region'][0], j, k, capitalcost_distributionlines.loc[0]['LV_cost'])
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
 def fixedcost(df, outPutFile, input_data, fixed_cost):
@@ -1069,7 +1135,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
        else:
            for k in pv_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
               battery_tech_n = battery_tech_name.loc[3]
-              sopvcapitalcostbatt = pv_tech.loc[cf][k] + battery_tech.loc['4r'][k]
+              sopvcapitalcostbatt = pv_tech.loc[cf][k] + battery_tech.loc['8r'][k]
               techname = pv_tech_name+battery_tech_n
               if elec['pointid'].eq(row['Location']).any():
                   dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
@@ -1096,7 +1162,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
            for k in comm_PV_tech.columns[3:]:
                battery_tech_n = battery_tech_name.loc[4]
                somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc['4c'][k]
-               techname = comm_PV_tech_name + battery_tech_n
+               techname = comm_PV_tech_name + '8c'
                dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
@@ -1126,26 +1192,6 @@ def capitalcost(outPutFile, trade_cost, input_data):
             while year <= int(input_data['endyear'][0]):
                 dataToInsert += "%s\t%s\t%i\t%f\n" % (input_data['region'][0], tech, year, cost)
                 year += 1
-
-    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
-    return(outPutFile)
-
-def adjacency_matrix(outPutFile, adjacencymatrix, input_data):
-    """
-    builds the AdjacencyMatrix (region,technology,technology)
-    -------------
-
-    """
-    dataToInsert = ""
-
-    print("Adjacency matrix", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    param = "param 	AdjacencyMatrix default 0 :=\n"
-    startIndex = outPutFile.index(param) + len(param)
-
-    for m, row in adjacencymatrix.iterrows():
-        recieving = row['ReceiveTech']
-        send = row['SendTech']
-        dataToInsert += "%s\t%s\t%s\t1\n" % (input_data['region'][0], recieving, send)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)

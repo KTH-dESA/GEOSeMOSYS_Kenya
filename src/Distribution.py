@@ -19,10 +19,18 @@ from pandas import Series, DataFrame
 from pandas.core.arrays import ExtensionArray
 
 def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
+    """
+    This function creates transmissionlines in both directions for each cell and connects the adjacent cells to grid to the central grid.
+    :param path:
+    :param noHV_file:
+    :param HV_file:
+    :param minigridcsv:
+    :param topath:
+    :return:
+    """
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
     minigrid = pd.read_csv(minigridcsv)
-    minigrid_no_grid = minigrid[~minigrid.pointid.isin(HV.pointid)]
     neartable = pd.read_csv(path)
     # The table includes the raw data from ArcMap function
     near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
@@ -39,13 +47,12 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
 
     central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.pointid))]
 
-    central_minigrid = central.loc[central.NEARID.isin(minigrid_no_grid.pointid)]
+    central_minigrid = central.loc[central.NEARID.isin(minigrid.pointid)]
     for m in central_minigrid.index:
         near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
         near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_grid_" + str(int(near_adj_points.NEARID[m]))
         near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
-    df_tech = pd.DataFrame(columns=near_adj_points.columns,index=range(0,5000))
     #select where no inputfuel is present and their recieving cell has no HV in baseyear
     nan_intech = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
     nan_intech_nogrid = nan_intech.loc[nan_intech.NEARID.isin(noHV.pointid)]
@@ -56,28 +63,14 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
         near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
         near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
 
-        df_tech.loc[m, 'INFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
-        df_tech.loc[m , 'INTECH'] = "TRHV_" + str(int(near_adj_points.NEARID[l]))+ "_"+ str(int(near_adj_points.SENDID[l]))
-        df_tech.loc[m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
-        m += 1
-
     nan_intech_minigr = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
-    nan_intech_minigrid = nan_intech_minigr.loc[nan_intech_minigr.NEARID.isin(minigrid_no_grid.pointid)]
+    nan_intech_minigrid = nan_intech_minigr.loc[nan_intech_minigr.NEARID.isin(minigrid.pointid)]
     #add input fuel to the (isnan INFUEL + isin noHV) selection
 
     for l in nan_intech_minigrid.index:
         near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
         near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
         near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
-
-        df_tech.loc[m, 'INFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
-        df_tech.loc[m , 'INTECH'] = "TRHV_" + str(int(near_adj_points.NEARID[l]))+ "_"+ str(int(near_adj_points.SENDID[l]))
-        df_tech.loc[m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
-        m += 1
-    #
-    #for i in noHV.pointid:
-    #    near_adj_points.loc[near_adj_points.SENDID == i, 'SendTech'] = "TRHV_"+ str(int(i))
-    #    near_adj_points.loc[near_adj_points.NEARID == i, 'ReceiveTech'] = "TRHV_" + str(int(i))
 
     #Allow for connections over cells with no population ("nan")
     not_grid = near_adj_points[~near_adj_points.SENDID.isin(HV.pointid)]
@@ -88,19 +81,69 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
         near_adj_points.loc[near_adj_points.index == j , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[j])) + "_" + str(int(near_adj_points.NEARID[j]))
         near_adj_points.loc[near_adj_points.index == j, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[j]))
 
-        df_tech.loc[m, 'INFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[j]))
-        df_tech.loc[m , 'INTECH'] = "TRHV_" + str(int(near_adj_points.NEARID[j]))+ "_"+ str(int(near_adj_points.SENDID[j]))
-        df_tech.loc[m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[j]))
-        m += 1
-
-    df_tech_nan = df_tech.dropna(axis=0,how='all')
     nan_matrix = near_adj_points.loc[near_adj_points.INTECH.notnull()]
-
     #concat the two dataframes with the transmissionlines to one
-    concat_matrices = pd.concat([nan_matrix, df_tech_nan], ignore_index=True)
-    final_matrix = concat_matrices.drop(['OBJECTID *','INPUT_FID','NEAR_FID','NEARID','SENDID'], axis=1)
+    final_matrix = nan_matrix.drop(['OBJECTID *','INPUT_FID','NEAR_FID','NEARID','SENDID'], axis=1)
     final_matrix = final_matrix.drop_duplicates()
 
     final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
-    return(os.path.join(topath,'adjacencymatrix.csv'))
 
+def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, distributionlines_file, distributioncelllength_file, tofolder):
+    """
+    This function calculates the peakdemand per year and demand. This is used to calculate the kW/km in the next step.
+    :param demand:
+    :param specifieddemand:
+    :param capacitytoactivity:
+    :return:
+    """
+    profile = pd.read_csv(specifieddemand,index_col='Timeslice', header=0)
+    demand = pd.read_csv(demand_csv, index_col='Fuel', header=0)
+    yearsplit = pd.read_csv(yearsplit_csv, index_col='Timeslice', header=0)
+    distributionlines = pd.read_csv(distributionlines_file)
+    distributioncelllength= pd.read_csv(distributioncelllength_file)
+
+    #The peakdemand is defined as the peak demand over km per cell
+    # Peakdemand = max(specifiedannualdemand*specifieddemandprofile/(capacitytoactivityunit*yearsplit))/km_cell
+
+    demand_capacitytoact = demand.apply(lambda row: row/capacitytoactivity,axis=1)
+    profile_yearsplit = profile.divide(yearsplit)
+    #I take the max of all years as the max decrease in 2030 in the Kenya case. This is to make sure that there is always capacity in OSemOSYS
+    max_share_peryear = (profile_yearsplit.max().max())/distr_losses
+
+    peak_demand_all = demand_capacitytoact.apply(lambda row: row * max_share_peryear, axis=1)
+    peakdemand = peak_demand_all.loc[peak_demand_all.index.str.endswith('_0', na=False)]
+    peakdemand.index = peakdemand.index.str.replace('EL3','TRLV')
+
+
+
+    distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
+    distribution = distributionlines.drop(columns ='Unnamed: 0')
+
+    distributioncelllength.index = distributioncelllength['pointid']
+    distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'pointid', 'elec'], axis = 1)
+
+    distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
+    ## TODO divide per cell the km that are defined in distribution_total
+
+    peakdemand.to_csv(os.path.join(tofolder,'peakdemand.csv'))
+
+
+distribution_length_cell= 'run/ref/distributioncelllength.csv'
+distribution = 'run/ref/distributionlines.csv'
+
+topath = 'run/Demand'
+noHV = 'run/noHV_cells.csv'
+HV = 'run/HV_cells.csv'
+minigrid = 'run/elec_noHV_cells.csv'
+neartable = 'run/Demand/Near_table.csv'
+
+demand = 'run/ref/ref_demand.csv'
+specifieddemand= 'run/ref/demandprofile_rural.csv'
+capacitytoactivity = 31.536
+yearsplit = 'run/Demand/yearsplit.csv'
+reffolder = 'run/ref'
+visionfolder = 'run/vision'
+dryvisionfolder = 'run/dryvision'
+distr_losses = 0.83
+
+peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, distribution, distribution_length_cell, reffolder)

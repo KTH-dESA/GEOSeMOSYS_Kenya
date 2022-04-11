@@ -42,13 +42,14 @@ def mosaic(dict_raster, proj_path):
     print('Pathfinder is now mosaicked to pathfinder.tif')
     return ()
 
-def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight):
+def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,tofolder):
     """
     This function sets the results (shortest path network) from Pathfinder that are overlapping weights less than 0.5
     so that where the grid route is utilized this is not double counted in the final results
     :param dict_pathfinder:
     :param dict_weight:
-    :return:
+    :param tofolder
+    :return:dict_pathfinder
     """
     sum_distribution = {}
     for key in dict_pathfinder:
@@ -71,16 +72,16 @@ def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight):
         sum_distribution[key] = elec_path.values.sum()
 
     df = pd.DataFrame.from_dict(sum_distribution, orient='index')
-    df.to_csv('run/Demand/distributionlines.csv')
+    df.to_csv(os.path.join(tofolder,'distributionlines.csv'))
 
-    return dict_pathfinder
 
-def pathfinder_main(path,proj_path, elec_shp):
+def pathfinder_main(path,proj_path, elec_shp, tofolder):
     """
     This is the function which runs all GIS functions and Pathfinder
     :param path:
     :param proj_path:
     :param elec_shp:
+    :param tofolder:
     :return:
     """
     elec_shape = convert_zero_to_one(elec_shp)
@@ -119,7 +120,7 @@ def pathfinder_main(path,proj_path, elec_shp):
         weight_csv = make_weight_numpyarray(weight_raster_cell, name)
         target_csv = make_target_numpyarray(elec_raster_cell, name)
         if not os.path.exists(target_csv):
-          e = "Not targets in square"
+          e = "No targets in square"
         try:
             if os.path.exists(target_csv):
                 targets = np.genfromtxt(os.path.join('temp/dijkstra', "%s_target.csv" % (name)), delimiter=',')
@@ -146,5 +147,5 @@ def pathfinder_main(path,proj_path, elec_shp):
     print("Make raster of pathfinder")
     mosaic(dict_raster, path)
     print("Remove pathfinder where grid is passed to not double count")
-    remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight)
+    remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight, tofolder)
 
