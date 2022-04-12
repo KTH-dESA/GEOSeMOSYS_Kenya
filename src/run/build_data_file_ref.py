@@ -872,131 +872,131 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
                     dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region,t, location,  ts, year, average_wind)
                 m = m + 1
             year = year + 1
-    if battery is None:
-        pass
-    else:
-        tech = battery.groupby('renewable ninjafile')
-        wind_battery = tech.get_group('capacityfactor_wind')
-        for j, line in wind_battery.iterrows():
-            capacityfactor_wind_batt = capacityfactor_wind.copy()  # deep copy
-            for k, row in df.iterrows():
-                location = str(row['Location'])
-                batteryCapacityFactor = line['Batterycapacityfactor']
-                batteryTime = line['BatteryTime']
-                lastRowWasZero = False
-                batteryConsumed = False
-                index = 0
-                for solarCapacity in capacityfactor_wind_batt[location].values:
-                    currentRowIsZero = solarCapacity == 0
-                    if not currentRowIsZero:
-                       # This will happen when the current row is not zero. We should "reset" everything.
-                       batteryTime = line['BatteryTime']
-                       batteryCapacityFactor = line['Batterycapacityfactor']
-                       batteryConsumed = False
-                       lastRowWasZero = False
-                    elif batteryTime == int(0):
-                       # This will happen when the current value is 0, the last value was zero and there is no batterytime left.
-                       batteryConsumed = True
-                       batteryTime = line['BatteryTime']
-                       batteryCapacityFactor = line['Batterycapacityfactor']
-                    elif solarCapacity == 0 and lastRowWasZero and not batteryConsumed:
-                       # This will happen when the last row was zero and the current row is 0.
-                       capacityfactor_wind_batt.at[index, location] = batteryCapacityFactor
-                       lastRowWasZero = True
-                       batteryTime -= 1
-                    elif not batteryConsumed:
-                       # This will happen when the last row was not zero and the current row is 0. Same as above?
-                       capacityfactor_wind_batt.at[index, location] = batteryCapacityFactor
-                       lastRowWasZero = True
-                       batteryTime -= 1
-                    index += 1
-
-                capacityfactor_wind_b = capacityfactor_wind_batt.copy()
-                capacityfactor_wind_b.index = capacityfactor_windc
-                capacityfactor_wind_battery = capacityfactor_wind_b.drop(columns=['adjtime'])
-
-                year = startyear
-                while year <= endyear:
-                    m = 0
-                    while m < 11:
-                        currentMonth = months[m]
-                        startDate = pd.to_datetime("2016-%s-01" % (currentMonth))
-                        endDate = pd.to_datetime("2016-%s-01" % (months[m + 1]))
-                        mask = (capacityfactor_wind_battery.index > startDate) & (capacityfactor_wind_battery.index <= endDate)
-                        thisMonthOnly = capacityfactor_wind_battery.loc[mask]
-                        sliceStart = timesliceDN
-                        sliceEnd = timesliceDE
-                        ts = "%iD" % (m + 1)
-                        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-                        try:
-                           average_wind = ((slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-                        except ZeroDivisionError:
-                           average_wind = 0
-                        dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-
-                        sliceStart = timesliceED
-                        sliceEnd = timesliceEN
-                        ts = "%iE" % (m + 1)
-                        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-                        try:
-                           average_wind = (
-                               (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-                        except ZeroDivisionError:
-                           average_wind = 0
-                        dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-
-                        sliceStart = timesliceNE
-                        sliceEnd = timesliceND
-                        ts = "%iN" % (m + 1)
-                        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-                        try:
-                           average_wind = (
-                               (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-                        except ZeroDivisionError:
-                           average_wind = 0
-                        dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-                        m = m + 1
-
-                    while m == 11:
-                        currentMonth = months[m]
-                        startDate = pd.to_datetime("2016-%s-01" % (currentMonth))
-                        endDate = pd.to_datetime("2016-%s-31" % (months[m]))
-                        mask = (capacityfactor_wind_battery.index > startDate) & (capacityfactor_wind_battery.index <= endDate)
-                        thisMonthOnly = capacityfactor_wind_battery.loc[mask]
-
-                        sliceStart = timesliceDN
-                        sliceEnd = timesliceDE
-                        ts = "%iD" % (m + 1)
-                        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-                        try:
-                           average_wind = (
-                               (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-                        except ZeroDivisionError:
-                           average_wind = 0
-                        dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-
-                        sliceStart = timesliceED
-                        sliceEnd = timesliceEN
-                        ts = "%iE" % (m + 1)
-                        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-                        try:
-                           average_wind = (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values))
-                        except ZeroDivisionError:
-                           average_wind = 0
-                        dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-
-                        sliceStart = timesliceNE
-                        sliceEnd = timesliceND
-                        ts = "%iN" % (m + 1)
-                        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-                        try:
-                           average_wind = (
-                               (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-                        except ZeroDivisionError:
-                           average_wind = 0
-                        dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-                        m = m + 1
-                    year = year + 1
+    # if battery is None:
+    #     pass
+    # else:
+    #     tech = battery.groupby('renewable ninjafile')
+    #     wind_battery = tech.get_group('capacityfactor_wind')
+    #     for j, line in wind_battery.iterrows():
+    #         capacityfactor_wind_batt = capacityfactor_wind.copy()  # deep copy
+    #         for k, row in df.iterrows():
+    #             location = str(row['Location'])
+    #             batteryCapacityFactor = line['Batterycapacityfactor']
+    #             batteryTime = line['BatteryTime']
+    #             lastRowWasZero = False
+    #             batteryConsumed = False
+    #             index = 0
+    #             for solarCapacity in capacityfactor_wind_batt[location].values:
+    #                 currentRowIsZero = solarCapacity == 0
+    #                 if not currentRowIsZero:
+    #                    # This will happen when the current row is not zero. We should "reset" everything.
+    #                    batteryTime = line['BatteryTime']
+    #                    batteryCapacityFactor = line['Batterycapacityfactor']
+    #                    batteryConsumed = False
+    #                    lastRowWasZero = False
+    #                 elif batteryTime == int(0):
+    #                    # This will happen when the current value is 0, the last value was zero and there is no batterytime left.
+    #                    batteryConsumed = True
+    #                    batteryTime = line['BatteryTime']
+    #                    batteryCapacityFactor = line['Batterycapacityfactor']
+    #                 elif solarCapacity == 0 and lastRowWasZero and not batteryConsumed:
+    #                    # This will happen when the last row was zero and the current row is 0.
+    #                    capacityfactor_wind_batt.at[index, location] = batteryCapacityFactor
+    #                    lastRowWasZero = True
+    #                    batteryTime -= 1
+    #                 elif not batteryConsumed:
+    #                    # This will happen when the last row was not zero and the current row is 0. Same as above?
+    #                    capacityfactor_wind_batt.at[index, location] = batteryCapacityFactor
+    #                    lastRowWasZero = True
+    #                    batteryTime -= 1
+    #                 index += 1
+    #
+    #             capacityfactor_wind_b = capacityfactor_wind_batt.copy()
+    #             capacityfactor_wind_b.index = capacityfactor_windc
+    #             capacityfactor_wind_battery = capacityfactor_wind_b.drop(columns=['adjtime'])
+    #
+    #             year = startyear
+    #             while year <= endyear:
+    #                 m = 0
+    #                 while m < 11:
+    #                     currentMonth = months[m]
+    #                     startDate = pd.to_datetime("2016-%s-01" % (currentMonth))
+    #                     endDate = pd.to_datetime("2016-%s-01" % (months[m + 1]))
+    #                     mask = (capacityfactor_wind_battery.index > startDate) & (capacityfactor_wind_battery.index <= endDate)
+    #                     thisMonthOnly = capacityfactor_wind_battery.loc[mask]
+    #                     sliceStart = timesliceDN
+    #                     sliceEnd = timesliceDE
+    #                     ts = "%iD" % (m + 1)
+    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #                     try:
+    #                        average_wind = ((slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
+    #                     except ZeroDivisionError:
+    #                        average_wind = 0
+    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
+    #
+    #                     sliceStart = timesliceED
+    #                     sliceEnd = timesliceEN
+    #                     ts = "%iE" % (m + 1)
+    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #                     try:
+    #                        average_wind = (
+    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
+    #                     except ZeroDivisionError:
+    #                        average_wind = 0
+    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
+    #
+    #                     sliceStart = timesliceNE
+    #                     sliceEnd = timesliceND
+    #                     ts = "%iN" % (m + 1)
+    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #                     try:
+    #                        average_wind = (
+    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
+    #                     except ZeroDivisionError:
+    #                        average_wind = 0
+    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
+    #                     m = m + 1
+    #
+    #                 while m == 11:
+    #                     currentMonth = months[m]
+    #                     startDate = pd.to_datetime("2016-%s-01" % (currentMonth))
+    #                     endDate = pd.to_datetime("2016-%s-31" % (months[m]))
+    #                     mask = (capacityfactor_wind_battery.index > startDate) & (capacityfactor_wind_battery.index <= endDate)
+    #                     thisMonthOnly = capacityfactor_wind_battery.loc[mask]
+    #
+    #                     sliceStart = timesliceDN
+    #                     sliceEnd = timesliceDE
+    #                     ts = "%iD" % (m + 1)
+    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #                     try:
+    #                        average_wind = (
+    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
+    #                     except ZeroDivisionError:
+    #                        average_wind = 0
+    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
+    #
+    #                     sliceStart = timesliceED
+    #                     sliceEnd = timesliceEN
+    #                     ts = "%iE" % (m + 1)
+    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #                     try:
+    #                        average_wind = (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values))
+    #                     except ZeroDivisionError:
+    #                        average_wind = 0
+    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
+    #
+    #                     sliceStart = timesliceNE
+    #                     sliceEnd = timesliceND
+    #                     ts = "%iN" % (m + 1)
+    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #                     try:
+    #                        average_wind = (
+    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
+    #                     except ZeroDivisionError:
+    #                        average_wind = 0
+    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
+    #                     m = m + 1
+    #                 year = year + 1
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
@@ -1113,7 +1113,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
            for k in wind_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
                windcapitalcostbatt = wind_tech.loc[cf][k] + battery_tech.loc['4c'][k]
                techname = wind_tech_name + battery_tech_name.loc[4]
-               dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, windcapitalcostbatt))
+               #dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, windcapitalcostbatt))
 
        #Solar PV
        for k in pv_tech.columns[3:]: # year is an object so I cannot match it with a number (e.g. startyear)
@@ -1144,7 +1144,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
               if un_elec['pointid'].eq(row['Location']).any():
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
 
-       #Solar MG
+       #Solar MG i excluded from the optimization
        for k in comm_PV_tech.columns[3:]:
           def find_nearest(comm_PV_CF, average_solar):
              #arraysun = np.asarray(comm_PV_CF)
@@ -1153,7 +1153,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
           cf = find_nearest(comm_PV_CF, average_solar)
           comm_PV_tech.index = comm_PV_tech['CF']
           somgcapitalcost = comm_PV_tech.loc[cf][k]
-          dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], comm_PV_tech_name, location, k, somgcapitalcost))
+       #    dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], comm_PV_tech_name, location, k, somgcapitalcost))
 
        # Battery
        if battery_tech is None:
