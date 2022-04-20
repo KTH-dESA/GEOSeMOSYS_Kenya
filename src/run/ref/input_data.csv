@@ -1,7 +1,7 @@
 Timeslice,Hour,Month,Daysplit,Demand fuel,startyear,endyear,timesliceDN,timesliceDE,timesliceED,timesliceEN,timesliceNE,timesliceND,region,Tech,renewable ninjafile,Inhibited_area,Area_cell_size,HH,peak(Watt),LV_area,MaxCapacityLV(W)
 1D,06:00,1,D,EL3_1_0,2016,2040,06:00,18:00,19:00,22:00,23:00,05:00,Kenya,SOPV,capacityfactor_solar,0.3,1,4,50,450,10000
-1E,18:00,2,E,EL3_1_1,,,,,,,,,,SOMG,capacityfactor_solar,,,,,,
-1N,23:00,3,N,EL3_2_0,,,,,,,,,,WI,capacityfactor_wind,,,,,,
+1E,18:00,2,E,EL3_1_1,,,,,,,,,,WI,capacityfactor_wind,,,,,,
+1N,23:00,3,N,EL3_2_0,,,,,,,,,,,,,,,,,
 2D,06:00,4,,EL3_3_0,,,,,,,,,,,,,,,,,
 2E,18:00,5,,EL3_4_0,,,,,,,,,,,,,,,,,
 2N,23:00,6,,EL3_5_0,,,,,,,,,,,,,,,,,

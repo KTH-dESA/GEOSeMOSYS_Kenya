@@ -267,10 +267,6 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
     #For all cells
     for k in range(1,379):
-        output_temp = [0,  "EL2_%i" % (k),"SOMG_%i" %(k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
 
         output_temp = [0,  "EL2_%i" % (k),"SOMG8c_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -278,11 +274,6 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity = outputactivity.sort_index()
 
         output_temp = [0,  "EL2_%i" % (k),"WI_%i" %(k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0,  "EL2_%i" % (k),"WI4c_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -528,10 +519,6 @@ def dryvision_capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_n
 
     # For all cells
     for k in range(1, 379):
-        output_temp = [0, "EL2_%i" % (k), "SOMG_%i" % (k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
 
         output_temp = [0, "EL2_%i" % (k), "SOMG8c_%i" % (k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -539,11 +526,6 @@ def dryvision_capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_n
         outputactivity = outputactivity.sort_index()
 
         output_temp = [0, "EL2_%i" % (k), "WI_%i" % (k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
-
-        output_temp = [0, "EL2_%i" % (k), "WI4c_%i" % (k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()

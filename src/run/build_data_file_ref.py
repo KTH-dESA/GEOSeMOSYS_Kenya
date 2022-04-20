@@ -64,7 +64,7 @@ def functions_to_run(dict_df, outPutFile):
         print('No peakdemand file')
 #################################################################################
     if 'distributionlines' in dict_df:
-        outPutFile = maxkm(outPutFile, dict_df['input_data'], dict_df['distributionlines'], dict_df['distributioncelllength'])
+        outPutFile = maxkm(outPutFile, dict_df['input_data'], dict_df['distributionlines'], dict_df['distributioncelllength'], dict_df['elec'])
     else:
         print('No distributionlines file')
 ########################################################################################################
@@ -191,7 +191,7 @@ def peakdemand(outPutFile,input_data, peakdemand):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def maxkm(outPutFile,input_data, distributionlines, distributioncelllength):
+def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec):
     dataToInsert = ""
     print("Max km Distribution", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     param = "param MaxKmPerTech default 99999999999999 :=\n"
@@ -210,6 +210,8 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength):
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
             dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
+            if elec['pointid'].eq(j).any():
+                dataToInsert += "%s\tTRLVM_%i_0\t%i\t%f\n" % (input_data['region'][0], j, year, km)
             year += 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
@@ -368,8 +370,17 @@ def inputact(outPutFile, inputactivity, input_data):
        inputactivityratio = row['Inputactivity']
        modeofoperation = row['ModeofOperation']
        year = int(input_data['startyear'][0])
+       dataToInsert += "\n[%s,%s,%s,*,*]:\n" % (
+       input_data['region'][0], technology, fuel)
        while year<=int(input_data['endyear'][0]):
-           dataToInsert += "%s\t%s\t%s\t%i\t%i\t%f\n" % (input_data['region'][0], technology, fuel, modeofoperation, year, inputactivityratio)
+           dataToInsert += "%i\t" % (year)
+           year = year + 1
+
+       year = int(input_data['startyear'][0])
+       dataToInsert += ":=\n%i\t" % (modeofoperation)
+       while year <= int(input_data['endyear'][0]):
+           dataToInsert += "%f\t" % (inputactivityratio)
+
            year = year + 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
@@ -1022,9 +1033,18 @@ def outputactivity(outPutFile, outputactivity, input_data):
        outputactivityratio = row['Outputactivity']
        modeofoperation = row['ModeofOperation']
        year = int(input_data['startyear'][0])
+       dataToInsert += "\n[%s,%s,%s,*,*]:\n" % (
+       input_data['region'][0], technology, fuel)
        while year<=int(input_data['endyear'][0]):
-          dataToInsert += "%s\t%s\t%s\t%s\t%i\t%f\n" % (input_data['region'][0], technology, fuel, modeofoperation, year, outputactivityratio)
-          year = year + 1
+           dataToInsert += "%i\t" % (year)
+           year = year + 1
+
+       year = int(input_data['startyear'][0])
+       dataToInsert += ":=\n%i\t" % (modeofoperation)
+       while year <= int(input_data['endyear'][0]):
+           dataToInsert += "%f\t" % (outputactivityratio)
+
+           year = year + 1
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)

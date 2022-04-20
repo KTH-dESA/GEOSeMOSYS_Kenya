@@ -42,7 +42,7 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
     central_nogrid = central.loc[central.NEARID.isin(noHV.pointid)]
     for m in central_nogrid.index:
         near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
-        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_grid_" + str(int(near_adj_points.NEARID[m]))
+        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] =  "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
         near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
     central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.pointid))]
@@ -50,7 +50,7 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
     central_minigrid = central.loc[central.NEARID.isin(minigrid.pointid)]
     for m in central_minigrid.index:
         near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
-        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_grid_" + str(int(near_adj_points.NEARID[m]))
+        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
         near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
     #select where no inputfuel is present and their recieving cell has no HV in baseyear
@@ -115,7 +115,6 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     peakdemand.index = peakdemand.index.str.replace('EL3','TRLV')
 
 
-
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
     distribution = distributionlines.drop(columns ='Unnamed: 0')
 
@@ -124,26 +123,7 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
 
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
     ## TODO divide per cell the km that are defined in distribution_total
+    ## TODO add peakdemand TRLVM as well to cover the demand
 
     peakdemand.to_csv(os.path.join(tofolder,'peakdemand.csv'))
 
-
-distribution_length_cell= 'run/ref/distributioncelllength.csv'
-distribution = 'run/ref/distributionlines.csv'
-
-topath = 'run/Demand'
-noHV = 'run/noHV_cells.csv'
-HV = 'run/HV_cells.csv'
-minigrid = 'run/elec_noHV_cells.csv'
-neartable = 'run/Demand/Near_table.csv'
-
-demand = 'run/ref/ref_demand.csv'
-specifieddemand= 'run/ref/demandprofile_rural.csv'
-capacitytoactivity = 31.536
-yearsplit = 'run/Demand/yearsplit.csv'
-reffolder = 'run/ref'
-visionfolder = 'run/vision'
-dryvisionfolder = 'run/dryvision'
-distr_losses = 0.83
-
-peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, distribution, distribution_length_cell, reffolder)
