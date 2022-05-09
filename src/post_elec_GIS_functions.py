@@ -83,7 +83,7 @@ def network_length(demandcells, input, tofolder):
     distribution =  networkkm[['elec', 'pointid', 'LV_km']]
     average_distrbution = distribution[distribution['elec'] == 0]
     distribution_aggr = average_distrbution.groupby(["pointid"])
-    distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(),'run/Demand/distribution.csv'))
+    distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(), tofolder,'distribution.csv'))
 
     return(os.path.join(os.getcwd(),tofolder, 'distribution.csv'))
 
