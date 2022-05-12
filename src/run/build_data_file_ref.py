@@ -64,7 +64,7 @@ def functions_to_run(dict_df, outPutFile):
         print('No peakdemand file')
 #################################################################################
     if 'distributionlines' in dict_df:
-        outPutFile = maxkm(outPutFile, dict_df['input_data'], dict_df['distributionlines'], dict_df['distributioncelllength'], dict_df['elec'])
+        outPutFile = maxkm(outPutFile, dict_df['input_data'], dict_df['distributionlines'], dict_df['distribution'], dict_df['elec'])
     else:
         print('No distributionlines file')
 ########################################################################################################
@@ -198,7 +198,7 @@ def peakdemand(outPutFile,input_data, peakdemand):
         year = demand.columns
         for k in year: #year is an object so I cannot match it with a number (e.g. startyear)
             demandForThisYearAndlocation = demand.loc[j][k]
-            dataToInsert += "%s\t%s\t%s\t%f\n" % (input_data['region'][0], j, k, demandForThisYearAndlocation)
+            dataToInsert += "%s\t%s\t%s\t%s\n" % (input_data['region'][0], j, k, demandForThisYearAndlocation)
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
