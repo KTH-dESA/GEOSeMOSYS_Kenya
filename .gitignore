@@ -47,7 +47,7 @@ src/run/results/**
 src/run/results_ref/**
 src/run/ref/update/**
 src/run/vision/update/**
-src/dryvision/update/**
+src/run/dryvision/update/**
 src/preprocessing.py
 src/run/dryvision/adjacencymatrix.csv
 src/run/dryvision/capacityfactor_other.csv
@@ -78,3 +78,14 @@ VIIRS_multiplied_pop_48_%.tif
 src/input_data/time_slice.csv
 src/input_data/eq2.png
 src/input_data/eq1.PNG
+src/run/DryVision_TS_nopeak.txt
+src/run/dryvision/inputactivity.csv
+src/run/dryvision/outputactivity.csv
+src/run/dryvision/peakdemand.csv
+src/run/dryvision/technologies.csv
+src/run/dryvision/un_elec.csv
+src/run/elec_noHV_cells.csv
+src/run/HV_cells.csv
+src/run/minigridcells.csv
+src/run/MW to kW.xlsx
+src/run/noHV_cells.csv
