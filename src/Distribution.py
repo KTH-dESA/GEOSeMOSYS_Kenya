@@ -97,23 +97,25 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     :return:
     """
     profile = pd.read_csv(specifieddemand,index_col='Timeslice', header=0)
-    demand = pd.read_csv(demand_csv, index_col='Fuel', header=0)
+    demand = pd.read_csv(demand_csv, header=0)
+    #demand['cell'] = demand['Fuel'].apply(lambda row: row.split("_")[1])
+    demand.index = demand['Fuel']
+    demand = demand.drop(['Fuel'], axis=1)
     yearsplit = pd.read_csv(yearsplit_csv, index_col='Timeslice', header=0)
     distributionlines = pd.read_csv(distributionlines_file)
     distributioncelllength= pd.read_csv(distributioncelllength_file)
 
     #The peakdemand is defined as the peak demand over km per cell
-    # Peakdemand = max(specifiedannualdemand*specifieddemandprofile/(capacitytoactivityunit*yearsplit))/km_cell
+    # Peakdemand = specifiedannualdemand*specifieddemandprofile/(capacitytoactivityunit*yearsplit)/km_cell
 
     demand_capacitytoact = demand.apply(lambda row: row/capacitytoactivity,axis=1)
     profile_yearsplit = profile.divide(yearsplit)
-    #I take the max of all years as the max decrease in 2030 in the Kenya case. This is to make sure that there is always capacity in OSemOSYS
-    max_share_peryear = (profile_yearsplit.max().max())/distr_losses
+    max_share_peryear = profile_yearsplit.max()/distr_losses
 
     peak_demand_all = demand_capacitytoact.apply(lambda row: row * max_share_peryear, axis=1)
     peakdemand = peak_demand_all.loc[peak_demand_all.index.str.endswith('_0', na=False)]
     peakdemand.index = peakdemand.index.str.replace('EL3','TRLV')
-
+    peakdemand['cell'] = peakdemand.index.to_series().apply(lambda row: int(row.split("_")[1]))
 
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
     distribution = distributionlines.drop(columns ='Unnamed: 0')
@@ -122,8 +124,13 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'pointid', 'elec'], axis = 1)
 
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
-    ## TODO divide per cell the km that are defined in distribution_total
+    peakdemand.index = peakdemand[('cell')]
+    peakdemand.drop(['cell'], axis=1)
+    peakdemand_divided_km = peakdemand.apply(lambda x: x/distribution_total.loc[x.index, 'km'] if x.index==distribution_total.index.any() else print('not same'))
+    peakdemand_divided_km['Fuel'] = peakdemand.index.to_series().apply(lambda row: 'TRLV_'+str(row)+'_0')
+    peakdemand_divided_km.index = peakdemand_divided_km['Fuel']
+
     ## TODO add peakdemand TRLVM as well to cover the demand
 
-    peakdemand.to_csv(os.path.join(tofolder,'peakdemand.csv'))
+    peakdemand_divided_km.to_csv(os.path.join(tofolder,'peakdemand.csv'))
 
