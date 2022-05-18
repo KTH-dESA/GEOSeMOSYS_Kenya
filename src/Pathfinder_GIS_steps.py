@@ -110,7 +110,12 @@ def merge_grid(proj_path):
         shpfile = gpd.read_file(f)
         dijkstraweight += [shpfile]
 
-    grid = pd.concat([shp for shp in dijkstraweight], sort=False).pipe(gpd.GeoDataFrame)
+    try:
+
+        grid = pd.concat([shp for shp in dijkstraweight], sort=False).pipe(gpd.GeoDataFrame)
+    except:
+        print('There are no shapefiles to concatinate')
+        grid = gpd.GeoDataFrame([shp for shp in dijkstraweight])
     #road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
     #gdf = grid.append(road)
     grid.to_file("../Projected_files/grid_weight.shp")
