@@ -114,3 +114,7 @@ src/run/vision/technologies.csv
 src/run/Vision_TS.txt
 src/run/Vision_TS_nopeak.txt
 Step_by_step_instruction.pptx
+src/run/output/DryVision.txt
+src/run/output/REF.txt
+src/run/output/Vision.txt
+src/run/REF_TS_d.txt
