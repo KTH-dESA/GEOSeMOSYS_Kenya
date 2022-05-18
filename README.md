@@ -1,15 +1,13 @@
-# The repository is still under progress....
-
 ## GEOSeMOSYS_Kenya
 
 This repository is for paper ****High spatial and temporal resolution in linear programming - the case of Kenya****, by: Nandi Moksnes, Mark Howells, Will Usher
 
-To be able to run the model you need to have approx 512 GB RAM. This model has been run on a High performance cluster at KTH.
-The shell file is therefor applicable for the HPC at PDC Tegner from SNIC (Swedish National Infrastructure for Computing).
+To be able to run the model you need to have approx 256 GB RAM. This model has been run on a High performance cluster at KTH.
+The shell file is therefor applicable for the HPC at PDC Dardel from SNIC (Swedish National Infrastructure for Computing).
 
 The whole workflow is run in Jupyter Notebook. The work flow is only tested on a Windows computer, therefore there might be small adjustements needed for other OS.
 
-![Spatial information model to OSeMOSYS](Workflow.png)
+![image](https://user-images.githubusercontent.com/30128518/169063135-8ce836a1-fca2-4273-b1da-41960e4fabb1.png)
 
 # Python dependencies
 The workflow has a number packages that needs to be installed.
