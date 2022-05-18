@@ -67,3 +67,14 @@ src/run/Dry_Vision_TS_noout.txt
 src/run/Checklist_inputdata.xlsx
 src/Capacityfactors_other.txt
 src/GEOSeMOSYS - onenode.ipynb
+test_data/**
+temp/**
+Workflow.png
+VIIRS_newresolution_max_Kenya.tif.aux.xml
+VIIRS_newresolution_max_Kenya.tif
+VIIRS_newresolution_max_Kenya.tfw
+VIIRS_multiplied_pop_48_%.tif.aux.xml
+VIIRS_multiplied_pop_48_%.tif
+src/input_data/time_slice.csv
+src/input_data/eq2.png
+src/input_data/eq1.PNG
