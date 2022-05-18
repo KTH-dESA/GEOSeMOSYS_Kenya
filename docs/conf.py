@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'GEOSeMOSYS Kenya'
-copyright = '2021, Nandi Moksnes, Mark Howells, Will Usher'
+copyright = '2022, Nandi Moksnes, Mark Howells, Will Usher'
 author = 'Nandi Moksnes, Mark Howells, Will Usher'
 
 # The full version, including alpha/beta/rc tags
