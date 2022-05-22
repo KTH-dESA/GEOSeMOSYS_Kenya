@@ -4,7 +4,6 @@ Projected_files/**
 .ipynb_checkpoints/*
 src/temp/**
 src/results/**
-results/**
 *.zip
 src/__pycache__/**
 src/results_files/**
