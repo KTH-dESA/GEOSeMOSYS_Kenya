@@ -130,7 +130,8 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
     peakdemand.index = peakdemand[('cell')]
     peakdemand.drop(['cell'], axis=1)
-    peakdemand_divided_km = peakdemand.apply(lambda x: x/distribution_total.loc[x.index, 'km'] if x.index==distribution_total.index.any() else print('not same'))
+    a = distribution_total.index
+    peakdemand_divided_km = peakdemand.apply(lambda x: x/distribution_total.loc[x.index, 'km'] if x.index==a.any() else print('not same'))
     peakdemand_divided_km['Fuel'] = peakdemand.index.to_series().apply(lambda row: 'TRLV_'+str(row)+'_0')
     peakdemand_divided_km.index = peakdemand_divided_km['Fuel']
 
