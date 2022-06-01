@@ -5,6 +5,7 @@ Projected_files/**
 src/temp/**
 src/results/**
 results/**
+results_substation/**
 *.zip
 src/__pycache__/**
 src/results_files/**

@@ -227,6 +227,3 @@ def project_main(GIS_files_path, topath):
     merge_minigrid(topath)
     merge_mv(topath)
     return ()
-
-
-project_main('../GIS_data', '../Projected_files')

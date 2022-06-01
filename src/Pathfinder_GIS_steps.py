@@ -357,8 +357,6 @@ def rasterize_transmission(file, proj_path):
     """
     # Rasterizing the point file
     InputVector = file
-    #_, filename = os.path.split(file)
-    #name, ending = os.path.splitext(filename)
     OutputImage3 = os.path.join(proj_path, 'transmission.tif')
     RefImage = os.path.join('../Projected_files', 'projected_HRSL_2019_UMT37S.tif')
 
@@ -414,21 +412,6 @@ def merge_raster(transmission_raster, highway_raster):
         dest.write(weights)
 
     return out_fp
-
-def removing_grid(elec_path, weights):
-    if elec_path.shape == weights.shape:
-        row = range(1,elec_path.shape[0])
-        col = range(1,elec_path.shape[1])
-        i = 0
-        for i in row:
-            j = 0
-            for j in col:
-                if weights[i][j] < 0.45:
-                    elec_path[i][j] =0
-                j += 1
-            i += 1
-
-    return elec_path
 
 def masking(shape,tif_file, s):
     """ This function masks the raster data (tif-file) with the GADM Admin 0 boundaries (admin)

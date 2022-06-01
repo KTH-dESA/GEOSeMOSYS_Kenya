@@ -2,8 +2,7 @@
 Module: Distribution
 =============================
 
-A module for building the distribution specific csv files for GEOSeMOSYS https://github.com/KTH-dESA/GEOSeMOSYS to run that code
-In this module the logic around peakdemand, transmissionlines and distributionlines are built.
+A module for building the logic around peakdemand, transmissionlines and distributionlines.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -20,7 +19,7 @@ from pandas.core.arrays import ExtensionArray
 
 def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
     """
-    This function creates transmissionlines in both directions for each cell and connects the adjacent cells to grid to the central grid.
+    This function creates transmission lines in both directions for each cell and connects the adjacent cells to grid to the central grid.
     :param path:
     :param noHV_file:
     :param HV_file:
@@ -90,10 +89,15 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
 
 def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, distributionlines_file, distributioncelllength_file, tofolder):
     """
-    This function calculates the peakdemand per year and demand. This is used to calculate the kW/km in the next step.
-    :param demand:
+    This function calculates the peakdemand per year and demand and divides it with the estimated km.
+    :param demand_csv:
     :param specifieddemand:
     :param capacitytoactivity:
+    :param yearsplit_csv:
+    :param distr_losses:
+    :param distributionlines_file:
+    :param distributioncelllength_file:
+    :param tofolder:
     :return:
     """
     profile = pd.read_csv(specifieddemand,index_col='Timeslice', header=0)
