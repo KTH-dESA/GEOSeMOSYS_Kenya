@@ -217,7 +217,7 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
 
     for j, row in distribution_total.iterrows():
-        km = distribution_total.loc[j]['km']
+        km = distribution_total.loc[j]['0']
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
             dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
