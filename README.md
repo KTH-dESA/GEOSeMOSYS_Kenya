@@ -1,6 +1,10 @@
 ## GEOSeMOSYS_Kenya
 
-This repository is for paper ****High spatial and temporal resolution in linear programming - the case of Kenya****, by: Nandi Moksnes, Mark Howells, Will Usher
+This repository is for paper ****Increasing spatial and temporal resolution in energy system optimization model – the case of Kenya**
+Nandi Moksnes (1) *, Mark Howells (2,3), William Usher (1)
+1)	KTH Royal Institute of Technology
+2)	STEER Centre, Department of Geography & Environment, Loughborough University, UK
+3)	Imperial College, London, United Kingdom
 
 To be able to run the model you need to have approx 256 GB RAM. This model has been run on a High performance cluster at KTH.
 The shell file is therefor applicable for the HPC at PDC Dardel from SNIC (Swedish National Infrastructure for Computing).
