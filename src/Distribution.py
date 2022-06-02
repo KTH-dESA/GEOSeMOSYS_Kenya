@@ -86,8 +86,9 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
     final_matrix = final_matrix.drop_duplicates()
 
     final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
+    return(final_matrix)
 
-def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, distributionlines_file, distributioncelllength_file, tofolder):
+def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, HV_csv, distributionlines_file, distributioncelllength_file, tofolder):
     """
     This function calculates the peakdemand per year and demand and divides it with the estimated km.
     :param demand_csv:
@@ -102,6 +103,7 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     """
     profile = pd.read_csv(specifieddemand,index_col='Timeslice', header=0)
     demand = pd.read_csv(demand_csv, header=0)
+    HV = pd.read_csv(HV_csv, header=0)
     #demand['cell'] = demand['Fuel'].apply(lambda row: row.split("_")[1])
     demand.index = demand['Fuel']
     demand = demand.drop(['Fuel'], axis=1)
@@ -129,13 +131,18 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
 
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
     peakdemand.index = peakdemand[('cell')]
-    peakdemand.drop(['cell'], axis=1)
     a = distribution_total.index
-    peakdemand_divided_km = peakdemand.apply(lambda x: x/distribution_total.loc[x.index, 'km'] if x.index==a.any() else print('not same'))
+    peakdemand_divided_km = peakdemand.apply(lambda x: (x/distribution_total.loc[x['cell']][0] if (x['cell']==a).any() else print('not same')), axis=1)
     peakdemand_divided_km['Fuel'] = peakdemand.index.to_series().apply(lambda row: 'TRLV_'+str(row)+'_0')
     peakdemand_divided_km.index = peakdemand_divided_km['Fuel']
+    peakdemand_divided_km_cleaned = peakdemand_divided_km.drop(['cell', 'Fuel'], axis=1)
 
-    ## TODO add peakdemand TRLVM as well to cover the demand
+    peakdemandLVM_ = peakdemand.loc[peakdemand['cell'].isin(HV.pointid)]
+    peakdemandLVM_divided_km = peakdemandLVM_.apply(lambda x: (x/distribution_total.loc[x['cell']][0] if (x['cell']==a).any() else print('not same')), axis=1)
+    peakdemandLVM_divided_km['Fuel'] = peakdemandLVM_divided_km.index.to_series().apply(lambda row: 'TRLVM_'+str(row)+'_0')
+    peakdemandLVM_divided_km.index = peakdemandLVM_divided_km['Fuel']
+    peakdemandLVM_divided_km_cleaned = peakdemandLVM_divided_km.drop(['cell', 'Fuel'], axis=1)
 
-    peakdemand_divided_km.to_csv(os.path.join(tofolder,'peakdemand.csv'))
+    TRLV_TRLVM = peakdemand_divided_km_cleaned.append(peakdemandLVM_divided_km_cleaned)
 
+    TRLV_TRLVM.to_csv(os.path.join(tofolder,'peakdemand.csv'))
