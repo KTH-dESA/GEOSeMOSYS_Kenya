@@ -1,6 +1,9 @@
 ## GEOSeMOSYS_Kenya
 
-This repository is for paper ****Increasing spatial and temporal resolution in energy system optimization model – the case of Kenya**
+This repository is for the paper
+
+**Increasing spatial and temporal resolution in energy system optimization model – the case of Kenya**
+
 Nandi Moksnes (1) *, Mark Howells (2,3), William Usher (1)
 1)	KTH Royal Institute of Technology
 2)	STEER Centre, Department of Geography & Environment, Loughborough University, UK
