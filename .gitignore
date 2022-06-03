@@ -6,6 +6,7 @@ src/temp/**
 src/results/**
 results/**
 results_substation/**
+results_submittedversion/**
 *.zip
 src/__pycache__/**
 src/results_files/**
@@ -29,6 +30,7 @@ src/run/output/REF_TS_d.txt
 src/run/output/REF_TS_out.txt
 src/run/output/Vision_TS.txt
 src/run/output/Vision_TS_out.txt
+src/run/output/REF_substation.txt
 src/run/ref/capacityfactor_other.csv
 src/run/ref/capacityfactor_solar.csv
 src/run/ref/capacityfactor_wind.csv
