@@ -167,7 +167,7 @@ def calculate_demand(settlements, demand):
 
     elec_list = []
     for i, row in elec_pointid.iterrows():
-        row['elec_share'] = 0.5*row['pop']/sum_pop_elec+0.5*row['GDP_PPP']/sum_gdp_elec
+        row['elec_share'] = 0.32*row['pop']/sum_pop_elec+0.68*row['GDP_PPP']/sum_gdp_elec
         pointid = int(i)
         row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
         startyear = 2016
@@ -217,7 +217,7 @@ def calculate_demand(settlements, demand):
 
     elec_list = []
     for i, row in elec_pointid.iterrows():
-        row['elec_share'] = 0.5*row['pop']/sum_pop_elec+0.5*row['GDP_PPP']/sum_gdp_elec
+        row['elec_share'] = 0.32*row['pop']/sum_pop_elec+0.68*row['GDP_PPP']/sum_gdp_elec
         pointid = int(i)
         row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
         startyear = 2016
