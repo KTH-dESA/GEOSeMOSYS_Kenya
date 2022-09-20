@@ -139,8 +139,8 @@ def highway_weights(path_grid, path):
     pd.options.mode.chained_assignment = None
     grid_col['weight'] = 1
     grid_col = grid_col.astype('float64')
-    grid_col.loc[grid_col['Length_km']>0, ['weight']] = 0.01
-    grid_col.loc[grid_col['Length_m_']>0, ['weight']] = 0.01
+    grid_col.loc[grid_col['Length_km']>0, ['weight']] = 0
+    grid_col.loc[grid_col['Length_m_']>0, ['weight']] = 0
 
     schema = grid.geometry  #the geometry same as highways
     gdf = gpd.GeoDataFrame(grid_col, crs=32737, geometry=schema)
@@ -152,7 +152,7 @@ def highway_weights(path_grid, path):
     pd.options.mode.chained_assignment = None
     highways_col['weight'] = 1
     highways_col = highways_col.astype('float64')
-    highways_col.loc[highways_col['Length_km']>0, ['weight']] = 0.5
+    highways_col.loc[highways_col['Length_km']>0, ['weight']] = 0.13
 
     schema = road.geometry  #the geometry same as highways
     gdf_road = gpd.GeoDataFrame(highways_col, crs=32737, geometry=schema)
