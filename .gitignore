@@ -122,3 +122,6 @@ src/run/output/DryVision.txt
 src/run/output/REF.txt
 src/run/output/Vision.txt
 src/run/REF_TS_d.txt
+src/temp/temp.zip
+.gitignore
+src/Results_extraction.py
