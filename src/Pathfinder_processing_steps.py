@@ -44,7 +44,7 @@ def mosaic(dict_raster, proj_path):
 
 def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,tofolder):
     """
-    This function sets the results (shortest path network) from Pathfinder that are overlapping weights less than 0.5
+    This function sets the results (shortest path network) from Pathfinder that are overlapping weights less than 0.13
     so that where the grid route is utilized this is not double counted in the final results
     :param dict_pathfinder:
     :param dict_weight:
@@ -64,7 +64,7 @@ def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,t
         while j < row_length:
             m = 0
             while m < col_length:
-                if path_weight.iloc[(i + j), (k + m)] < 0.5:
+                if path_weight.iloc[(i + j), (k + m)] < 0.13:
                     elec_path.iloc[(i + j), (k + m)] = 0
                 m += 1
             j += 1
