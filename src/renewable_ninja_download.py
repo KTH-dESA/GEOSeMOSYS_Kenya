@@ -147,6 +147,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
     :param path:
     :param wind:
     :param solar:
+    :param token:
     :return:
     """
 
