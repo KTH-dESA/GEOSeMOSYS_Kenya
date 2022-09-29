@@ -198,7 +198,7 @@ def peakdemand(outPutFile,input_data, peakdemand):
         year = demand.columns
         for k in year: #year is an object so I cannot match it with a number (e.g. startyear)
             demandForThisYearAndlocation = demand.loc[j][k]
-            dataToInsert += "%s\t%s\t%s\t%s\n" % (input_data['region'][0], j, k, demandForThisYearAndlocation)
+            dataToInsert += "%s\t%s\t%s\t%s\n" % (input_data['region'][0], j, k, round(demandForThisYearAndlocation,4))
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
@@ -220,9 +220,9 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
         km = distribution_total.loc[j]['0']
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
-            dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
+            dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, round(km,4))
             if elec['pointid'].eq(j).any():
-                dataToInsert += "%s\tTRLVM_%i_0\t%i\t%f\n" % (input_data['region'][0], j, year, km)
+                dataToInsert += "%s\tTRLVM_%i_0\t%i\t%f\n" % (input_data['region'][0], j, year, round(km,4))
             year += 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
@@ -425,13 +425,13 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, demandprofile_rural, input
                 timeslice = line['Timeslice']
                 for j in d:
                     demand_value = demandprofile.loc[timeslice][j]
-                    dataToInsert += "%s\t%s\t%s\t%s\t%f\n" % (input_data['region'][0], i, timeslice, j, demand_value)
+                    dataToInsert += "%s\t%s\t%s\t%s\t%f\n" % (input_data['region'][0], i, timeslice, j, round(demand_value,4))
         else:
             for k, line in demandprofile_rural.iterrows():
                 timeslice = line['Timeslice']
                 for j in dr:
                     value = demandprofile_rural.loc[timeslice][j]
-                    dataToInsert += "%s\t%s\t%s\t%s\t%f\n" % (input_data['region'][0], i, timeslice, j, value)
+                    dataToInsert += "%s\t%s\t%s\t%s\t%f\n" % (input_data['region'][0], i, timeslice, j, round(value,4))
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
@@ -531,20 +531,20 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
                 for t in solar_tech:
                     if t == 'SOPV':
                         if elec['pointid'].eq(row['Location']).any():
-                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
+                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsday, year, round(average_solar_day,4))
+                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, round(average_solar_day,4))
+                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, round(average_solar_evening,4))
+                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, round(average_solar_evening,4))
+                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, round(average_solar_night,4))
+                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, round(average_solar_night,4))
                         if un_elec['pointid'].eq(row['Location']).any():
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
+                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, round(average_solar_day,4))
+                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, round(average_solar_evening,4))
+                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, round(average_solar_night,4))
                     else:
-                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
+                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsday, year, round(average_solar_day,4))
+                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, round(average_solar_evening,4))
+                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, round(average_solar_night,4))
                 m +=1
             year += 1
     if battery is None:
@@ -606,23 +606,23 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
 
                         if line['Technology'] == 'SOPV':
                             if elec['pointid'].eq(row['Location']).any():
-                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
+                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, round(average_solar_day,4))
                                 dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
                                 region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
+                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, round(average_solar_evening,4))
                                 dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
                                 region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
+                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, round(average_solar_night,4))
                                 dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
-                                region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
+                                region, line['Technology'], line['BatteryTime'], location, tsnight, year, round(average_solar_night,4))
                             if un_elec['pointid'].eq(row['Location']).any():
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
+                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, round(average_solar_day,4))
+                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, round(average_solar_evening,4))
+                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, round(average_solar_night,4))
                         else:
-                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
+                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, round(average_solar_day,4))
+                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, round(average_solar_evening,4))
+                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, round(average_solar_night,4))
                         m +=1
                     year +=1
 
@@ -651,9 +651,9 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
                 tsnight = timeslice[m] + "_" + daysplit[2]
 
                 for t in wind_tech:
-                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, average_wind_day)
-                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_wind_evening)
-                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_wind_night)
+                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, round(average_wind_day,4))
+                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, round(average_wind_evening,4))
+                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, round(average_wind_night,4))
                 m = m + 1
             year = year + 1
     # if battery is None:
@@ -849,7 +849,7 @@ def specifiedannualdemand(outPutFile, demand, input_data):
         year = demand.columns
         for k in year: #year is an object so I cannot match it with a number (e.g. startyear)
             demandForThisYearAndlocation = demand.loc[j][k]
-            dataToInsert += "%s\t%s\t%s\t%f\n" % (input_data['region'][0], j, k, demandForThisYearAndlocation)
+            dataToInsert += "%s\t%s\t%s\t%f\n" % (input_data['region'][0], j, k, round(demandForThisYearAndlocation,4))
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
@@ -990,7 +990,7 @@ def capitalcost(outPutFile, trade_cost, input_data):
             tech = row['Technology']
             year = int(input_data['startyear'][0])
             while year <= int(input_data['endyear'][0]):
-                dataToInsert += "%s\t%s\t%i\t%f\n" % (input_data['region'][0], tech, year, cost)
+                dataToInsert += "%s\t%s\t%i\t%f\n" % (input_data['region'][0], tech, year, round(cost,4))
                 year += 1
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
