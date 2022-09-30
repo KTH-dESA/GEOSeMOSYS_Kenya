@@ -905,7 +905,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
           cf=find_nearest(wind_CF, average_wind)
           wind_tech.index = wind_tech['CF']
           windcapitalcost = wind_tech.loc[cf][k]
-          dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], wind_tech_name, location, k, windcapitalcost)
+          dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], wind_tech_name, location, k, round(windcapitalcost,4))
 
        if battery_tech is None:
            pass
@@ -925,11 +925,11 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
           pv_tech.index = pv_tech['CF']
           pvcapitalcost = pv_tech.loc[cf][k]
           if elec['pointid'].eq(row['Location']).any():
-            dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], pv_tech_name, location, k, pvcapitalcost))
+            dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], pv_tech_name, location, k, round(pvcapitalcost,4)))
             dataToInsert += (
-                        "%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], pv_tech_name, location, k, pvcapitalcost))
+                        "%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], pv_tech_name, location, k, round(pvcapitalcost,4)))
           if un_elec['pointid'].eq(row['Location']).any():
-              dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], pv_tech_name, location, k, pvcapitalcost))
+              dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], pv_tech_name, location, k, round(pvcapitalcost,4)))
        if battery_tech is None:
             pass
        else:
@@ -938,11 +938,11 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
               sopvcapitalcostbatt = pv_tech.loc[cf][k] + battery_tech.loc['8r'][k]
               techname = pv_tech_name+battery_tech_n
               if elec['pointid'].eq(row['Location']).any():
-                  dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+                  dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, round(sopvcapitalcostbatt,4)))
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (
-                  input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+                  input_data['region'][0], techname, location, k, round(sopvcapitalcostbatt,4)))
               if un_elec['pointid'].eq(row['Location']).any():
-                  dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+                  dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location, k, round(sopvcapitalcostbatt,4)))
 
        #Solar MG i excluded from the optimization
        for k in comm_PV_tech.columns[3:]:
@@ -963,7 +963,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
                battery_tech_n = battery_tech_name.loc[4]
                somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc['4c'][k]
                techname = comm_PV_tech_name + '8c'
-               dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
+               dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, round(somgcapitalcostbatt,4)))
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
