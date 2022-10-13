@@ -65,7 +65,7 @@ def csv_make(coordinates):
     solar["capacity"] = 1
     solar["system_loss"] = 0.1
     solar["tracking"] = 0
-    solar["tilt"] = 35
+    solar["tilt"] = 4
     solar["azim"] = 180
     wind_csv = []
     #Make wind csv-files
@@ -147,6 +147,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
     :param path:
     :param wind:
     :param solar:
+    :param token:
     :return:
     """
 
