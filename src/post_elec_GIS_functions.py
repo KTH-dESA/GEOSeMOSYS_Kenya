@@ -18,6 +18,7 @@ from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
 import os
 import math
+pd.options.mode.chained_assignment = None  # default='warn'
 
 def join(elec, tif, cells):
     """
@@ -240,6 +241,3 @@ def calculate_demand(settlements, demand):
     vision.to_csv('run/dryvision/vision_demand.csv')
 
     return ()
-settlements = 'run/Demand/demand_cells.csv'
-demand = 'input_data/demand.csv'
-calculate_demand(settlements, demand)
