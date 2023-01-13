@@ -14,9 +14,68 @@ import pandas as pd
 import geopandas as gpd
 import os
 import fnmatch
+from PV_battery_optimization import optimize_battery_pv
 
 pd.options.mode.chained_assignment = None
 
+def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pv_cost, battery_cost, tofilePV, scenario):
+    """This function re-distributes the load based on the load and capacity factor from renewable ninja
+    """
+    def indexfix(df_path):
+        df = pd.read_csv(df_path).dropna()
+        df_copy = df.copy()
+        df_copy_datetime = pd.to_datetime(df_copy['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
+        df_copy.index = df_copy_datetime
+        df_copy = df_copy.drop(columns=['adjtime'])
+        return df_copy
+
+    capacityf_solar = indexfix(capacityfactor_pv)
+    load = indexfix(loadprofile)
+    df = pd.read_csv(locations, index_col=0, header=0)
+
+    #normalise data
+    def reduceload_data(data):
+        max = data['Load'].max()
+        x = 1/max
+        data_list = []
+        for i in data['Load']:
+            norm = i*x
+            data_list.append(norm)
+        
+        adjusted_load = pd.DataFrame(data_list, index = data.index, columns = ['Load'])
+
+        return adjusted_load
+
+    adjusted_load = reduceload_data(load)
+
+    PV_size = {}
+    battery_size = {}
+    capacityf_solar_batteries = capacityf_solar.copy() #deep copy
+    for row in df.iterrows():
+        location = str(row[0])
+        capacityf_solar_batteries_location = capacityf_solar_batteries[[location]]
+        #charging = charging_binary(capacityf_solar_batteries_location,adjusted_load, location)
+        PVadj, batterytime = optimize_battery_pv(capacityf_solar_batteries_location, location, adjusted_load, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario)
+        PV_size[location]= PVadj
+        battery_size[location] = batterytime
+        print("location=", location, "PV-size =", PVadj, "Batterytime=", batterytime)
+
+    df_PV_size = pd.DataFrame(PV_size.items(), columns=['location', 'PV_size'])
+    df_battery_size = pd.DataFrame(battery_size.items(), columns=['location','Battery_hours'])
+    df_PV_battery_size = pd.merge(df_PV_size, df_battery_size)
+
+    df_PV_battery_size.to_csv(tofilePV)
+
+loadprofile = 'input_data/Williams_rural_data_year.csv'
+capacityfactor_pv = 'input_data/capacityfactor_solar.csv'
+tofilePV = 'run/ref/capacityfactor_solar_batteries_low.csv'
+efficiency_discharge = 0.98 # Koko (2022)
+efficiency_charge = 0.95 # Koko (2022)
+pvcost = 2540 #ATB 2021 version for 2021 value
+batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
+locations = 'run/ref/GIS_data.csv'
+scenario = 'low'
+battery_to_pv(loadprofile,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario)
 
 def renewableninja(path, dest):
     """
