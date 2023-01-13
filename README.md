@@ -14,7 +14,7 @@ The shell file is therefor applicable for the HPC at PDC Dardel from SNIC (Swedi
 
 The whole workflow is run in Jupyter Notebook. The work flow is only tested on a Windows computer, therefore there might be small adjustements needed for other OS.
 
-![image](https://user-images.githubusercontent.com/30128518/169063135-8ce836a1-fca2-4273-b1da-41960e4fabb1.png)
+![image](https://user-images.githubusercontent.com/30128518/212334273-5084f5cf-25e2-4672-8c89-bdb5cd639706.png)
 
 # Python dependencies
 The workflow has a number packages that needs to be installed.
