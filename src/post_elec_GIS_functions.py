@@ -133,6 +133,8 @@ def calculate_demand(settlements, demand):
     vision_demand = demand_GJ[demand_GJ['Scenario'].str.contains('Vision')]
 
     demand_cols =  demand_cell[['elec', 'pointid', 'pop', 'GDP_PPP']]
+    demand_cols[demand_cols < 0] = 0
+    
     #The case of unelectrified
     un_elec = demand_cols[demand_cols['elec'] == 0]
     unelec_pointid = un_elec.groupby(["pointid"]).sum()
@@ -238,3 +240,6 @@ def calculate_demand(settlements, demand):
     vision.to_csv('run/dryvision/vision_demand.csv')
 
     return ()
+settlements = 'run/Demand/demand_cells.csv'
+demand = 'input_data/demand.csv'
+calculate_demand(settlements, demand)
