@@ -8,35 +8,37 @@ A module for optimising the PV and battery for each location. Returns the size o
 
 Module author: Nandi Moksnes <nandi@kth.se>
 """
+import pulp as pl
 from pulp import *
 import pandas as pd
 from datetime import timedelta
 from matplotlib import pyplot as plt
 
-def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge,  efficiency_charge, battery_constant, pv_cost, battery_cost):
+def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario):
     """
     This function optmize the PV+battery system based on the location specific capacity factor and load profile.
     The function returns the PV adjustment needed plus the required battery hours to meet the whole demand.
-    The script is from the answer of AirSquid on March 16, 2022: 
+    The original script is from the answer of AirSquid on March 16, 2022:
     https://stackoverflow.com/questions/71494297/python-pulp-linear-optimisation-for-off-grid-pv-and-battery-system 
-    The changes made are that the losses are accounted for discharging and charging
+    Released under license CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
+    The charging variable did not work properly (charging when no excess energy exsited) therefore a binary variable controling 
+    that only charging or discharging can be true at one time slice was introduced.
+    In addition losses are accounted for discharging and charging which was not part of the code.
+    This code does use CPLEX CMD as this is a MILP problem and solving time with PuLP was too long.
     """
 
     load = load_profile['Load']
 
     T = len(load)
-
     # Decision variables
     Bmax = LpVariable('Bmax', 0, None) # battery max energy (kWh)
     PV_size = LpVariable('PV_size', 0, None) # PV size
-    batteryBin = LpVariable('BatteryBinary', cat='Binary')
 
     # Optimisation problem
     prb = LpProblem('Battery_Operation', LpMinimize)
 
     # Auxilliary variables
     PV_gen = [LpVariable('PVgen_{}'.format(i), 0, None) for i in range(T)]
-
 
     # Load difference
     Pflow = [LpVariable('Pflow_{}'.format(i), None, None) for i in range(T)]
@@ -46,11 +48,13 @@ def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge, 
     Pdischarge = [LpVariable('Pdischarge_{}'.format(i), lowBound=None, upBound=0) for i in range(T)]
     # Charge delivered
     Pcharge_a = [LpVariable('Pcharge_a{}'.format(i), 0, None) for i in range(T)]
+    bin_dich = LpVariable.dicts('BinaryDischarge', indexs=range(T), cat='Binary')
+    M =100
 
     ###  Moved this down as it needs to include Pdischarge
     # Objective function
     # cost + some small penalty for cumulative discharge, just to shape behavior 
-    prb += (PV_size*pv_cost) + (Bmax*battery_cost)- 0.01 * lpSum(Pdischarge[t] for t in range(T))
+    prb += (PV_size*pv_cost) + (Bmax*battery_cost) #- 0.01 * lpSum(Pdischarge[t] for t in range(T))
 
     # Battery
     Bstate = [LpVariable('E_{}'.format(i), 0, None) for i in range(T)]
@@ -69,20 +73,26 @@ def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge, 
         # Negative if load greater than PV, positive if PV greater than load
         prb += Pflow[t] == PV_gen[t] - load[t]
         
-        # Given the below, it will push Pflow available for charge to zero or to to or greater than excess PV
+        # charging should be more than zero if Pflow is larger than zero
         prb += Pcharge[t]*efficiency_charge  >= 0
         prb += Pcharge[t]*efficiency_charge >= Pflow[t]
+
+        prb += Pcharge[t]*efficiency_charge - M*(1-bin_dich[t])<=0
 
         # If Pflow is negative (discharge), then it will at least Pflow discharge required load
         # If Pflow is positive (charge), then Pdischarge (discharge rePflowuired will ePflowual 0)
         prb += Pdischarge[t]*efficiency_discharge <= 0
         prb += Pdischarge[t]*efficiency_discharge <= Pflow[t]
+
+        prb += Pdischarge[t]*efficiency_discharge + M*bin_dich[t]>=0
+        prb += Pflow[t]<= M*(1-bin_dich[t])
+
         # Discharge cannot exceed available charge in battery
         # Discharge is negative
         prb += Pdischarge[t]*efficiency_discharge >= (-1)*Bstate[t-1]
         
         # Ensures that energy flow rePflowuired is satisifed by charge and discharge flows
-        prb += Pflow[t] == Pcharge[t]*efficiency_charge + Pdischarge[t]*efficiency_discharge
+        prb += Pflow[t] >= Pcharge[t]*efficiency_charge + Pdischarge[t]*efficiency_discharge
         
         # Limit amount charge delivered by the available space in the battery
         prb += Pcharge_a[t]*efficiency_charge  >= 0
@@ -93,33 +103,32 @@ def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge, 
         prb += Bstate[t] <= Bmax
 
     # Solve problem
+    solver = pl.CPLEX_CMD(msg=0)
+    prb.setSolver(solver)
     prb.solve()
 
-    # make some records to prep for dataframe (what a pain in pulp!!)
-    res = []
-    for t in range(T):
-        record = {  'period': t,
-                    'Load': load[t],
-                    'PV_gen': PV_gen[t].varValue,
-                    'Pflow' : Pflow[t].varValue,
-                    'Pcharge': Pcharge[t].varValue,
-                    'Pcharge_a': Pcharge_a[t].varValue,
-                    'Pdischarge': Pdischarge[t].varValue,
-                    'Bstate': Bstate[t].varValue}
-        res.append(record)
+    # # make some records to prep for dataframe (what a pain in pulp!!)
+    # res = []
+    # for t in range(T):
+    #     record = {  'period': t,
+    #                 'Load': load[t],
+    #                 'PV_gen': PV_gen[t].varValue,
+    #                 'Pflow' : Pflow[t].varValue,
+    #                 'Pcharge': Pcharge[t].varValue,
+    #                 'Pcharge_a': Pcharge_a[t].varValue,
+    #                 'Pdischarge': Pdischarge[t].varValue,
+    #                 'Bstate': Bstate[t].varValue}
+    #     res.append(record)
 
-    df = pd.DataFrame.from_records(res)
-    df.set_index('period', inplace=True)
-    df = df.round(2)
-    print(df.to_string())
+    # df = pd.DataFrame.from_records(res)
+    # df.set_index('period', inplace=True)
+    # df = df.round(2)
+    # print(df.to_string())
 
-    print(f'PV size: {PV_size.varValue : 0.1f}, Batt size: {Bmax.varValue : 0.1f}')
-
-    df.plot()
-    plt.show()
+    # print(f'PV size: {PV_size.varValue : 0.1f}, Batt size: {Bmax.varValue : 0.1f}')
 
     # write to a csv file
-    output_filename = 'input_data/results_PuLP{}.csv'.format(location)
+    output_filename = 'input_data/results_PuLP_%s_%s.csv'%(location, scenario)
 
     # use a context manager to open/close the file...
     with open(output_filename, 'w') as fout:
@@ -130,5 +139,5 @@ def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge, 
             #fout.write(line2) 
             fout.write('\n')    # add a newline character
 
-    return PV_size, Bstate
+    return PV_size.varValue , Bmax.varValue
 
