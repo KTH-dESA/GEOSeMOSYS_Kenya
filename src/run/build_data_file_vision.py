@@ -93,7 +93,7 @@ def functions_to_run(dict_df, outPutFile):
     if 'capitalcost_RET_vision' in dict_df:
         outPutFile = capitalcost_dynamic(dict_df['GIS_data'], outPutFile, dict_df['capitalcost_RET_vision'],
                                         dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'],
-                                        dict_df['input_data'],dict_df['elec'],dict_df['un_elec'], dict_df['battery'],dict_df['capacityfactor_solar_batteries_low'], dict_df['capacityfactor_solar_batteries_high'])
+                                        dict_df['input_data'],dict_df['elec'],dict_df['un_elec'], dict_df['battery'],dict_df['capacityfactor_solar_batteries_high'], dict_df['capacityfactor_solar_batteries_high'])
     else:
         print('No capitalcost_RET file')
 ###########################################################################
