@@ -94,7 +94,7 @@ def functions_to_run(dict_df, outPutFile):
     if 'capitalcost_RET_ref' in dict_df:
         outPutFile = capitalcost_dynamic(dict_df['GIS_data'], outPutFile, dict_df['capitalcost_RET_ref'],
                                         dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'],
-                                        dict_df['input_data'],dict_df['elec'],dict_df['un_elec'], dict_df['battery'])
+                                        dict_df['input_data'],dict_df['elec'],dict_df['un_elec'], dict_df['battery'], dict_df['capacityfactor_solar_batteries_low'], dict_df['capacityfactor_solar_batteries_high'])
     else:
         print('No capitalcost_RET file')
 ###########################################################################
@@ -633,7 +633,7 @@ def specifiedannualdemand(outPutFile, demand, input_data):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, capacityfactor_solar, input_data, elec, un_elec, battery):
+def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, capacityfactor_solar, input_data, elec, un_elec, battery, capacityfactor_solar_batteries_low, capacityfactor_solar_batteries_high):
     """
     builds the Capitalcost (Region, Technology, Year, CapitalCost) where the cost is dynamic. Here when the capacity factor vary for Wind
     -------------
@@ -651,6 +651,9 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
     param = "param CapitalCost default 0 :=\n"
     startIndex = outPutFile.index(param) + len(param)
 
+    capacityfactor_solar_batteries_low.index = capacityfactor_solar_batteries_low['location']
+    capacityfactor_solar_batteries_high.index = capacityfactor_solar_batteries_high['location']
+
     #Section the different technology types per CF and OSeMOSYS name
     cf_tech = capitalcost_RET.groupby('Technology')
     wind_tech = cf_tech.get_group('Wind')
@@ -663,9 +666,9 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
     pv_CF = pv_tech['CF']
     pv_tech_name = pv_tech.loc[2]['Technology_name_OSeMOSYS']
     battery_tech = cf_tech.get_group('Battery')
-    battery_tech_name = battery_tech.loc[3:4]['Technology_name_OSeMOSYS']
+    battery_tech_name = battery_tech.loc[3:6]['Technology_name_OSeMOSYS']
     battery_CF = battery_tech['CF']
-    battery_tech.index = battery_tech['CF']
+    battery_tech.index = battery_tech['Technology_name_OSeMOSYS']
 
     #Caluculate the CF for the location over the year
     for m, row in df.iterrows():
@@ -687,19 +690,9 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
           windcapitalcost = wind_tech.loc[cf][k]
           dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], wind_tech_name, location, k, windcapitalcost)
 
-       if battery_tech is None:
-           pass
-       else:
-           for k in wind_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
-               windcapitalcostbatt = wind_tech.loc[cf][k] + battery_tech.loc['4c'][k]
-               techname = wind_tech_name + battery_tech_name.loc[4]
-               #dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, windcapitalcostbatt))
-
        #Solar PV
        for k in pv_tech.columns[3:]: # year is an object so I cannot match it with a number (e.g. startyear)
           def find_nearest(pv_CF, average_solar):
-             #arraysun = np.asarray(float(pv_CF))
-             #idx = (np.abs(arraysun - average_solar)).argmin()
              return str(0.21)
           cf=find_nearest(pv_CF, average_solar)
           pv_tech.index = pv_tech['CF']
@@ -713,16 +706,23 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
        if battery_tech is None:
             pass
        else:
+        #Case elec = 0 low demand profile
            for k in pv_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
               battery_tech_n = battery_tech_name.loc[3]
-              sopvcapitalcostbatt = pv_tech.loc[cf][k] + battery_tech.loc['8r'][k]
+              sopvcapitalcostbatt = pv_tech.loc[cf][k]*capacityfactor_solar_batteries_low.loc[row['Location']]['PV_size']+ battery_tech.loc['res_kWh'][k]*capacityfactor_solar_batteries_low.loc[row['Location']]['Battery_hours']+ battery_tech.loc['res_constant'][k]
               techname = pv_tech_name+battery_tech_n
               if elec['pointid'].eq(row['Location']).any():
-                  dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (
                   input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
               if un_elec['pointid'].eq(row['Location']).any():
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+        #Case elec = 1 high demand profile
+           for k in pv_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
+              battery_tech_n = battery_tech_name.loc[3]
+              sopvcapitalcostbatt = pv_tech.loc[cf][k]*capacityfactor_solar_batteries_high.loc[row['Location']]['PV_size']+ battery_tech.loc['res_kWh'][k]*capacityfactor_solar_batteries_high.loc[row['Location']]['Battery_hours']+ battery_tech.loc['res_constant'][k]
+              techname = pv_tech_name+battery_tech_n
+              if elec['pointid'].eq(row['Location']).any():
+                  dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
 
        #Solar MG i excluded from the optimization
        for k in comm_PV_tech.columns[3:]:
@@ -741,7 +741,7 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
        else:
            for k in comm_PV_tech.columns[3:]:
                battery_tech_n = battery_tech_name.loc[4]
-               somgcapitalcostbatt = comm_PV_tech.loc[cf][k] + battery_tech.loc['4c'][k]
+               somgcapitalcostbatt = comm_PV_tech.loc[cf][k]*(capacityfactor_solar_batteries_high.loc[row['Location']]['PV_size']+capacityfactor_solar_batteries_low.loc[row['Location']]['PV_size'])/2 + battery_tech.loc['comm_kWh'][k]*(capacityfactor_solar_batteries_high.loc[row['Location']]['Battery_hours'] +capacityfactor_solar_batteries_low.loc[row['Location']]['Battery_hours'])/2 + battery_tech.loc['comm_constant'][k]
                techname = comm_PV_tech_name + '8c'
                dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
 
