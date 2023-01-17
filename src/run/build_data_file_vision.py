@@ -652,6 +652,9 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
     param = "param CapitalCost default 0 :=\n"
     startIndex = outPutFile.index(param) + len(param)
 
+    capacityfactor_solar_batteries_low.index = capacityfactor_solar_batteries_low['location']
+    capacityfactor_solar_batteries_high.index = capacityfactor_solar_batteries_high['location']
+
     #Section the different technology types per CF and OSeMOSYS name
     cf_tech = capitalcost_RET.groupby('Technology')
     wind_tech = cf_tech.get_group('Wind')
@@ -666,7 +669,8 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
     battery_tech = cf_tech.get_group('Battery')
     battery_tech_name = battery_tech.loc[3:4]['Technology_name_OSeMOSYS']
     battery_CF = battery_tech['CF']
-    battery_tech.index = battery_tech['CF']
+    battery_tech.index = battery_tech['Technology_name_OSeMOSYS']
+
 
     #Caluculate the CF for the location over the year
     for m, row in df.iterrows():
@@ -688,13 +692,6 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
           windcapitalcost = wind_tech.loc[cf][k]
           dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], wind_tech_name, location, k, round(windcapitalcost,4))
 
-       if battery_tech is None:
-           pass
-       else:
-           for k in wind_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
-               windcapitalcostbatt = wind_tech.loc[cf][k] + battery_tech.loc['4c'][k]
-               techname = wind_tech_name + battery_tech_name.loc[4]
-               #dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, windcapitalcostbatt))
 
        #Solar PV
        for k in pv_tech.columns[3:]: # year is an object so I cannot match it with a number (e.g. startyear)
