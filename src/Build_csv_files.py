@@ -424,11 +424,9 @@ def noHV_polygons(polygons, noHV, outpath):
     unelec = pd.read_csv(noHV, usecols= ["pointid"])
     point = gpd.read_file(polygons)
     point.index = point['pointid']
-    unelec_shp = gpd.GeoDataFrame(crs=32737)
+    unelec_shp = gpd.GeoDataFrame(columns=["geometry"], crs=32737)
     for i in unelec['pointid']:
         unelec_point = point.loc[i]
         unelec_shp = unelec_shp.append(unelec_point)
 
-    #unelec_shp.set_crs(32737)
-    #outpath = "run/Demand/un_elec_polygons.shp"
     unelec_shp.to_file(outpath)
