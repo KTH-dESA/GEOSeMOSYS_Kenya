@@ -66,17 +66,6 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
 
     df_PV_battery_size.to_csv(tofilePV)
 
-loadprofile = 'input_data/Williams_rural_data_year.csv'
-capacityfactor_pv = 'input_data/capacityfactor_solar.csv'
-tofilePV = 'run/ref/capacityfactor_solar_batteries_low.csv'
-efficiency_discharge = 0.98 # Koko (2022)
-efficiency_charge = 0.95 # Koko (2022)
-pvcost = 2540 #ATB 2021 version for 2021 value
-batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
-locations = 'run/ref/GIS_data.csv'
-scenario = 'low'
-battery_to_pv(loadprofile,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario)
-
 def renewableninja(path, dest):
     """
     This function organize the data to the required format of a matrix with the
