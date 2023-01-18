@@ -94,7 +94,7 @@ def functions_to_run(dict_df, outPutFile):
     if 'capitalcost_RET_ref' in dict_df:
         outPutFile = capitalcost_dynamic(dict_df['GIS_data'], outPutFile, dict_df['capitalcost_RET_ref'],
                                         dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'],
-                                        dict_df['input_data'],dict_df['elec'],dict_df['un_elec'], dict_df['battery'], dict_df['capacityfactor_solar_batteries_low'], dict_df['capacityfactor_solar_batteries_high'])
+                                        dict_df['input_data'],dict_df['elec'],dict_df['un_elec'], dict_df['capacityfactor_solar_batteries_low'], dict_df['capacityfactor_solar_batteries_high'])
     else:
         print('No capitalcost_RET file')
 ###########################################################################
@@ -142,7 +142,7 @@ def functions_to_run(dict_df, outPutFile):
     ################################################################
 
     if ('capacityfactor_solar' or 'capacityfactor_wind') in dict_df.keys():
-       outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['battery'], dict_df['input_data'],
+       outPutFile = capacityfactor(outPutFile, dict_df['GIS_data'], dict_df['input_data'],
                                   dict_df['capacityfactor_wind'], dict_df['capacityfactor_solar'], dict_df['elec'], dict_df['un_elec'])
     else:
        print('No capacityfactor_solar or capacityfactor_wind file')
@@ -425,7 +425,7 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, demandprofile_rural, input
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, capacityfactor_solar, elec, un_elec):
+def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfactor_solar, elec, un_elec):
     """
     builds the Capacityfactor(Region, Technolgy, Timeslice, Year, CapacityFactor)
     This method is for capacityfactor which does not use storage equations but still model batteries
@@ -633,7 +633,7 @@ def specifiedannualdemand(outPutFile, demand, input_data):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, capacityfactor_solar, input_data, elec, un_elec, battery, capacityfactor_solar_batteries_low, capacityfactor_solar_batteries_high):
+def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, capacityfactor_solar, input_data, elec, un_elec, capacityfactor_solar_batteries_low, capacityfactor_solar_batteries_high):
     """
     builds the Capitalcost (Region, Technology, Year, CapitalCost) where the cost is dynamic. Here when the capacity factor vary for Wind
     -------------
@@ -650,6 +650,9 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
     print("Capital cost dynamic cost", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     param = "param CapitalCost default 0 :=\n"
     startIndex = outPutFile.index(param) + len(param)
+
+    fixedcostDataToinsert = ""
+
 
     capacityfactor_solar_batteries_low.index = capacityfactor_solar_batteries_low['location']
     capacityfactor_solar_batteries_high.index = capacityfactor_solar_batteries_high['location']
@@ -710,17 +713,22 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
            for k in pv_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
               sopvcapitalcostbatt = pv_tech.loc[cf][k]*capacityfactor_solar_batteries_low.loc[row['Location']]['PV_size']+ battery_tech.loc['res_kWh'][k]*capacityfactor_solar_batteries_low.loc[row['Location']]['Battery_hours']+ battery_tech.loc['res_constant'][k]
               techname = pv_tech_name+'8r'
+              fixedcost_SOPV = sopvcapitalcostbatt*0.025
               if elec['pointid'].eq(row['Location']).any():
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (
                   input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+                  fixedcostDataToinsert += "%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location,k, round(fixedcost_SOPV, 4))
               if un_elec['pointid'].eq(row['Location']).any():
                   dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+                  fixedcostDataToinsert += "%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], techname,location,k, round(fixedcost_SOPV,4))
         #Case elec = 1 high demand profile
            for k in pv_tech.columns[3:]:  # year is an object so I cannot match it with a number (e.g. startyear)
-              sopvcapitalcostbatt = pv_tech.loc[cf][k]*capacityfactor_solar_batteries_high.loc[row['Location']]['PV_size']+ battery_tech.loc['res_kWh'][k]*capacityfactor_solar_batteries_high.loc[row['Location']]['Battery_hours']+ battery_tech.loc['res_constant'][k]
+              sopvcapitalcostbatt_high = pv_tech.loc[cf][k]*capacityfactor_solar_batteries_high.loc[row['Location']]['PV_size']+ battery_tech.loc['res_kWh'][k]*capacityfactor_solar_batteries_high.loc[row['Location']]['Battery_hours']+ battery_tech.loc['res_constant'][k]
               techname = pv_tech_name+'8r'
+              fixedcost_SOPV_high = sopvcapitalcostbatt_high*0.025
               if elec['pointid'].eq(row['Location']).any():
-                  dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt))
+                  dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname, location, k, sopvcapitalcostbatt_high))
+                  fixedcostDataToinsert += "%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], techname,location,k, round(fixedcost_SOPV_high,4))
 
        #Solar MG i excluded from the optimization
        for k in comm_PV_tech.columns[3:]:
@@ -740,9 +748,15 @@ def capitalcost_dynamic(df, outPutFile, capitalcost_RET, capacityfactor_wind, ca
            for k in comm_PV_tech.columns[3:]:
                somgcapitalcostbatt = comm_PV_tech.loc[cf][k]*(capacityfactor_solar_batteries_high.loc[row['Location']]['PV_size']+capacityfactor_solar_batteries_low.loc[row['Location']]['PV_size'])/2 + battery_tech.loc['comm_kWh'][k]*(capacityfactor_solar_batteries_high.loc[row['Location']]['Battery_hours'] +capacityfactor_solar_batteries_low.loc[row['Location']]['Battery_hours'])/2 + battery_tech.loc['comm_constant'][k]
                techname = comm_PV_tech_name + '8c'
+               fixedcost_SOMG = somgcapitalcostbatt*0.025
                dataToInsert += ("%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname, location, k, somgcapitalcostbatt))
+               fixedcostDataToinsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], techname,location,k, fixedcost_SOMG)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    paramF = "param FixedCost default 0 :=\n"
+    startIndexF = outPutFile.index(paramF) + len(paramF)
+    outPutFile = outPutFile[:startIndexF] + fixedcostDataToinsert + outPutFile[startIndexF:]
     return(outPutFile)
 
 def capitalcost(outPutFile, trade_cost, input_data):
