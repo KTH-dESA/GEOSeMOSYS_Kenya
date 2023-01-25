@@ -74,30 +74,30 @@ def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge, 
         prb += Pflow[t] == PV_gen[t] - load[t]
         
         # charging should be more than zero if Pflow is larger than zero
-        prb += Pcharge[t]*efficiency_charge  >= 0
-        prb += Pcharge[t]*efficiency_charge >= Pflow[t]
+        prb += Pcharge[t]  >= 0
+        prb += Pcharge[t] >= Pflow[t]
 
-        prb += Pcharge[t]*efficiency_charge - M*(1-bin_dich[t])<=0
+        prb += Pcharge[t] - M*(1-bin_dich[t])<=0
 
         # If Pflow is negative (discharge), then it will at least Pflow discharge required load
         # If Pflow is positive (charge), then Pdischarge (discharge rePflowuired will ePflowual 0)
-        prb += Pdischarge[t]*efficiency_discharge <= 0
-        prb += Pdischarge[t]*efficiency_discharge <= Pflow[t]
+        prb += Pdischarge[t] <= 0
+        prb += Pdischarge[t] <= Pflow[t]
 
-        prb += Pdischarge[t]*efficiency_discharge + M*bin_dich[t]>=0
+        prb += Pdischarge[t] + M*bin_dich[t]>=0
         prb += Pflow[t]<= M*(1-bin_dich[t])
 
         # Discharge cannot exceed available charge in battery
         # Discharge is negative
-        prb += Pdischarge[t]*efficiency_discharge >= (-1)*Bstate[t-1]
+        prb += Pdischarge[t] >= (-1)*Bstate[t-1]
         
         # Ensures that energy flow rePflowuired is satisifed by charge and discharge flows
-        prb += Pflow[t] >= Pcharge[t]*efficiency_charge + Pdischarge[t]*efficiency_discharge
+        prb += Pflow[t] >= Pcharge[t] + Pdischarge[t]
         
         # Limit amount charge delivered by the available space in the battery
-        prb += Pcharge_a[t]*efficiency_charge  >= 0
-        prb += Pcharge_a[t]*efficiency_charge  <= Pcharge[t]
-        prb += Pcharge_a[t]*efficiency_charge  <= Bmax - Bstate[t-1]
+        prb += Pcharge_a[t]  >= 0
+        prb += Pcharge_a[t]  <= Pcharge[t]
+        prb += Pcharge_a[t]  <= Bmax - Bstate[t-1]
         
         prb += Bstate[t] >= 0
         prb += Bstate[t] <= Bmax
