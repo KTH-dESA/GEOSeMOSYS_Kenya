@@ -18,6 +18,7 @@ from rasterio.merge import merge
 from osgeo import gdal, ogr, gdalconst
 import os
 import math
+pd.options.mode.chained_assignment = None  # default='warn'
 
 def join(elec, tif, cells):
     """
@@ -133,6 +134,8 @@ def calculate_demand(settlements, demand):
     vision_demand = demand_GJ[demand_GJ['Scenario'].str.contains('Vision')]
 
     demand_cols =  demand_cell[['elec', 'pointid', 'pop', 'GDP_PPP']]
+    demand_cols[demand_cols < 0] = 0
+    
     #The case of unelectrified
     un_elec = demand_cols[demand_cols['elec'] == 0]
     unelec_pointid = un_elec.groupby(["pointid"]).sum()

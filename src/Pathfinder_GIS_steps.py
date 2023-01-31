@@ -124,7 +124,7 @@ def merge_grid(proj_path):
 
 def highway_weights(path_grid, path):
     """
-    This function adds the weight to where the grid (0.01 weight) is located as well as road (0.5 weight) to column weight
+    This function adds the weight to where the grid (0.00001 weight) is located as well as road (0.13 weight) to column weight
     :param path_grid:
     :param path:
     :return:

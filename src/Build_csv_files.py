@@ -14,9 +14,57 @@ import pandas as pd
 import geopandas as gpd
 import os
 import fnmatch
+from PV_battery_optimization import optimize_battery_pv
 
 pd.options.mode.chained_assignment = None
 
+def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pv_cost, battery_cost, tofilePV, scenario):
+    """This function re-distributes the load based on the load and capacity factor from renewable ninja
+    """
+    def indexfix(df_path):
+        df = pd.read_csv(df_path).dropna()
+        df_copy = df.copy()
+        df_copy_datetime = pd.to_datetime(df_copy['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
+        df_copy.index = df_copy_datetime
+        df_copy = df_copy.drop(columns=['adjtime'])
+        return df_copy
+
+    capacityf_solar = indexfix(capacityfactor_pv)
+    load = indexfix(loadprofile)
+    df = pd.read_csv(locations, index_col=0, header=0)
+
+    #normalise data
+    def reduceload_data(data):
+        max = data['Load'].max()
+        x = 1/max
+        data_list = []
+        for i in data['Load']:
+            norm = i*x
+            data_list.append(norm)
+        
+        adjusted_load = pd.DataFrame(data_list, index = data.index, columns = ['Load'])
+
+        return adjusted_load
+
+    adjusted_load = reduceload_data(load)
+
+    PV_size = {}
+    battery_size = {}
+    capacityf_solar_batteries = capacityf_solar.copy() #deep copy
+    for row in df.iterrows():
+        location = str(row[0])
+        capacityf_solar_batteries_location = capacityf_solar_batteries[[location]]
+        #charging = charging_binary(capacityf_solar_batteries_location,adjusted_load, location)
+        PVadj, batterytime = optimize_battery_pv(capacityf_solar_batteries_location, location, adjusted_load, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario)
+        PV_size[location]= PVadj
+        battery_size[location] = batterytime
+        print("location=", location, "PV-size =", PVadj, "Batterytime=", batterytime)
+
+    df_PV_size = pd.DataFrame(PV_size.items(), columns=['location', 'PV_size'])
+    df_battery_size = pd.DataFrame(battery_size.items(), columns=['location','Battery_hours'])
+    df_PV_battery_size = pd.merge(df_PV_size, df_battery_size)
+
+    df_PV_battery_size.to_csv(tofilePV)
 
 def renewableninja(path, dest):
     """
@@ -376,11 +424,9 @@ def noHV_polygons(polygons, noHV, outpath):
     unelec = pd.read_csv(noHV, usecols= ["pointid"])
     point = gpd.read_file(polygons)
     point.index = point['pointid']
-    unelec_shp = gpd.GeoDataFrame(crs=32737)
+    unelec_shp = gpd.GeoDataFrame(columns=["geometry"], crs=32737)
     for i in unelec['pointid']:
         unelec_point = point.loc[i]
         unelec_shp = unelec_shp.append(unelec_point)
 
-    #unelec_shp.set_crs(32737)
-    #outpath = "run/Demand/un_elec_polygons.shp"
     unelec_shp.to_file(outpath)
