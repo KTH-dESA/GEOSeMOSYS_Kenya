@@ -2,7 +2,7 @@
 
 This repository is for the paper
 
-**Increasing spatial and temporal resolution in energy system optimization model – the case of Kenya**
+**[Increasing spatial and temporal resolution in energy system optimisation model – The case of Kenya](https://www.sciencedirect.com/science/article/pii/S2211467X23002134)**
 
 Nandi Moksnes (1) *, Mark Howells (2,3), William Usher (1)
 1)	KTH Royal Institute of Technology
