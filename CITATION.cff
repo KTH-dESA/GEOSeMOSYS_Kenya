@@ -7,23 +7,24 @@ title: "GEOSeMOSYS_Kenya"
 version: 1.0.0
 date-released: 2022-06-07
 url: "https://github.com/KTH-dESA/GEOSeMOSYS_Kenya"
-message: If you use this software, please cite our article in Energy Strategy Reviews.
-preferred-citation:
-  authors:
-- family-names: "Moksnes"
-  given-names: "Nandi"
-  orcid: "https://orcid.org/0000-0002-8641-564X"
-- family-names: "Howells"
-  given-names: "Mark"
-- family-names: "Usher"
-  given-names: "William"
-  orcid: "https://orcid.org/0000-0001-9367-1791"
-  issn: ISSN 2211-467X
-  journal: Energy Strategy Reviews
-  publisher:
-    name: Elsevier
-  start: 101263
-  title: "Increasing spatial and temporal resolution in energy system optimisation model – The case of Kenya"
-  type: article
-  url: "https://www.sciencedirect.com/science/article/pii/S2211467X23002134"
-  volume: 51
+metadata:
+  message: "If you use this software, please cite our article in Energy Strategy Reviews."
+  preferred-citation:
+    authors:
+    - family-names: "Moksnes"
+      given-names: "Nandi"
+      orcid: "https://orcid.org/0000-0002-8641-564X"
+    - family-names: "Howells"
+      given-names: "Mark"
+    - family-names: "Usher"
+      given-names: "William"
+      orcid: "https://orcid.org/0000-0001-9367-1791"
+    issn: ISSN 2211-467X
+    journal: Energy Strategy Reviews
+    publisher:
+      name: Elsevier
+    start: 101263
+    title: "Increasing spatial and temporal resolution in energy system optimisation model – The case of Kenya"
+    type: article
+    url: "https://www.sciencedirect.com/science/article/pii/S2211467X23002134"
+    volume: 51
